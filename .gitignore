@@ -1,0 +1,20 @@
+# Compilação Maven e logs
+target/
+*.log
+*.tmp
+
+# Banco de dados local H2 (execução local)
+data/
+
+# IDEs e Sistema Operacional
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Documentos de referência originais da disciplina (mantidos localmente na pasta)
+Edital do Projeto EngSFWII*.pdf
+Modelo_Portfolio_Engenharia_Software_II_ABNT.docx
+Documento_Power_Plus.docx
+~$*.docx
