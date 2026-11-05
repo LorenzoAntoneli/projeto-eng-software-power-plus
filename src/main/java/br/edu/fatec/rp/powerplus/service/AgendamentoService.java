@@ -1,48 +1,45 @@
 package br.edu.fatec.rp.powerplus.service;
 
 import br.edu.fatec.rp.powerplus.domain.*;
-import br.edu.fatec.rp.powerplus.domain.exception.ConflitoHorarioException;
 import br.edu.fatec.rp.powerplus.domain.exception.RecursoNaoEncontradoException;
 import br.edu.fatec.rp.powerplus.domain.exception.RegraNegocioException;
-import br.edu.fatec.rp.powerplus.repository.*;
+import br.edu.fatec.rp.powerplus.repository.AgendamentoRepository;
+import br.edu.fatec.rp.powerplus.repository.HistoricoStatusRepository;
 import br.edu.fatec.rp.powerplus.service.notification.NotificacaoGateway;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Etapa GREEN do TDD: implementação funcional fazendo todos os testes passarem.
- */
 @Service
 public class AgendamentoService {
 
-    private static final List<StatusAgendamento> STATUS_QUE_OCUPAM_AGENDA =
-            List.of(StatusAgendamento.CONFIRMADO, StatusAgendamento.EM_ATENDIMENTO);
+    private static final DateTimeFormatter FMT_DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final AgendamentoRepository agendamentoRepository;
-    private final DisponibilidadeSemanalRepository disponibilidadeRepository;
-    private final BloqueioAgendaRepository bloqueioRepository;
     private final HistoricoStatusRepository historicoRepository;
     private final ClienteService clienteService;
+    private final PoliticaAgendamentoValidator validador;
     private final NotificacaoGateway notificacaoGateway;
     private final Clock clock;
     private final AtomicLong sequencialProtocolo = new AtomicLong(100);
 
     public AgendamentoService(AgendamentoRepository agendamentoRepository,
-                              DisponibilidadeSemanalRepository disponibilidadeRepository,
-                              BloqueioAgendaRepository bloqueioRepository,
                               HistoricoStatusRepository historicoRepository,
                               ClienteService clienteService,
+                              PoliticaAgendamentoValidator validador,
                               NotificacaoGateway notificacaoGateway,
                               Clock clock) {
         this.agendamentoRepository = agendamentoRepository;
-        this.disponibilidadeRepository = disponibilidadeRepository;
-        this.bloqueioRepository = bloqueioRepository;
         this.historicoRepository = historicoRepository;
         this.clienteService = clienteService;
+        this.validador = validador;
         this.notificacaoGateway = notificacaoGateway;
         this.clock = clock;
     }
@@ -52,31 +49,15 @@ public class AgendamentoService {
                                               String endereco, PerfilCliente perfil,
                                               LocalDate data, LocalTime horaInicio,
                                               TipoServico tipoServico, String descricao) {
-        if (data == null || horaInicio == null || tipoServico == null) {
-            throw new RegraNegocioException("Data, horário e tipo de serviço são obrigatórios.");
+        if (tipoServico == null) {
+            throw new RegraNegocioException("O tipo de serviço elétrico é obrigatório.");
         }
-        LocalDateTime agora = LocalDateTime.now(clock);
-        if (!LocalDateTime.of(data, horaInicio).isAfter(agora)) {
-            throw new RegraNegocioException("O agendamento deve ser realizado para uma data e horário futuros.");
-        }
-        if (bloqueioRepository.existsByData(data)) {
-            throw new RegraNegocioException("A data selecionada encontra-se bloqueada na agenda do eletricista.");
-        }
-        DisponibilidadeSemanal disp = disponibilidadeRepository.findByDiaSemana(data.getDayOfWeek())
-                .filter(DisponibilidadeSemanal::isAtivo)
-                .orElseThrow(() -> new RegraNegocioException("Não há expediente configurado para o dia da semana selecionado."));
-
-        LocalTime horaFim = horaInicio.plusMinutes(disp.getDuracaoSlotMinutos());
-        if (horaInicio.isBefore(disp.getHoraInicio()) || horaFim.isAfter(disp.getHoraFim())) {
-            throw new RegraNegocioException("O horário escolhido está fora do expediente configurado.");
-        }
-
-        if (agendamentoRepository.existeConflitoNoHorario(data, horaInicio, STATUS_QUE_OCUPAM_AGENDA, null)) {
-            throw new ConflitoHorarioException("O horário selecionado já está ocupado por outro atendimento.");
-        }
-
+        LocalTime horaFim = validador.validarHorarioDisponivelECalcularFim(data, horaInicio, null);
         Cliente cliente = clienteService.obterOuCadastrarNoAgendamento(nomeCliente, telefone, email, endereco, perfil);
-        String protocolo = String.format("PP-%d-%04d", data.getYear(), sequencialProtocolo.incrementAndGet());
+
+        LocalDateTime agora = LocalDateTime.now(clock);
+        long proximoNumero = Math.max(sequencialProtocolo.incrementAndGet(), agendamentoRepository.count() + 101);
+        String protocolo = String.format("PP-%d-%04d", data.getYear(), proximoNumero);
 
         Agendamento novo = new Agendamento(
                 protocolo,
@@ -86,7 +67,7 @@ public class AgendamentoService {
                 horaFim,
                 tipoServico,
                 endereco.trim(),
-                descricao != null ? descricao.trim() : null
+                descricao != null && !descricao.isBlank() ? descricao.trim() : null
         );
         novo.setCriadoEm(agora);
         novo.setAtualizadoEm(agora);
@@ -94,30 +75,47 @@ public class AgendamentoService {
 
         historicoRepository.save(new HistoricoStatusAgendamento(
                 salvo, null, StatusAgendamento.CONFIRMADO, "CLIENTE (Autoatendimento)",
-                "Agendamento criado pelo cliente", agora
+                "Agendamento criado com sucesso", agora
         ));
         notificacaoGateway.notificarAgendamentoConfirmado(salvo);
         return salvo;
     }
 
     @Transactional
-    public Agendamento cancelarPeloCliente(String protocolo, String motivo) {
-        Agendamento agendamento = agendamentoRepository.findByProtocoloIgnoreCase(protocolo)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Protocolo não encontrado: " + protocolo));
-
-        if (!agendamento.getStatus().podeTransitarPara(StatusAgendamento.CANCELADO)) {
-            throw new RegraNegocioException("Este agendamento não pode mais ser cancelado (status atual: "
-                    + agendamento.getStatus().getDescricao() + ").");
+    public Agendamento remarcarPeloCliente(String protocolo, LocalDate novaData, LocalTime novaHoraInicio, String motivo) {
+        Agendamento agendamento = buscarPorProtocolo(protocolo);
+        if (agendamento.getStatus() != StatusAgendamento.CONFIRMADO) {
+            throw new RegraNegocioException("Apenas agendamentos confirmados podem ser remarcados.");
         }
+
+        validador.validarAntecedenciaAutoatendimento(agendamento);
+        LocalTime novaHoraFim = validador.validarHorarioDisponivelECalcularFim(novaData, novaHoraInicio, agendamento.getId());
+
+        String horarioAnterior = agendamento.getDataHoraInicio().format(FMT_DATA_HORA);
+        LocalDateTime agora = LocalDateTime.now(clock);
+
+        agendamento.setData(novaData);
+        agendamento.setHoraInicio(novaHoraInicio);
+        agendamento.setHoraFim(novaHoraFim);
+        agendamento.setAtualizadoEm(agora);
+        Agendamento salvo = agendamentoRepository.save(agendamento);
+
+        historicoRepository.save(new HistoricoStatusAgendamento(
+                salvo, StatusAgendamento.CONFIRMADO, StatusAgendamento.CONFIRMADO, "CLIENTE",
+                "Remarcado de " + horarioAnterior + (motivo != null && !motivo.isBlank() ? " (" + motivo.trim() + ")" : ""),
+                agora
+        ));
+        notificacaoGateway.notificarAgendamentoRemarcado(salvo, horarioAnterior);
+        return salvo;
+    }
+
+    @Transactional
+    public Agendamento cancelarPeloCliente(String protocolo, String motivo) {
+        Agendamento agendamento = buscarPorProtocolo(protocolo);
+        validador.validarTransicaoStatus(agendamento, StatusAgendamento.CANCELADO);
+        validador.validarAntecedenciaAutoatendimento(agendamento);
 
         LocalDateTime agora = LocalDateTime.now(clock);
-        Duration antecedencia = Duration.between(agora, agendamento.getDataHoraInicio());
-        if (antecedencia.toMinutes() < 120) {
-            throw new RegraNegocioException(
-                    "Cancelamentos ou remarcações pelo sistema exigem no mínimo 2 horas de antecedência. " +
-                    "Por favor, fale diretamente com o proprietário no chat.");
-        }
-
         StatusAgendamento anterior = agendamento.getStatus();
         agendamento.setStatus(StatusAgendamento.CANCELADO);
         agendamento.setAtualizadoEm(agora);
@@ -137,13 +135,7 @@ public class AgendamentoService {
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado: " + agendamentoId));
 
-        if (!agendamento.getStatus().podeTransitarPara(novoStatus)) {
-            throw new RegraNegocioException(String.format(
-                    "Transição inválida de status: não é permitido alterar de %s para %s.",
-                    agendamento.getStatus().getDescricao(),
-                    novoStatus != null ? novoStatus.getDescricao() : "NULO"
-            ));
-        }
+        validador.validarTransicaoStatus(agendamento, novoStatus);
 
         LocalDateTime agora = LocalDateTime.now(clock);
         StatusAgendamento anterior = agendamento.getStatus();
@@ -163,5 +155,53 @@ public class AgendamentoService {
             notificacaoGateway.notificarAgendamentoCancelado(salvo, "PROPRIETARIO");
         }
         return salvo;
+    }
+
+    @Transactional
+    public void dispararLembreteManual(Long agendamentoId) {
+        Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado: " + agendamentoId));
+        if (agendamento.getStatus() != StatusAgendamento.CONFIRMADO) {
+            throw new RegraNegocioException("Lembretes só podem ser enviados para agendamentos confirmados.");
+        }
+        notificacaoGateway.enviarLembreteVisita(agendamento);
+    }
+
+    @Transactional(readOnly = true)
+    public Agendamento buscarPorProtocolo(String protocolo) {
+        if (protocolo == null || protocolo.isBlank()) {
+            throw new RegraNegocioException("Informe o código de protocolo.");
+        }
+        return agendamentoRepository.findByProtocoloIgnoreCase(protocolo.trim())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Protocolo não encontrado: " + protocolo));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Agendamento> consultarPorTelefoneCliente(String telefone) {
+        String tel = Cliente.normalizarTelefone(telefone);
+        if (tel.length() < 10) {
+            throw new RegraNegocioException("Informe um telefone válido com DDD para consulta.");
+        }
+        return agendamentoRepository.findByClienteTelefoneOrderByDataDescHoraInicioDesc(tel);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Agendamento> consultarHistoricoClienteId(Long clienteId) {
+        return agendamentoRepository.findByClienteIdOrderByDataDescHoraInicioDesc(clienteId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Agendamento> listarAgendaDia(LocalDate data) {
+        return agendamentoRepository.findByDataOrderByHoraInicioAsc(data);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Agendamento> listarAgendaPeriodo(LocalDate inicio, LocalDate fim) {
+        return agendamentoRepository.findByDataBetweenOrderByDataAscHoraInicioAsc(inicio, fim);
+    }
+
+    @Transactional(readOnly = true)
+    public List<HistoricoStatusAgendamento> listarHistoricoStatus(Long agendamentoId) {
+        return historicoRepository.findByAgendamentoIdOrderByDataHoraAsc(agendamentoId);
     }
 }

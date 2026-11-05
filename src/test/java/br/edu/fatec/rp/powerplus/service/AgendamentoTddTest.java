@@ -40,17 +40,22 @@ class AgendamentoTddTest {
 
     @BeforeEach
     void setUp() {
-        // Stub determinístico de relógio: Quinta-feira, 10/09/2026 às 09:00 (America/Sao_Paulo)
         ZoneId zona = ZoneId.of("America/Sao_Paulo");
         Instant instanteFixo = LocalDateTime.of(2026, 9, 10, 9, 0).atZone(zona).toInstant();
         clockFixo = Clock.fixed(instanteFixo, zona);
 
-        agendamentoService = new AgendamentoService(
+        PoliticaAgendamentoValidator validador = new PoliticaAgendamentoValidator(
                 agendamentoRepository,
                 disponibilidadeRepository,
                 bloqueioRepository,
+                clockFixo
+        );
+
+        agendamentoService = new AgendamentoService(
+                agendamentoRepository,
                 historicoRepository,
                 clienteService,
+                validador,
                 notificacaoGateway,
                 clockFixo
         );
@@ -108,7 +113,6 @@ class AgendamentoTddTest {
     @DisplayName("TU07 [TDD] - Deve bloquear cancelamento pelo cliente com menos de 2h de antecedência (HU04/RN03)")
     void deveBloquearCancelamentoPeloClienteComMenosDeDuasHorasDeAntecedencia() {
         Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
-        // Relógio fixo em 10/09/2026 09:00 -> visita às 10:00 (apenas 1h de antecedência)
         Agendamento agendamentoProximo = new Agendamento(
                 "PP-2026-0010",
                 cliente,
@@ -135,7 +139,6 @@ class AgendamentoTddTest {
     @DisplayName("TU08 [TDD + Mock] - Deve cancelar dentro do prazo, liberar horário e acionar NotificacaoGateway (HU03/HU04/HU10)")
     void deveLiberarHorarioERegistrarNotificacaoAoCancelarDentroDoPrazo() {
         Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
-        // Relógio fixo em 10/09/2026 09:00 -> visita às 15:00 (6h de antecedência >= 2h)
         Agendamento agendamento = new Agendamento(
                 "PP-2026-0011",
                 cliente,
@@ -183,5 +186,40 @@ class AgendamentoTddTest {
         ));
 
         verify(agendamentoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("TU10 [TDD Refactor] - Deve remarcar agendamento válido reaproveitando PoliticaAgendamentoValidator (HU04/UC02)")
+    void deveRemarcarAgendamentoValidoENotificarProprietario() {
+        Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
+        Agendamento existente = new Agendamento(
+                "PP-2026-0015",
+                cliente,
+                LocalDate.of(2026, 9, 11),
+                LocalTime.of(10, 0),
+                LocalTime.of(11, 0),
+                TipoServico.QUADRO_DISJUNTORES,
+                "Rua A, 10",
+                "Troca de DR"
+        );
+        existente.setId(15L);
+
+        LocalDate novaData = LocalDate.of(2026, 9, 11);
+        LocalTime novoHorario = LocalTime.of(16, 0);
+
+        when(agendamentoRepository.findByProtocoloIgnoreCase("PP-2026-0015")).thenReturn(Optional.of(existente));
+        when(bloqueioRepository.existsByData(novaData)).thenReturn(false);
+        when(disponibilidadeRepository.findByDiaSemana(DayOfWeek.FRIDAY)).thenReturn(Optional.of(
+                new DisponibilidadeSemanal(DayOfWeek.FRIDAY, true, LocalTime.of(8, 0), LocalTime.of(18, 0), 60)
+        ));
+        when(agendamentoRepository.existeConflitoNoHorario(eq(novaData), eq(novoHorario), anyCollection(), eq(15L)))
+                .thenReturn(false);
+        when(agendamentoRepository.save(any(Agendamento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Agendamento remarcado = agendamentoService.remarcarPeloCliente("PP-2026-0015", novaData, novoHorario, "Reunião");
+
+        assertEquals(LocalTime.of(16, 0), remarcado.getHoraInicio());
+        assertEquals(LocalTime.of(17, 0), remarcado.getHoraFim());
+        verify(notificacaoGateway).notificarAgendamentoRemarcado(eq(remarcado), eq("11/09/2026 10:00"));
     }
 }
