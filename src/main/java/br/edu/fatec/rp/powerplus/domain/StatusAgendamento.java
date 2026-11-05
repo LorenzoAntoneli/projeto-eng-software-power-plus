@@ -1,0 +1,39 @@
+package br.edu.fatec.rp.powerplus.domain;
+
+public enum StatusAgendamento {
+    CONFIRMADO("Confirmado"),
+    EM_ATENDIMENTO("Em Atendimento"),
+    CONCLUIDO("Concluído"),
+    CANCELADO("Cancelado");
+
+    private final String descricao;
+
+    StatusAgendamento(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    /**
+     * RN04 - Valida se a transição de estado operacional é permitida.
+     */
+    public boolean podeTransitarPara(StatusAgendamento novoStatus) {
+        if (novoStatus == null || this == novoStatus) {
+            return false;
+        }
+        return switch (this) {
+            case CONFIRMADO -> novoStatus == EM_ATENDIMENTO
+                    || novoStatus == CONCLUIDO
+                    || novoStatus == CANCELADO;
+            case EM_ATENDIMENTO -> novoStatus == CONCLUIDO
+                    || novoStatus == CANCELADO;
+            case CONCLUIDO, CANCELADO -> false;
+        };
+    }
+
+    public boolean ocupaHorarioNaAgenda() {
+        return this == CONFIRMADO || this == EM_ATENDIMENTO;
+    }
+}
