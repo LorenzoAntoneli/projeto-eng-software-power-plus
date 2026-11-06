@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes e Histórico — Painel Power Plus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="backoffice-layout">
+        <aside class="backoffice-sidebar" id="boSidebarMount"></aside>
+
+        <main class="backoffice-main">
+            <div class="bo-header">
+                <div>
+                    <h1>Clientes cadastrados</h1>
+                    <p>Base unificada de clientes residenciais, empresas e condomínios com histórico de serviços prestados.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="btnAbrirFormCliente">+ Cadastrar cliente</button>
+            </div>
+
+            <div id="boxFormCliente" class="surface-box hidden" style="margin-bottom:18px">
+                <div class="box-header">
+                    <h2>Novo cadastro de cliente</h2>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnFecharFormCliente">Cancelar</button>
+                </div>
+                <form id="formNovoCliente">
+                    <div class="grid-3">
+                        <div class="field">
+                            <label for="cliNome">Nome ou condomínio</label>
+                            <input type="text" id="cliNome" required>
+                        </div>
+                        <div class="field">
+                            <label for="cliTelefone">Telefone com DDD</label>
+                            <input type="tel" id="cliTelefone" placeholder="(16) 99123-4567" required>
+                        </div>
+                        <div class="field">
+                            <label for="cliPerfil">Categoria</label>
+                            <select id="cliPerfil">
+                                <option value="RESIDENCIAL">Residencial</option>
+                                <option value="EMPRESARIAL_CONDOMINIO">Empresarial / Condomínio</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid-3">
+                        <div class="field">
+                            <label for="cliEndereco">Endereço padrão</label>
+                            <input type="text" id="cliEndereco" required>
+                        </div>
+                        <div class="field">
+                            <label for="cliEmail">E-mail</label>
+                            <input type="email" id="cliEmail">
+                        </div>
+                        <div class="field">
+                            <label for="cliObs">Notas técnicas</label>
+                            <input type="text" id="cliObs" placeholder="Ex.: Padrão trifásico; falar com zelador">
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;margin-top:8px">
+                        <button type="submit" class="btn btn-primary btn-sm">Salvar cliente</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="surface-box">
+                <div style="display:flex;gap:8px;max-width:420px;margin-bottom:16px">
+                    <input type="text" id="inputBuscaCliente" placeholder="Buscar por nome ou telefone...">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnBuscarCliente">Filtrar</button>
+                </div>
+                <div id="mountTabelaClientes"></div>
+            </div>
+
+            <div id="mountHistoricoCliente" class="surface-box hidden" style="margin-top:18px"></div>
+        </main>
+    </div>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/painel-clientes.js"></script>
+</body>
+</html>
+

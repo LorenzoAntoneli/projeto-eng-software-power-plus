@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atendimento Online — Power Plus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="public-header">
+        <div class="shell public-header-inner">
+            <a href="/" class="brand-id">
+                <span class="brand-box" aria-hidden="true">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
+                    </svg>
+                </span>
+                <span class="brand-copy">
+                    <span class="brand-name">Power Plus</span>
+                    <span class="brand-location">Instalações e Manutenção Elétrica · Ribeirão Preto</span>
+                </span>
+            </a>
+
+            <nav class="public-nav" aria-label="Navegação do cliente">
+                <a href="/">Agendar visita</a>
+                <a href="/acompanhar">Meus agendamentos</a>
+                <a href="/atendimento" class="active">Atendimento</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="public-page">
+        <div class="shell">
+            <div class="page-head">
+                <h1>Central de atendimento</h1>
+                <p>Consulte informações rápidas sobre horários, orçamentos e serviços ou fale diretamente com o eletricista responsável.</p>
+            </div>
+
+            <div class="chat-shell">
+                <aside class="chat-topics-pane">
+                    <div>
+                        <div class="rail-heading" style="margin-bottom:10px">Seus dados para contato</div>
+                        <div class="field">
+                            <label for="chatNomeCliente">Nome</label>
+                            <input type="text" id="chatNomeCliente" placeholder="Ex.: Roberto Almeida">
+                        </div>
+                        <div class="field">
+                            <label for="chatTelefoneCliente">Telefone / WhatsApp</label>
+                            <input type="tel" id="chatTelefoneCliente" placeholder="(16) 99111-2233">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="rail-heading" style="margin-bottom:8px">Dúvidas frequentes</div>
+                        <button type="button" class="topic-button" data-prompt="Quais horários disponíveis vocês têm para os próximos dias?">
+                            <span>Próximos horários vagos</span>
+                            <span>→</span>
+                        </button>
+                        <button type="button" class="topic-button" data-prompt="Como funciona o orçamento e valor da visita técnica?">
+                            <span>Orçamento e avaliação</span>
+                            <span>→</span>
+                        </button>
+                        <button type="button" class="topic-button" data-prompt="Quais serviços elétricos vocês atendem para residência e condomínio?">
+                            <span>Serviços atendidos</span>
+                            <span>→</span>
+                        </button>
+                        <button type="button" class="topic-button" data-prompt="Quais bairros de Ribeirão Preto vocês atendem e qual a garantia?">
+                            <span>Região atendida e garantia</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+
+                    <div class="handoff-panel">
+                        <span>Caso complexo ou demanda de condomínio?</span>
+                        <button type="button" class="btn btn-secondary btn-full" id="btnSolicitarEletricista">
+                            Falar com Carlos (Eletricista)
+                        </button>
+                    </div>
+                </aside>
+
+                <div class="chat-conversation-pane">
+                    <div class="chat-top-bar">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <strong style="font-size:0.92rem">Canal de Atendimento</strong>
+                            <span id="chatStatusPill" class="status-badge st-AUTOMATICO">Triagem automática</span>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnReiniciarChat">Nova conversa</button>
+                    </div>
+
+                    <div id="chatMessagesStream" class="chat-stream">
+                        <div class="chat-msg theirs">
+                            <div class="chat-author">Atendimento Power Plus</div>
+                            <div class="chat-bubble">Olá! Escolha um assunto ao lado ou escreva sua dúvida abaixo. Se precisar tratar detalhes técnicos específicos, clique em "Falar com Carlos" para encaminharmos sua conversa.</div>
+                        </div>
+                    </div>
+
+                    <form id="formChatCliente" class="chat-form-bar">
+                        <input type="text" id="chatInputMsg" placeholder="Escreva sua mensagem..." required>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="public-footer">
+        <div class="shell public-footer-inner">
+            <span>Power Plus Serviços Elétricos · Ribeirão Preto, SP</span>
+            <a href="/painel/login" class="footer-internal-link">Acesso interno (Equipe)</a>
+        </div>
+    </footer>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/cliente-atendimento.js"></script>
+</body>
+</html>
+

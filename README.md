@@ -58,10 +58,18 @@ No terminal (PowerShell, CMD ou Bash), na raiz do projeto:
 *(No Linux/macOS: `./mvnw spring-boot:run`)*
 
 Acesse no navegador:
-- **Aplicação Web (Cliente + Chat + Painel do Proprietário):** `http://localhost:8080`
-- **Credenciais de Demonstração do Proprietário:**
-  - **Usuário:** `carlos.powerplus`
-  - **Senha:** `PowerPlus@2026`
+- **Portal do Cliente (Telas Públicas Separadas):**
+  - `http://localhost:8080/` — Agendamento de Visita em 2 etapas
+  - `http://localhost:8080/acompanhar` — Consulta por protocolo/telefone, remarcação e cancelamento
+  - `http://localhost:8080/comprovante?protocolo=PP-2026-0102` — Ordem / Comprovante imprimível
+  - `http://localhost:8080/atendimento` — Central de Atendimento (triagem + transbordo em tempo real)
+- **Sistema Operacional Interno (Telas do Proprietário):**
+  - `http://localhost:8080/painel/login` — Autenticação (`carlos.powerplus` / `PowerPlus@2026`)
+  - `http://localhost:8080/painel/agenda` — Agenda Diária e Semanal
+  - `http://localhost:8080/painel/expediente` — Horários semanais e bloqueio de datas
+  - `http://localhost:8080/painel/clientes` — Base de clientes e histórico de serviços
+  - `http://localhost:8080/painel/mensagens` — Inbox de atendimento humano ao vivo
+  - `http://localhost:8080/painel/avisos` — Registro de envios e avisos
 - **Protocolos/Dados de Demonstração (Seed Fictício LGPD):**
   - Protocolo ativo para testar consulta/remarcação: `PP-2026-0102` ou `PP-2026-0103`
   - Telefone empresarial com histórico: `1636258899`

@@ -392,4 +392,20 @@ class PowerPlusIntegrationAcceptanceTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("CT07 - Navegação multi-telas: Deve resolver rotas separadas do Portal do Cliente e do Painel Operacional")
+    void deveResolverTodasAsRotasSeparadasDeTelasWeb() throws Exception {
+        for (String rota : new String[]{
+                "/agendar", "/comprovante", "/acompanhar", "/atendimento",
+                "/painel/login", "/painel/agenda", "/painel/expediente",
+                "/painel/clientes", "/painel/mensagens", "/painel/avisos"
+        }) {
+            mockMvc.perform(get(rota))
+                    .andExpect(status().isOk());
+        }
+        mockMvc.perform(get("/painel"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/painel/agenda"));
+    }
 }

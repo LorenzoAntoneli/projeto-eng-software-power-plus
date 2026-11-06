@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprovante de Agendamento — Power Plus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="public-header">
+        <div class="shell public-header-inner">
+            <a href="/" class="brand-id">
+                <span class="brand-box" aria-hidden="true">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
+                    </svg>
+                </span>
+                <span class="brand-copy">
+                    <span class="brand-name">Power Plus</span>
+                    <span class="brand-location">Instalações e Manutenção Elétrica · Ribeirão Preto</span>
+                </span>
+            </a>
+
+            <nav class="public-nav" aria-label="Navegação do cliente">
+                <a href="/">Agendar visita</a>
+                <a href="/acompanhar">Meus agendamentos</a>
+                <a href="/atendimento">Atendimento</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="public-page">
+        <div class="shell">
+            <div id="ticketMount" class="ticket-card">
+                <div class="ticket-body">
+                    <p class="hint">Carregando comprovante...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="public-footer">
+        <div class="shell public-footer-inner">
+            <span>Power Plus Serviços Elétricos · Ribeirão Preto, SP</span>
+            <a href="/painel/login" class="footer-internal-link">Acesso interno (Equipe)</a>
+        </div>
+    </footer>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/cliente-comprovante.js"></script>
+</body>
+</html>
+
