@@ -1,0 +1,48 @@
+name: Power Plus CI - Build, Testes JUnit e Cobertura JaCoCo
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-test-coverage:
+    name: Compilação, JUnit 5, Cobertura JaCoCo e Pacote MVP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout do código-fonte
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar JDK 21 (Eclipse Temurin) e cache de dependências Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: 3. Compilação da aplicação
+        run: ./mvnw -B compile
+
+      - name: 4. Execução dos testes automatizados (Unitários, TDD, Mocks e Integração)
+        run: ./mvnw -B test
+
+      - name: 5. Verificação do Quality Gate de Cobertura JaCoCo e Empacotamento do MVP
+        run: ./mvnw -B verify
+
+      - name: 6. Publicar Relatórios de Testes e Cobertura (Artefatos CI)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-qualidade-jacoco-junit
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+
+      - name: 7. Publicar Pacote Executável da Release Candidata (JAR MVP)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: power-plus-mvp-jar
+          path: target/power-plus-mvp-*.jar
