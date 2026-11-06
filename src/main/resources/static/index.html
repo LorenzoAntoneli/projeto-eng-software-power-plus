@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Plus – Agendamento Elétrico & Atendimento Automatizado</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Barra Superior -->
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand">
+                <div class="brand-icon" aria-hidden="true">&#9889;</div>
+                <div>
+                    <span class="brand-title">POWER PLUS</span>
+                    <span class="brand-subtitle">Serviços Elétricos • Ribeirão Preto</span>
+                </div>
+            </div>
+
+            <nav class="mode-nav" aria-label="Navegação principal">
+                <button type="button" class="mode-btn active" data-view="cliente-agendar">Agendar Visita</button>
+                <button type="button" class="mode-btn" data-view="cliente-consulta">Meus Agendamentos</button>
+                <button type="button" class="mode-btn" data-view="cliente-chat">Chat Assistente</button>
+                <button type="button" class="mode-btn mode-owner" data-view="proprietario">
+                    Painel do Proprietário
+                    <span id="badgeOwnerAlert" class="nav-badge hidden">!</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Notificação Toast Global -->
+    <div id="toastBox" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <main class="container main-content">
+        <!-- ==================== VISÃO 1: AUTOATENDIMENTO DE AGENDAMENTO ==================== -->
+        <section id="view-cliente-agendar" class="view-section active">
+            <div class="hero-card">
+                <div>
+                    <span class="pill-tag">Autoatendimento 24h • Zero Espera</span>
+                    <h1>Agende sua visita técnica elétrica sem esperar resposta no WhatsApp</h1>
+                    <p>Escolha um horário realmente disponível na agenda do eletricista, informe o serviço e receba seu protocolo confirmado na hora.</p>
+                </div>
+                <div class="hero-highlights">
+                    <div class="highlight-item"><strong>100% Sem Conflitos</strong><span>Horários validados em tempo real</span></div>
+                    <div class="highlight-item"><strong>Residencial &amp; Condomínios</strong><span>Atendimento em toda Ribeirão Preto</span></div>
+                </div>
+            </div>
+
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>1. Data, Horário Livre e Serviço</h2>
+                        <p class="muted">Selecione o dia para visualizar apenas os horários livres na agenda.</p>
+                    </div>
+                    <form id="formNovoAgendamento" novalidate>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="agData">Data desejada *</label>
+                                <input type="date" id="agData" required>
+                                <small class="field-hint" id="hintDataAgenda">Seg–Sex (08h–18h) | Sáb (08h–13h)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="agTipoServico">Tipo de serviço elétrico *</label>
+                                <select id="agTipoServico" required></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Horários disponíveis na data selecionada *</label>
+                            <div id="slotsContainer" class="slots-grid">
+                                <span class="muted">Carregando horários livres...</span>
+                            </div>
+                            <input type="hidden" id="agHoraInicio" required>
+                        </div>
+
+                        <hr class="divider">
+                        <h3>2. Dados do Cliente e Local do Atendimento</h3>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="agNome">Nome completo / Razão Social *</label>
+                                <input type="text" id="agNome" placeholder="Ex.: Mariana Ferreira ou Condomínio Solar" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="agPerfil">Perfil do cliente *</label>
+                                <select id="agPerfil" required></select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="agTelefone">Telefone / WhatsApp com DDD *</label>
+                                <input type="tel" id="agTelefone" placeholder="(16) 99123-4567" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="agEmail">E-mail (opcional)</label>
+                                <input type="email" id="agEmail" placeholder="cliente@exemplo.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="agEndereco">Endereço completo da visita (Rua, nº, bairro, complemento) *</label>
+                            <input type="text" id="agEndereco" placeholder="Ex.: Rua São Sebastião, 410, Apto 42 - Centro, Ribeirão Preto" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="agDescricao">Detalhes do problema ou serviço (opcional)</label>
+                            <textarea id="agDescricao" rows="2" placeholder="Ex.: Disjuntor do chuveiro desarmando após 5 minutos; tensão 220V."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Confirmar Agendamento Agora</button>
+                    </form>
+                </div>
+
+                <div>
+                    <!-- Comprovante de confirmação imediata (HU03) -->
+                    <div id="cardConfirmacaoRecente" class="card confirmation-card hidden">
+                        <div class="badge status-CONFIRMADO">Confirmado Imediatamente</div>
+                        <h2>Visita Agendada com Sucesso!</h2>
+                        <p class="protocol-box">Protocolo: <strong id="confProtocolo">PP-2026-0000</strong></p>
+                        <ul class="summary-list" id="confResumoLista"></ul>
+                        <p class="muted small-note">Guarde seu protocolo ou consulte a qualquer momento pelo seu telefone na aba <strong>Meus Agendamentos</strong>.</p>
+                    </div>
+
+                    <div class="card info-card">
+                        <h3>Dúvidas rápidas antes de agendar?</h3>
+                        <p class="muted">Nosso assistente automatizado responde na hora sobre valores de visita, regiões atendidas, emergências ou encaminha você ao proprietário.</p>
+                        <div class="quick-benefits">
+                            <div><strong>Sem conflito de agenda:</strong> o horário escolhido fica bloqueado exclusivamente para você.</div>
+                            <div><strong>Flexibilidade:</strong> remarque ou cancele online com até 2 horas de antecedência.</div>
+                            <div><strong>Histórico empresarial:</strong> condomínios e empresas consultam todas as visitas realizadas por telefone.</div>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block" onclick="App.switchView('cliente-chat')">
+                            Abrir Chat de Atendimento Automatizado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VISÃO 2: CONSULTAR / REMARCAR / CANCELAR (HU04 & HU12) ==================== -->
+        <section id="view-cliente-consulta" class="view-section">
+            <div class="grid-2col">
+                <div class="card">
+                    <h2>Consultar por Protocolo ou Telefone</h2>
+                    <p class="muted">Localize seu agendamento para acompanhar o status, remarcar, cancelar ou emitir comprovante de histórico (empresas/condomínios).</p>
+
+                    <div class="search-box-group">
+                        <label for="inputBuscaProtocolo">Buscar por código de protocolo</label>
+                        <div class="inline-form">
+                            <input type="text" id="inputBuscaProtocolo" placeholder="Ex.: PP-2026-0102">
+                            <button type="button" class="btn btn-primary" id="btnBuscarProtocolo">Consultar</button>
+                        </div>
+                    </div>
+
+                    <div class="search-box-group">
+                        <label for="inputBuscaTelefone">Ou listar histórico completo pelo Telefone/WhatsApp</label>
+                        <div class="inline-form">
+                            <input type="tel" id="inputBuscaTelefone" placeholder="Ex.: (16) 3625-8899">
+                            <button type="button" class="btn btn-secondary" id="btnBuscarTelefone">Listar Histórico</button>
+                        </div>
+                        <small class="field-hint">Dica de demonstração: teste <code>PP-2026-0102</code> ou telefone <code>1636258899</code>.</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Resultado da Consulta</h2>
+                    <div id="resultadoConsultaCliente" class="empty-state">
+                        Informe seu protocolo ou telefone ao lado para visualizar seus agendamentos.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal simples de Remarcação pelo Cliente -->
+            <div id="modalRemarcar" class="modal-backdrop hidden">
+                <div class="modal-card">
+                    <h3>Remarcar Atendimento (<span id="remProtocoloTitulo"></span>)</h3>
+                    <form id="formRemarcarCliente">
+                        <input type="hidden" id="remProtocolo">
+                        <div class="form-group">
+                            <label for="remNovaData">Nova data *</label>
+                            <input type="date" id="remNovaData" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="remNovoHorario">Novo horário livre *</label>
+                            <select id="remNovoHorario" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="remMotivo">Motivo da remarcação (opcional)</label>
+                            <input type="text" id="remMotivo" placeholder="Ex.: Imprevisto no trabalho">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline" onclick="App.fecharModalRemarcar()">Voltar</button>
+                            <button type="submit" class="btn btn-primary">Confirmar Novo Horário</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VISÃO 3: CHAT DE ATENDIMENTO AUTOMATIZADO (HU05 & HU11) ==================== -->
+        <section id="view-cliente-chat" class="view-section">
+            <div class="chat-layout">
+                <div class="card chat-sidebar">
+                    <h2>Assistente Power Plus</h2>
+                    <p class="muted">Tire dúvidas instantaneamente ou peça para falar direto com o eletricista Carlos.</p>
+
+                    <div class="form-group">
+                        <label for="chatNomeCliente">Seu nome</label>
+                        <input type="text" id="chatNomeCliente" placeholder="Ex.: Roberto Almeida">
+                    </div>
+                    <div class="form-group">
+                        <label for="chatTelefoneCliente">Seu telefone/WhatsApp</label>
+                        <input type="tel" id="chatTelefoneCliente" placeholder="(16) 99111-2233">
+                    </div>
+
+                    <h4>Perguntas rápidas (1 clique):</h4>
+                    <div class="quick-prompts">
+                        <button type="button" class="chip-btn" data-prompt="Quais horários disponíveis vocês têm para os próximos dias?">Ver próximos horários livres</button>
+                        <button type="button" class="chip-btn" data-prompt="Como funciona o orçamento e valor da visita técnica?">Valor da visita e orçamento</button>
+                        <button type="button" class="chip-btn" data-prompt="Quais serviços elétricos vocês atendem para residência e condomínio?">Serviços atendidos</button>
+                        <button type="button" class="chip-btn" data-prompt="Quais bairros de Ribeirão Preto vocês atendem e qual a garantia?">Região atendida e garantia</button>
+                        <button type="button" class="chip-btn chip-human" data-human="true" data-prompt="Preciso falar diretamente com o eletricista sobre um caso específico.">Falar com o Proprietário (Humano)</button>
+                    </div>
+                </div>
+
+                <div class="card chat-window-card">
+                    <div class="chat-header">
+                        <div>
+                            <strong id="chatStatusTitulo">Atendimento Automatizado Online</strong>
+                            <span id="chatConversaBadge" class="badge status-CONFIRMADO">Resposta Imediata</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline" id="btnNovaConversaChat">Nova Conversa</button>
+                    </div>
+
+                    <div id="chatMessagesBox" class="chat-messages">
+                        <div class="msg msg-bot">
+                            <div class="msg-meta">Assistente Power Plus</div>
+                            <div class="msg-bubble">Olá! Sou o assistente virtual da Power Plus. Escolha uma pergunta rápida ao lado ou escreva sua dúvida abaixo!</div>
+                        </div>
+                    </div>
+
+                    <form id="formEnviarChatCliente" class="chat-input-bar">
+                        <input type="text" id="chatTextoMensagem" placeholder="Digite sua dúvida ou peça um horário..." required>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VISÃO 4: PAINEL DO PROPRIETÁRIO (AUTENTICADO) ==================== -->
+        <section id="view-proprietario" class="view-section">
+            <!-- Tela de Login do Proprietário (RNF03) -->
+            <div id="ownerLoginBox" class="login-wrapper">
+                <div class="card login-card">
+                    <span class="pill-tag">Acesso Restrito • RNF03 (BCrypt)</span>
+                    <h2>Área do Proprietário – Power Plus</h2>
+                    <p class="muted">Gerencie sua agenda diária/semanal, disponibilidade, clientes, notificações e conversas encaminhadas pelo chat.</p>
+
+                    <form id="formOwnerLogin">
+                        <div class="form-group">
+                            <label for="loginUser">Usuário</label>
+                            <input type="text" id="loginUser" value="carlos.powerplus" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPass">Senha</label>
+                            <input type="password" id="loginPass" value="PowerPlus@2026" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Entrar no Painel Operacional</button>
+                    </form>
+                    <small class="field-hint">Credenciais acadêmicas pré-preenchidas para demonstração na Banca de Produto.</small>
+                </div>
+            </div>
+
+            <!-- Conteúdo Autenticado do Proprietário -->
+            <div id="ownerAppBox" class="hidden">
+                <div class="owner-header-bar">
+                    <div>
+                        <h2 id="ownerWelcomeTitle">Painel Operacional – Carlos Eduardo</h2>
+                        <span class="muted" id="ownerFeatureFlagInfo">Canal WhatsApp Externo: Desativado (Feature Flag MVP)</span>
+                    </div>
+                    <div class="owner-subnav">
+                        <button type="button" class="subtab-btn active" data-subtab="tab-agenda">Dashboard &amp; Agenda</button>
+                        <button type="button" class="subtab-btn" data-subtab="tab-disponibilidade">Disponibilidade &amp; Folgas</button>
+                        <button type="button" class="subtab-btn" data-subtab="tab-clientes">Clientes &amp; Histórico</button>
+                        <button type="button" class="subtab-btn" data-subtab="tab-chats">Chats Encaminhados <span id="countChatsPendentes" class="mini-counter">0</span></button>
+                        <button type="button" class="subtab-btn" data-subtab="tab-notificacoes">Avisos <span id="countNotifNaoLidas" class="mini-counter">0</span></button>
+                        <button type="button" class="btn btn-sm btn-outline" id="btnOwnerLogout">Sair</button>
+                    </div>
+                </div>
+
+                <!-- SUBABA 1: DASHBOARD + AGENDA DIÁRIA / SEMANAL -->
+                <div id="tab-agenda" class="owner-tab active">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <span class="kpi-label">Atendimentos na Data</span>
+                            <strong class="kpi-value" id="kpiTotalHoje">0</strong>
+                        </div>
+                        <div class="kpi-card">
+                            <span class="kpi-label">Confirmados / Pendentes</span>
+                            <strong class="kpi-value text-amber" id="kpiConfirmadosHoje">0</strong>
+                        </div>
+                        <div class="kpi-card">
+                            <span class="kpi-label">Concluídos na Data</span>
+                            <strong class="kpi-value text-green" id="kpiConcluidosHoje">0</strong>
+                        </div>
+                        <div class="kpi-card">
+                            <span class="kpi-label">Total Ativos na Semana</span>
+                            <strong class="kpi-value" id="kpiTotalSemana">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="agenda-toolbar">
+                            <div class="inline-form">
+                                <label for="adminDataAgenda"><strong>Data de referência:</strong></label>
+                                <input type="date" id="adminDataAgenda">
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-primary" id="btnModoDia">Visão Diária</button>
+                                <button type="button" class="btn btn-sm btn-outline" id="btnModoSemana">Visão Semanal</button>
+                            </div>
+                        </div>
+
+                        <div id="adminAgendaContainer" class="agenda-list-container"></div>
+                    </div>
+                </div>
+
+                <!-- SUBABA 2: CONFIGURAR DISPONIBILIDADE E BLOQUEIOS (UC04) -->
+                <div id="tab-disponibilidade" class="owner-tab">
+                    <div class="grid-2col">
+                        <div class="card">
+                            <h3>Horários de Atendimento por Dia da Semana</h3>
+                            <p class="muted">Os clientes só conseguem agendar dentro das faixas ativas abaixo (HU07).</p>
+                            <div id="listaDisponibilidadeSemanal" class="disp-table-wrap"></div>
+                        </div>
+
+                        <div class="card">
+                            <h3>Bloquear Folgas, Cursos ou Feriados</h3>
+                            <p class="muted">Se já houver cliente agendado na data, o sistema alerta antes de bloquear (RN06).</p>
+                            <form id="formNovoBloqueio" class="mb-16">
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="bloqData">Data a bloquear *</label>
+                                        <input type="date" id="bloqData" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bloqMotivo">Motivo *</label>
+                                        <input type="text" id="bloqMotivo" placeholder="Ex.: Feriado Municipal / Curso NR-10" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Bloquear Data na Agenda</button>
+                            </form>
+                            <h4>Datas bloqueadas ativas</h4>
+                            <div id="listaBloqueiosAtivos"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBABA 3: CADASTRO DE CLIENTES E HISTÓRICO (HU09 / UC06) -->
+                <div id="tab-clientes" class="owner-tab">
+                    <div class="grid-2col">
+                        <div class="card">
+                            <h3>Cadastrar Novo Cliente</h3>
+                            <form id="formAdminCliente">
+                                <div class="form-group">
+                                    <label for="cliNome">Nome / Empresa / Condomínio *</label>
+                                    <input type="text" id="cliNome" required>
+                                </div>
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="cliTelefone">Telefone com DDD *</label>
+                                        <input type="tel" id="cliTelefone" placeholder="(16) 99123-4567" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cliPerfil">Perfil *</label>
+                                        <select id="cliPerfil">
+                                            <option value="RESIDENCIAL">Residencial</option>
+                                            <option value="EMPRESARIAL_CONDOMINIO">Empresarial / Condomínio</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cliEmail">E-mail</label>
+                                    <input type="email" id="cliEmail">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cliEndereco">Endereço padrão *</label>
+                                    <input type="text" id="cliEndereco" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cliObs">Observações técnicas</label>
+                                    <input type="text" id="cliObs" placeholder="Ex.: Padrão trifásico; falar com zelador">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Salvar Cliente</button>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <h3>Base de Clientes &amp; Histórico de Serviços</h3>
+                            <div class="inline-form mb-16">
+                                <input type="text" id="inputAdminBuscaCliente" placeholder="Pesquisar por nome ou telefone...">
+                                <button type="button" class="btn btn-secondary" id="btnAdminBuscarCliente">Pesquisar</button>
+                            </div>
+                            <div id="listaAdminClientes"></div>
+                            <div id="boxHistoricoClienteAdmin" class="mt-16 hidden"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBABA 4: TRANSBORDO HUMANO DO CHAT (HU11) -->
+                <div id="tab-chats" class="owner-tab">
+                    <div class="grid-2col">
+                        <div class="card">
+                            <h3>Conversas de Clientes</h3>
+                            <p class="muted">Conversas marcadas como <strong>Aguardando Proprietário</strong> foram encaminhadas pelo assistente com todo o histórico.</p>
+                            <div id="listaAdminConversas"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Histórico e Resposta Humana</h3>
+                            <div id="boxAdminDetalheConversa" class="empty-state">
+                                Selecione uma conversa ao lado para ler o histórico e responder ao cliente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBABA 5: CENTRAL DE AVISOS E LEMBRETES (HU10 / UC07) -->
+                <div id="tab-notificacoes" class="owner-tab">
+                    <div class="card">
+                        <div class="agenda-toolbar">
+                            <div>
+                                <h3>Registro de Confirmações, Alterações e Lembretes</h3>
+                                <p class="muted">Rastreabilidade completa de eventos enviados ao cliente e alertas do proprietário.</p>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" id="btnMarcarNotifLidas">Marcar todas como lidas</button>
+                        </div>
+                        <div id="listaAdminNotificacoes"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <span><strong>Power Plus MVP v1.0.0</strong> • Engenharia de Software II – FATEC Ribeirão Preto (2º Sem/2026)</span>
+            <span>Dados demonstrativos fictícios/anonimizados em conformidade com a LGPD.</span>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
