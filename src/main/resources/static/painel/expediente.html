@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expediente e Folgas — Painel Power Plus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="backoffice-layout">
+        <aside class="backoffice-sidebar" id="boSidebarMount"></aside>
+
+        <main class="backoffice-main">
+            <div class="bo-header">
+                <div>
+                    <h1>Expediente e bloqueios</h1>
+                    <p>Configure a grade semanal disponível para agendamento online e registre ausências ou feriados.</p>
+                </div>
+            </div>
+
+            <div class="bo-split">
+                <div class="surface-box">
+                    <div class="box-header">
+                        <h2>Janelas semanais de atendimento</h2>
+                    </div>
+                    <div id="mountDisponibilidade"></div>
+                </div>
+
+                <div class="surface-box">
+                    <div class="box-header">
+                        <h2>Bloquear data específica</h2>
+                    </div>
+                    <form id="formBloqueioData">
+                        <div class="grid-2">
+                            <div class="field">
+                                <label for="bloqData">Data</label>
+                                <input type="date" id="bloqData" required>
+                            </div>
+                            <div class="field">
+                                <label for="bloqMotivo">Motivo</label>
+                                <input type="text" id="bloqMotivo" placeholder="Ex.: Feriado / Curso NR-10" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:4px">Bloquear data</button>
+                    </form>
+
+                    <div style="height:1px;background:var(--border);margin:20px 0"></div>
+                    <div class="rail-heading" style="margin-bottom:10px">Datas bloqueadas</div>
+                    <div id="mountBloqueios"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/painel-expediente.js"></script>
+</body>
+</html>
+
