@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Operacional — Painel Power Plus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="backoffice-layout">
+        <aside class="backoffice-sidebar" id="boSidebarMount"></aside>
+
+        <main class="backoffice-main">
+            <div class="bo-header">
+                <div>
+                    <h1>Agenda de atendimentos</h1>
+                    <p>Controle diário e semanal de ordens agendadas, execução em campo e envio de lembretes.</p>
+                </div>
+                <div class="bo-toolbar">
+                    <input type="date" id="adminDataRef" style="width:auto;padding:6px 10px;font-size:0.83rem">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnHoje">Hoje</button>
+                    <div class="segmented">
+                        <button type="button" class="seg-item active" id="btnModoDia">Dia</button>
+                        <button type="button" class="seg-item" id="btnModoSemana">Semana</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-strip">
+                <div class="kpi-box">
+                    <div class="kpi-title">Visitas na data</div>
+                    <div class="kpi-num mono" id="kpiDiaTotal">0</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-title">Confirmadas / em curso</div>
+                    <div class="kpi-num mono" id="kpiDiaPendentes">0</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-title">Concluídas na data</div>
+                    <div class="kpi-num mono" id="kpiDiaConcluidas">0</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-title">Ativas na semana</div>
+                    <div class="kpi-num mono" id="kpiSemanaTotal">0</div>
+                </div>
+            </div>
+
+            <div class="surface-box">
+                <div id="agendaContainer">
+                    <p class="hint">Carregando agenda...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/core.js"></script>
+    <script src="../js/painel-agenda.js"></script>
+</body>
+</html>
+

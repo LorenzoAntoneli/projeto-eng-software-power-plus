@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envios e Avisos — Painel Power Plus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="backoffice-layout">
+        <aside class="backoffice-sidebar" id="boSidebarMount"></aside>
+
+        <main class="backoffice-main">
+            <div class="bo-header">
+                <div>
+                    <h1>Envios e avisos operacionais</h1>
+                    <p>Registro completo de confirmações de reserva, remarcações, cancelamentos e lembretes disparados.</p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnMarcarTodasLidas">Marcar tudo como lido</button>
+            </div>
+
+            <div class="surface-box">
+                <div id="mountTabelaAvisos"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/core.js"></script>
+    <script src="../js/painel-avisos.js"></script>
+</body>
+</html>
+

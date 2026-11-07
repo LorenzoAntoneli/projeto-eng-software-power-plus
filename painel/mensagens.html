@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagens — Painel Power Plus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="backoffice-layout">
+        <aside class="backoffice-sidebar" id="boSidebarMount"></aside>
+
+        <main class="backoffice-main">
+            <div class="bo-header">
+                <div>
+                    <h1>Mensagens e atendimento direto</h1>
+                    <p>Conversas iniciadas pelos clientes no site e solicitações encaminhadas para resposta humana.</p>
+                </div>
+            </div>
+
+            <div class="inbox-container">
+                <div class="inbox-Master" id="mountListaConversas"></div>
+                <div class="inbox-Detail" id="mountDetalheConversa">
+                    <div class="empty-placeholder" style="margin:auto 0">
+                        Selecione um atendimento na coluna à esquerda para ler as mensagens e responder ao cliente.
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/core.js"></script>
+    <script src="../js/painel-mensagens.js"></script>
+</body>
+</html>
+
