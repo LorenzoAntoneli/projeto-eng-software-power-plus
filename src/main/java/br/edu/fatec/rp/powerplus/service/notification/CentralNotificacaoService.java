@@ -33,6 +33,18 @@ public class CentralNotificacaoService implements NotificacaoGateway {
 
     @Override
     @Transactional
+    public void notificarSolicitacaoRecebida(Agendamento a) {
+        // TODO TDD GREEN
+    }
+
+    @Override
+    @Transactional
+    public void notificarAgendamentoRecusado(Agendamento a, String motivo) {
+        // TODO TDD GREEN
+    }
+
+    @Override
+    @Transactional
     public void notificarAgendamentoConfirmado(Agendamento a) {
         LocalDateTime agora = LocalDateTime.now(clock);
         String canal = canalAtivo();

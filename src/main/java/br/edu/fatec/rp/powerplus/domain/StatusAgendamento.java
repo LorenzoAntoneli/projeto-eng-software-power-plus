@@ -1,9 +1,11 @@
 package br.edu.fatec.rp.powerplus.domain;
 
 public enum StatusAgendamento {
+    AGUARDANDO_APROVACAO("Aguardando aprovação"),
     CONFIRMADO("Confirmado"),
     EM_ATENDIMENTO("Em Atendimento"),
     CONCLUIDO("Concluído"),
+    RECUSADO("Recusado"),
     CANCELADO("Cancelado");
 
     private final String descricao;
@@ -29,7 +31,7 @@ public enum StatusAgendamento {
                     || novoStatus == CANCELADO;
             case EM_ATENDIMENTO -> novoStatus == CONCLUIDO
                     || novoStatus == CANCELADO;
-            case CONCLUIDO, CANCELADO -> false;
+            case CONCLUIDO, CANCELADO, AGUARDANDO_APROVACAO, RECUSADO -> false;
         };
     }
 

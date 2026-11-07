@@ -158,6 +158,18 @@ public class AgendamentoService {
     }
 
     @Transactional
+    public Agendamento aprovarSolicitacao(Long agendamentoId, String responsavel, String observacao) {
+        return agendamentoRepository.findById(agendamentoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado: " + agendamentoId));
+    }
+
+    @Transactional
+    public Agendamento recusarSolicitacao(Long agendamentoId, String responsavel, String motivo) {
+        return agendamentoRepository.findById(agendamentoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado: " + agendamentoId));
+    }
+
+    @Transactional
     public void dispararLembreteManual(Long agendamentoId) {
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado: " + agendamentoId));
