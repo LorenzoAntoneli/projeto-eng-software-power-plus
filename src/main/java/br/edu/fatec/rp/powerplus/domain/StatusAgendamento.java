@@ -26,16 +26,19 @@ public enum StatusAgendamento {
             return false;
         }
         return switch (this) {
+            case AGUARDANDO_APROVACAO -> novoStatus == CONFIRMADO
+                    || novoStatus == RECUSADO
+                    || novoStatus == CANCELADO;
             case CONFIRMADO -> novoStatus == EM_ATENDIMENTO
                     || novoStatus == CONCLUIDO
                     || novoStatus == CANCELADO;
             case EM_ATENDIMENTO -> novoStatus == CONCLUIDO
                     || novoStatus == CANCELADO;
-            case CONCLUIDO, CANCELADO, AGUARDANDO_APROVACAO, RECUSADO -> false;
+            case CONCLUIDO, RECUSADO, CANCELADO -> false;
         };
     }
 
     public boolean ocupaHorarioNaAgenda() {
-        return this == CONFIRMADO || this == EM_ATENDIMENTO;
+        return this == AGUARDANDO_APROVACAO || this == CONFIRMADO || this == EM_ATENDIMENTO;
     }
 }

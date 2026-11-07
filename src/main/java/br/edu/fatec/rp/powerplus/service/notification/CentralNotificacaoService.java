@@ -34,13 +34,61 @@ public class CentralNotificacaoService implements NotificacaoGateway {
     @Override
     @Transactional
     public void notificarSolicitacaoRecebida(Agendamento a) {
-        // TODO TDD GREEN
+        LocalDateTime agora = LocalDateTime.now(clock);
+        String canal = canalAtivo();
+        String dataHora = a.getData().format(FMT_DATA) + " às " + a.getHoraInicio().format(FMT_HORA);
+
+        repository.save(new NotificacaoRegistro(
+                TipoNotificacao.SOLICITACAO_RECEBIDA,
+                "CLIENTE",
+                "Solicitação recebida — Aguardando aprovação (" + a.getProtocolo() + ")",
+                "Olá " + a.getCliente().getNome() + "! Recebemos seu pedido para " + dataHora
+                        + ". O horário está pré-reservado e aguarda aprovação do Leonardo.",
+                a.getProtocolo(),
+                canal,
+                agora
+        ));
+
+        repository.save(new NotificacaoRegistro(
+                TipoNotificacao.SOLICITACAO_RECEBIDA,
+                "PROPRIETARIO",
+                "Aprovação pendente: " + a.getCliente().getNome(),
+                "Protocolo " + a.getProtocolo() + " solicitou visita em " + dataHora + " – "
+                        + a.getTipoServico().getDescricao() + ". Aprove ou recuse no painel.",
+                a.getProtocolo(),
+                canal,
+                agora
+        ));
     }
 
     @Override
     @Transactional
     public void notificarAgendamentoRecusado(Agendamento a, String motivo) {
-        // TODO TDD GREEN
+        LocalDateTime agora = LocalDateTime.now(clock);
+        String canal = canalAtivo();
+        String dataHora = a.getData().format(FMT_DATA) + " às " + a.getHoraInicio().format(FMT_HORA);
+        String detalhe = (motivo != null && !motivo.isBlank()) ? motivo : "Indisponibilidade técnica no horário";
+
+        repository.save(new NotificacaoRegistro(
+                TipoNotificacao.RECUSA,
+                "CLIENTE",
+                "Solicitação não aprovada (" + a.getProtocolo() + ")",
+                "Não foi possível aprovar o horário de " + dataHora + " (" + detalhe
+                        + "). Por favor, escolha outro horário livre na agenda.",
+                a.getProtocolo(),
+                canal,
+                agora
+        ));
+
+        repository.save(new NotificacaoRegistro(
+                TipoNotificacao.RECUSA,
+                "PROPRIETARIO",
+                "Solicitação recusada: " + a.getCliente().getNome(),
+                "Horário de " + dataHora + " liberado após recusa do protocolo " + a.getProtocolo() + " (" + detalhe + ").",
+                a.getProtocolo(),
+                canal,
+                agora
+        ));
     }
 
     @Override
