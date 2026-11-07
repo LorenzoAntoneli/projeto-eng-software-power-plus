@@ -23,7 +23,9 @@ jobs:
           cache: maven
 
       - name: 3. Compilação da aplicação
-        run: ./mvnw -B compile
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B compile
 
       - name: 4. Execução dos testes automatizados (Unitários, TDD, Mocks e Integração)
         run: ./mvnw -B test
