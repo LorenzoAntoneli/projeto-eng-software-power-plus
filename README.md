@@ -1,5 +1,7 @@
 # ⚡ Power Plus – Sistema de Agendamento de Clientes e Atendimento Automatizado
 
+[![Power Plus CI - Build, Testes JUnit e Cobertura JaCoCo](https://github.com/LorenzoAntoneli/projeto-eng-software-power-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/LorenzoAntoneli/projeto-eng-software-power-plus/actions/workflows/ci.yml)
+
 > **Projeto Integrador – Fábrica de Software (2º Semestre de 2026)**  
 > **Instituição:** FATEC Ribeirão Preto – Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas  
 > **Disciplina:** Engenharia de Software II  
@@ -39,7 +41,7 @@ Aplicação web responsiva (acessível via smartphone e computador) estruturada 
 - **Banco de Dados:** H2 Database (persistência local em arquivo `./data/powerplus-db` em execução normal e em memória na suíte de testes)
 - **Frontend:** HTML5 Semântico, CSS3 Responsivo (Mobile-First) e JavaScript ES2022 (`Fetch API`)
 - **Qualidade e Testes:** JUnit 5, Mockito, Spring MockMvc e JaCoCo `0.8.12` (Quality Gate automático no `mvn verify`)
-- **DevOps & CI/CD:** Git (Gitflow simplificado `main`, `develop`, `feature/*`) + GitHub Actions (`.github/ci-workflow.yml`) + Maven Wrapper (`mvnw` / `mvnw.cmd`)
+- **DevOps & CI/CD:** Git (Gitflow simplificado `main`, `develop`, `feature/*`) + GitHub Actions (`.github/workflows/ci.yml`) + Maven Wrapper (`mvnw` / `mvnw.cmd`)
 
 ---
 
@@ -92,7 +94,7 @@ Após a execução, o relatório visual completo de cobertura JaCoCo estará dis
 ## 5. Estrutura do Repositório
 
 ```text
-├── .github/ci-workflow.yml           # Pipeline de Integração Contínua (GitHub Actions)
+├── .github/workflows/ci.yml          # Pipeline de Integração Contínua (GitHub Actions)
 ├── docs/
 │   └── ROTEIRO_BANCA_DE_PRODUTO.md   # Guia objetivo para apresentação e demonstração na Banca
 ├── src/
