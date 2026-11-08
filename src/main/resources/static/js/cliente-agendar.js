@@ -74,14 +74,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const servicoTxt = opt ? opt.textContent : '—';
         railServico.textContent = servicoTxt;
         railData.textContent = PP.formatarDataExtenso(inputData.value);
-        railHorario.textContent = hiddenHora.value ? `${hiddenHora.value} (60 min)` : 'Selecione um horário';
+        railHorario.textContent = hiddenHora.value ? `${hiddenHora.value} (duração estimada: 1h)` : 'Aguardando seleção';
         if (resumoEtapa2 && hiddenHora.value) {
             resumoEtapa2.innerHTML = `
                 <div>
-                    <strong>Horário escolhido:</strong> <span class="mono">${PP.formatarDataBr(inputData.value)} às ${hiddenHora.value}</span>
+                    <strong>Data e horário:</strong> <span class="mono">${PP.formatarDataBr(inputData.value)} às ${hiddenHora.value}</span>
                     · ${PP.esc(servicoTxt)}
                 </div>
-                <span class="status-badge st-AGUARDANDO_APROVACAO">Sujeito à aprovação do Leonardo</span>
+                <span class="status-badge st-AGUARDANDO_APROVACAO">Sujeito à aprovação</span>
             `;
         }
     }
@@ -90,13 +90,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         hiddenHora.value = '';
         atualizarResumoLateral();
         if (!inputData.value) {
-            slotsContainer.innerHTML = '<span class="hint">Selecione uma data acima.</span>';
+            slotsContainer.innerHTML = '<span class="hint">Informe uma data para listar os horários.</span>';
             return;
         }
         try {
             const res = await PP.api(`/api/publico/horarios-livres?data=${inputData.value}`);
             if (!res.horariosLivres || res.horariosLivres.length === 0) {
-                slotsContainer.innerHTML = '<div class="empty-placeholder" style="grid-column:1/-1;padding:18px">Sem horários vagos nesta data (fora de expediente, data bloqueada ou agenda completa). Use os atalhos acima para escolher outro dia.</div>';
+                slotsContainer.innerHTML = '<div class="empty-placeholder" style="grid-column:1/-1;padding:18px">Não há horários livres nesta data (fora de expediente, data bloqueada ou agenda preenchida). Selecione outra data nos atalhos acima.</div>';
                 return;
             }
             slotsContainer.innerHTML = res.horariosLivres
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     slotsContainer.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
                     hiddenHora.value = btn.dataset.hora;
-                    document.getElementById('msgEtapa1').textContent = `Horário ${btn.dataset.hora} selecionado — clique em Continuar.`;
+                    document.getElementById('msgEtapa1').textContent = `Horário ${btn.dataset.hora} selecionado. Clique em Avançar para identificação.`;
                     atualizarResumoLateral();
                 });
             });
@@ -119,8 +119,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function irParaEtapa(num) {
         if (num === 2) {
-            if (!inputData.value) return PP.toast('Selecione a data da visita.', true);
-            if (!hiddenHora.value) return PP.toast('Escolha um dos horários disponíveis antes de continuar.', true);
+            if (!inputData.value) return PP.toast('Selecione a data desejada.', true);
+            if (!hiddenHora.value) return PP.toast('Selecione um horário disponível antes de avançar.', true);
             atualizarResumoLateral();
             etapa1.classList.add('hidden');
             etapa2.classList.remove('hidden');
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ev.preventDefault();
         const btn = document.getElementById('btnSubmitReserva');
         btn.disabled = true;
-        btn.textContent = 'Enviando solicitação...';
+        btn.textContent = 'Registrando solicitação...';
         try {
             const criado = await PP.api('/api/publico/agendamentos', {
                 method: 'POST',
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) {
             PP.toast(err.message, true);
             btn.disabled = false;
-            btn.textContent = 'Solicitar agendamento';
+            btn.textContent = 'Enviar solicitação de visita';
         }
     });
 });

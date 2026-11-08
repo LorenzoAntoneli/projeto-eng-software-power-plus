@@ -10,43 +10,43 @@ document.addEventListener('DOMContentLoaded', () => {
         const alteravel = a.statusCodigo === 'CONFIRMADO' || a.statusCodigo === 'AGUARDANDO_APROVACAO';
         let resumoStatus = '';
         if (a.statusCodigo === 'AGUARDANDO_APROVACAO') {
-            resumoStatus = '<div class="ticket-notice pending" style="margin-bottom:12px">Solicitação recebida e horário pré-reservado — aguardando aprovação do Leonardo.</div>';
+            resumoStatus = '<div class="ticket-notice pending" style="margin-bottom:12px">Solicitação registrada e horário pré-reservado — aguardando aprovação do Leonardo.</div>';
         } else if (a.statusCodigo === 'CONFIRMADO') {
-            resumoStatus = '<div class="ticket-notice confirmed" style="margin-bottom:12px">Visita aprovada e confirmada pelo Leonardo.</div>';
+            resumoStatus = '<div class="ticket-notice confirmed" style="margin-bottom:12px">Visita técnica aprovada e confirmada pelo Leonardo.</div>';
         } else if (a.statusCodigo === 'RECUSADO') {
             resumoStatus = `<div class="ticket-notice refused" style="margin-bottom:12px">Solicitação recusada neste horário${a.observacaoTecnica ? `: ${PP.esc(a.observacaoTecnica)}` : '.'}</div>`;
         }
         const histHtml = historico && historico.length
             ? `<div class="order-history">
-                <strong style="color:var(--ink)">Registro de movimentações</strong>
+                <strong style="color:var(--ink)">Histórico de tramitação</strong>
                 ${historico.map(h => `<div>${PP.esc(h.statusNovo)} — ${PP.esc(h.responsavel)}${h.observacao ? ` (${PP.esc(h.observacao)})` : ''}</div>`).join('')}
                </div>`
             : '';
 
         return `
-            <div class="order-item">
+            <div class="order-item os-${a.statusCodigo}">
                 <div class="order-head">
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <strong class="mono">${PP.esc(a.protocolo)}</strong>
-                        <span class="hint mono">${PP.formatarDataBr(a.data)} · ${a.horaInicio}–${a.horaFim}</span>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <strong class="code-ref">${PP.esc(a.protocolo)}</strong>
+                        <span class="hint mono">${PP.formatarDataBr(a.data)} · ${a.horaInicio} às ${a.horaFim}</span>
                     </div>
                     <span class="status-badge st-${a.statusCodigo}">${PP.esc(a.statusDescricao)}</span>
                 </div>
                 ${resumoStatus}
                 <div class="order-meta">
                     <div><strong>Serviço:</strong> ${PP.esc(a.tipoServicoDescricao)}</div>
-                    <div><strong>Cliente:</strong> ${PP.esc(a.clienteNome)} (${PP.esc(a.clientePerfil)})</div>
+                    <div><strong>Solicitante:</strong> ${PP.esc(a.clienteNome)} (${PP.esc(a.clientePerfil)})</div>
                     <div style="grid-column:1/-1"><strong>Endereço:</strong> ${PP.esc(a.enderecoAtendimento)}</div>
-                    ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Observação do eletricista:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
+                    ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Parecer técnico:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
                 </div>
                 ${histHtml}
                 <div class="order-foot">
-                    <a href="/comprovante?protocolo=${encodeURIComponent(a.protocolo)}" class="btn btn-secondary btn-sm">Ver comprovante</a>
+                    <a href="/comprovante?protocolo=${encodeURIComponent(a.protocolo)}" class="btn btn-secondary btn-sm">Abrir guia</a>
                     ${alteravel ? `
-                        <button type="button" class="btn btn-secondary btn-sm" data-remarcar="${PP.esc(a.protocolo)}" data-data="${a.data}">Trocar horário</button>
-                        <button type="button" class="btn btn-danger btn-sm" data-cancelar="${PP.esc(a.protocolo)}">Cancelar pedido</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-remarcar="${PP.esc(a.protocolo)}" data-data="${a.data}">Remarcar horário</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-cancelar="${PP.esc(a.protocolo)}">Cancelar solicitação</button>
                     ` : ''}
-                    ${a.statusCodigo === 'RECUSADO' ? `<a href="/" class="btn btn-primary btn-sm">Escolher outro horário</a>` : ''}
+                    ${a.statusCodigo === 'RECUSADO' ? `<a href="/" class="btn btn-primary btn-sm">Solicitar outro horário</a>` : ''}
                 </div>
             </div>
         `;
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function buscarProtocolo(prot) {
         const codigo = (prot ?? inputProt.value).trim();
-        if (!codigo) return PP.toast('Informe o protocolo para consultar.', true);
+        if (!codigo) return PP.toast('Informe o código de protocolo para busca.', true);
         inputProt.value = codigo;
         try {
             const res = await PP.api(`/api/publico/agendamentos/protocolo/${encodeURIComponent(codigo)}`);
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const lista = await PP.api(`/api/publico/agendamentos/cliente?telefone=${encodeURIComponent(fone)}`);
             if (!lista.length) {
                 boxResultado.className = 'empty-placeholder';
-                boxResultado.textContent = 'Nenhum atendimento localizado para este telefone.';
+                boxResultado.textContent = 'Nenhuma ordem localizada para o telefone informado.';
                 return;
             }
             boxResultado.className = '';
@@ -118,11 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function cancelarVisita(protocolo) {
         const motivo = await PP.openDialog({
-            title: `Cancelar visita ${protocolo}`,
-            description: 'O horário será liberado imediatamente na agenda. Cancelamentos exigem antecedência mínima de 2 horas.',
+            title: `Cancelar protocolo ${protocolo}`,
+            description: 'A janela de horário será liberada imediatamente na agenda. Cancelamentos exigem antecedência mínima de 2 horas.',
             inputLabel: 'Motivo do cancelamento (opcional)',
             defaultValue: '',
-            placeholder: 'Ex.: Imprevisto no trabalho',
+            placeholder: 'Ex.: Imprevisto no local',
             confirmLabel: 'Confirmar cancelamento'
         });
         if (motivo === null) return;
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: JSON.stringify({ motivo })
             });
-            PP.toast(`Visita ${protocolo} cancelada.`);
+            PP.toast(`Solicitação ${protocolo} cancelada.`);
             await buscarProtocolo(protocolo);
         } catch (err) {
             PP.toast(err.message, true);
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnBuscarProtocolo').addEventListener('click', () => buscarProtocolo());
     document.getElementById('btnBuscarTelefone').addEventListener('click', () => buscarTelefone());
     inputProt.addEventListener('keydown', ev => { if (ev.key === 'Enter') buscarProtocolo(); });
-    inputTel.addEventListener('keydown', ev => { if (ev.key === 'Enter') buscarTelefone(); });
+    inputTel.addEventListener('keydown', ev => { if (ev.key === 'Enter') buscarTelefone()); });
 
     document.querySelectorAll('[data-prot]').forEach(b => b.addEventListener('click', () => buscarProtocolo(b.dataset.prot)));
     document.querySelectorAll('[data-tel]').forEach(b => b.addEventListener('click', () => buscarTelefone(b.dataset.tel)));
@@ -175,4 +175,3 @@ document.addEventListener('DOMContentLoaded', () => {
         buscarProtocolo(urlProt);
     }
 });
-

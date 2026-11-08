@@ -162,51 +162,43 @@ window.PP = (() => {
             const ownerName = localStorage.getItem('pp_owner_name') || 'Leonardo';
             host.innerHTML = `
                 <div class="bo-brand">
-                    <span class="brand-box" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
-                        </svg>
-                    </span>
-                    <div>
-                        <div class="bo-title">Power Plus</div>
-                        <div class="bo-sub">Painel do Leonardo</div>
-                    </div>
+                    <img src="/img/logo-powerplus-light.svg" alt="Power Plus Gestão Operacional">
                 </div>
 
-                <nav class="bo-nav" aria-label="Navegação do painel">
+                <div class="bo-section-label">Operação de Campo</div>
+                <nav class="bo-nav" aria-label="Navegação operacional">
                     <a href="/painel/agenda" class="bo-link ${activeSlug === 'agenda' ? 'active' : ''}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         <span>Agenda e aprovações</span>
                         <span id="boCountAprovacoes" class="bo-badge">0</span>
                     </a>
                     <a href="/painel/expediente" class="bo-link ${activeSlug === 'expediente' ? 'active' : ''}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span>Expediente e folgas</span>
+                        <span>Expediente e bloqueios</span>
                     </a>
                     <a href="/painel/clientes" class="bo-link ${activeSlug === 'clientes' ? 'active' : ''}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        <span>Clientes</span>
+                        <span>Cadastro de clientes</span>
                     </a>
+                </nav>
+
+                <div class="bo-section-label" style="margin-top:8px">Relacionamento</div>
+                <nav class="bo-nav" aria-label="Navegação de comunicação">
                     <a href="/painel/mensagens" class="bo-link ${activeSlug === 'mensagens' ? 'active' : ''}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <span>Mensagens</span>
+                        <span>Mensagens recebidas</span>
                         <span id="boCountChats" class="bo-badge">0</span>
                     </a>
                     <a href="/painel/avisos" class="bo-link ${activeSlug === 'avisos' ? 'active' : ''}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        <span>Envios e avisos</span>
+                        <span>Registro de avisos</span>
                         <span id="boCountAvisos" class="bo-badge">0</span>
                     </a>
                 </nav>
 
                 <div class="bo-footer">
                     <div class="bo-user-row">
-                        <strong>${esc(ownerName)}</strong>
-                        <span id="boCanalStatus">Canal interno ativo</span>
+                        <strong>${esc(ownerName)} · Responsável Técnico</strong>
+                        <span id="boCanalStatus">Notificações internas ativas</span>
                     </div>
                     <div class="bo-footer-links">
-                        <a href="/" target="_blank">Abrir site público ↗</a>
-                        <button type="button" id="boBtnLogout">Sair</button>
+                        <a href="/" target="_blank">Portal do cliente</a>
+                        <button type="button" id="boBtnLogout">Encerrar sessão</button>
                     </div>
                 </div>
             `;
@@ -244,7 +236,7 @@ window.PP = (() => {
             }
             if (elCanal) {
                 elCanal.textContent = dash.whatsappFeatureFlagAtiva
-                    ? 'WhatsApp integrado ativo'
+                    ? 'Integração WhatsApp ativa'
                     : 'Notificações internas ativas';
             }
             return dash;
@@ -270,4 +262,3 @@ window.PP = (() => {
         refreshSidebarCounters
     };
 })();
-

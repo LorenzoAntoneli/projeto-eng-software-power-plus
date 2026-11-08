@@ -22,8 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             PP.toast(err.message, true);
             btn.disabled = false;
-            btn.textContent = 'Entrar no painel';
+            btn.textContent = 'Acessar painel de gestão';
         }
     });
 });
-

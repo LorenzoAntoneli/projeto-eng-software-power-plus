@@ -4,36 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso Operacional — Power Plus</title>
+    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <main class="login-page">
         <div class="login-panel">
-            <div class="brand-box" aria-hidden="true">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
-                </svg>
-            </div>
-            <h1>Sistema Operacional</h1>
-            <p>Entre com suas credenciais para gerenciar agenda, clientes e atendimentos da Power Plus.</p>
+            <img src="/img/logo-powerplus.svg" alt="Power Plus Engenharia e Serviços Elétricos" class="login-logo">
+            <h1>Acesso Operacional</h1>
+            <p>Área restrita ao responsável técnico para aprovação de visitas, controle de expediente e gestão de clientes.</p>
 
             <form id="formLoginPainel">
                 <div class="field">
-                    <label for="loginUser">Usuário</label>
+                    <label for="loginUser">Usuário operacional</label>
                     <input type="text" id="loginUser" value="leonardo.powerplus" autocomplete="username" required>
                 </div>
                 <div class="field">
-                    <label for="loginPass">Senha</label>
+                    <label for="loginPass">Senha de acesso</label>
                     <input type="password" id="loginPass" value="PowerPlus@2026" autocomplete="current-password" required>
                 </div>
-                <button type="submit" class="btn btn-primary btn-full" id="btnEntrarPainel" style="margin-top:6px">Entrar no painel</button>
+                <button type="submit" class="btn btn-primary btn-full" id="btnEntrarPainel" style="margin-top:6px">Acessar painel de gestão</button>
             </form>
 
             <div class="login-back">
-                <a href="/">← Ir para o site público</a>
+                <a href="/">Voltar ao portal do cliente</a>
                 <span>Ribeirão Preto · SP</span>
             </div>
         </div>
@@ -43,4 +40,3 @@
     <script src="/js/painel-login.js"></script>
 </body>
 </html>
-

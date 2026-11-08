@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 246 44" fill="none" role="img" aria-label="Power Plus Painel Operacional">
+  <g transform="translate(0, 0)">
+    <path d="M7 2H33.5L42 10.5V37C42 39.7614 39.7614 42 37 42H7C4.23858 42 2 39.7614 2 37V7C2 4.23858 4.23858 2 7 2Z" fill="#163A63" stroke="#285282" stroke-width="1"/>
+    <path d="M33.5 2L42 10.5H35.5C34.3954 10.5 33.5 9.60457 33.5 8.5V2Z" fill="#F28500"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 10H21C24.7555 10 27.8 13.0445 27.8 16.8C27.8 20.5555 24.7555 23.6 21 23.6H15.5V34H9.5V10ZM15.5 14.8H20.8C21.9046 14.8 22.8 15.6954 22.8 16.8C22.8 17.9046 21.9046 18.8 20.8 18.8H15.5V14.8Z" fill="#FFFFFF"/>
+    <path d="M28.3 22H32.7V26.3H37V30.7H32.7V35H28.3V30.7H24V26.3H28.3V22Z" fill="#FF981A"/>
+  </g>
+  <text x="52" y="21.5" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="0.4" fill="#FFFFFF">POWER<tspan fill="#FF981A" dx="3">PLUS</tspan></text>
+  <text x="52.5" y="36" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="9.2" font-weight="600" letter-spacing="1.2" fill="#94A3B8">GESTÃO OPERACIONAL</text>
+</svg>
+
