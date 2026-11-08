@@ -62,7 +62,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU05 [TDD] - Deve impedir dois agendamentos ativos no mesmo horário (HU08/RN01)")
+    @DisplayName("Impede dois agendamentos ativos no mesmo horário")
     void deveImpedirDoisAgendamentosNoMesmoHorario() {
         LocalDate sexta = LocalDate.of(2026, 9, 11);
         LocalTime horario = LocalTime.of(14, 0);
@@ -91,7 +91,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU06 [TDD] - Deve impedir agendamento em data bloqueada ou fora do expediente (HU07/RN02)")
+    @DisplayName("Impede agendamento em data bloqueada ou fora do expediente")
     void deveImpedirAgendamentoEmDataBloqueadaOuForaDoExpediente() {
         LocalDate feriadoBloqueado = LocalDate.of(2026, 9, 14);
         when(bloqueioRepository.existsByData(feriadoBloqueado)).thenReturn(true);
@@ -110,7 +110,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU07 [TDD] - Deve bloquear cancelamento pelo cliente com menos de 2h de antecedência (HU04/RN03)")
+    @DisplayName("Bloqueia cancelamento pelo cliente com menos de 2 horas de antecedência")
     void deveBloquearCancelamentoPeloClienteComMenosDeDuasHorasDeAntecedencia() {
         Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
         Agendamento agendamentoProximo = new Agendamento(
@@ -136,7 +136,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU08 [TDD + Mock] - Deve cancelar dentro do prazo, liberar horário e acionar NotificacaoGateway (HU03/HU04/HU10)")
+    @DisplayName("Cancela dentro do prazo, libera horário e gera notificação")
     void deveLiberarHorarioERegistrarNotificacaoAoCancelarDentroDoPrazo() {
         Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
         Agendamento agendamento = new Agendamento(
@@ -163,7 +163,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU09 [TDD - Negativo] - Deve impedir transição inválida de CANCELADO diretamente para CONCLUIDO (RN04)")
+    @DisplayName("Impede alterar status de cancelado diretamente para concluído")
     void deveImpedirTransicaoInvalidaDeCanceladoParaConcluido() {
         Cliente cliente = new Cliente("Paulo Silva", "16998887766", "Rua B, 20", PerfilCliente.RESIDENCIAL);
         Agendamento cancelado = new Agendamento(
@@ -189,7 +189,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU10 [TDD Refactor] - Deve remarcar agendamento válido reaproveitando PoliticaAgendamentoValidator (HU04/UC02)")
+    @DisplayName("Remarca agendamento válido e notifica o proprietário")
     void deveRemarcarAgendamentoValidoENotificarProprietario() {
         Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
         Agendamento existente = new Agendamento(
@@ -224,7 +224,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU19 [TDD - Aprovação] - Deve registrar pedido do cliente como 'Aguardando aprovação' pré-reservando horário")
+    @DisplayName("Cria solicitação inicial como aguardando aprovação e reserva o horário")
     void deveCriarSolicitacaoComStatusAguardandoAprovacao() {
         LocalDate sexta = LocalDate.of(2026, 9, 11);
         LocalTime horario = LocalTime.of(14, 0);
@@ -254,7 +254,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU20 [TDD - Aprovação] - Deve aprovar visita pendente mudando para CONFIRMADO e notificando cliente")
+    @DisplayName("Aprova visita pendente mudando status para confirmado")
     void deveAprovarSolicitacaoPendenteConfirmandoVisitaENotificandoCliente() {
         Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
         Agendamento pendente = new Agendamento(
@@ -277,7 +277,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU21 [TDD - Recusa] - Deve recusar visita pendente liberando imediatamente a vaga na agenda")
+    @DisplayName("Recusa visita pendente liberando a vaga na agenda")
     void deveRecusarSolicitacaoPendenteLiberandoHorarioNaAgenda() {
         Cliente cliente = new Cliente("Roberto Almeida", "16992223344", "Av. B, 500", PerfilCliente.EMPRESARIAL_CONDOMINIO);
         Agendamento pendente = new Agendamento(
@@ -301,7 +301,7 @@ class AgendamentoTddTest {
     }
 
     @Test
-    @DisplayName("TU22 [TDD - Negativo] - Deve impedir concluir visita que ainda está Aguardando aprovação ou aprovar visita recusada")
+    @DisplayName("Impede concluir visita sem aprovação prévia ou aprovar visita recusada")
     void deveImpedirConclusaoSemAprovacaoPreviaOuAprovarRecusada() {
         Cliente cliente = new Cliente("Paulo Silva", "16998887766", "Rua C, 30", PerfilCliente.RESIDENCIAL);
         Agendamento pendente = new Agendamento(

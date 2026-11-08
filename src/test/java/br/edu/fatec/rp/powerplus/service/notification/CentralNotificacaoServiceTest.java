@@ -31,7 +31,7 @@ class CentralNotificacaoServiceTest {
     }
 
     @Test
-    @DisplayName("TU16 - Deve usar canal SISTEMA_INTERNO quando Feature Flag WhatsApp estiver desativada no MVP")
+    @DisplayName("Registra envio pelo canal interno quando integração WhatsApp está desligada")
     void deveUsarCanalInternoQuandoFeatureFlagDesativada() {
         CentralNotificacaoService service = new CentralNotificacaoService(repository, clock, false);
         assertFalse(service.isIntegracaoWhatsAppAtiva());
@@ -51,7 +51,7 @@ class CentralNotificacaoServiceTest {
     }
 
     @Test
-    @DisplayName("TU17 - Deve habilitar canal WhatsApp quando Feature Flag estiver ligada em evolução futura")
+    @DisplayName("Habilita canal WhatsApp quando a flag de integração está ativa")
     void deveHabilitarCanalWhatsAppQuandoFeatureFlagAtiva() {
         CentralNotificacaoService service = new CentralNotificacaoService(repository, clock, true);
         assertTrue(service.isIntegracaoWhatsAppAtiva());
@@ -69,7 +69,7 @@ class CentralNotificacaoServiceTest {
     }
 
     @Test
-    @DisplayName("TU18 - Deve cobrir transições da máquina de estados StatusAgendamento (RN04)")
+    @DisplayName("Valida regras de transição entre os status de agendamento")
     void deveValidarTodasAsTransicoesDoEnumStatusAgendamento() {
         assertTrue(StatusAgendamento.AGUARDANDO_APROVACAO.podeTransitarPara(StatusAgendamento.CONFIRMADO));
         assertTrue(StatusAgendamento.AGUARDANDO_APROVACAO.podeTransitarPara(StatusAgendamento.RECUSADO));
@@ -100,7 +100,7 @@ class CentralNotificacaoServiceTest {
     }
 
     @Test
-    @DisplayName("TU23 - Deve registrar notificações de solicitação pendente e de recusa ao cliente e ao proprietário")
+    @DisplayName("Registra avisos de nova solicitação e de recusa")
     void deveRegistrarNotificacoesDeSolicitacaoERecusa() {
         CentralNotificacaoService service = new CentralNotificacaoService(repository, clock, false);
         Cliente cli = new Cliente("Roberto", "16992223344", "Av. Z, 100", PerfilCliente.EMPRESARIAL_CONDOMINIO);

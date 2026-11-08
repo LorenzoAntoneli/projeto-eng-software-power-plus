@@ -48,9 +48,9 @@ class DisponibilidadeServiceTest {
     }
 
     @Test
-    @DisplayName("TU11 - Deve listar apenas horários futuros e desocupados dentro do expediente (HU01/HU07/HU08)")
+    @DisplayName("Lista apenas horários futuros e vagos dentro do expediente")
     void deveListarApenasHorariosFuturosELivres() {
-        LocalDate hoje = LocalDate.of(2026, 9, 10); // relógio às 09:30
+        LocalDate hoje = LocalDate.of(2026, 9, 10);
         DisponibilidadeSemanal quinta = new DisponibilidadeSemanal(
                 DayOfWeek.THURSDAY, true, LocalTime.of(8, 0), LocalTime.of(13, 0), 60
         );
@@ -66,12 +66,11 @@ class DisponibilidadeServiceTest {
 
         List<LocalTime> livres = disponibilidadeService.consultarHorariosLivres(hoje);
 
-        // 08:00 e 09:00 já passaram (relógio 09:30); 11:00 está ocupado -> sobram 10:00 e 12:00
         assertEquals(List.of(LocalTime.of(10, 0), LocalTime.of(12, 0)), livres);
     }
 
     @Test
-    @DisplayName("TU12 - Deve alertar conflito ao bloquear data que já possui cliente agendado (UC04 3a / RN06)")
+    @DisplayName("Exige confirmação antes de bloquear data que já possui agendamento ativo")
     void deveAlertarAoBloquearDataComAgendamentoAtivo() {
         LocalDate data = LocalDate.of(2026, 9, 15);
         Cliente cli = new Cliente("Condomínio Bela Vista", "1636112233", "Av. Brasil, 90", PerfilCliente.EMPRESARIAL_CONDOMINIO);
@@ -89,7 +88,6 @@ class DisponibilidadeServiceTest {
         assertTrue(ex.getMessage().contains("PP-2026-0042"));
         verify(bloqueioRepository, never()).save(any());
 
-        // Ao confirmar explicitamente (forcarComConflito = true), registra o bloqueio retornando os protocolos impactados
         when(bloqueioRepository.save(any(BloqueioAgenda.class))).thenAnswer(inv -> inv.getArgument(0));
         DisponibilidadeService.ResultadoBloqueio res = disponibilidadeService.registrarBloqueioData(data, "Compromisso médico", true);
         assertEquals(1, res.agendamentosConflitantes());

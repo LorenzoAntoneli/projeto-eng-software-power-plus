@@ -28,7 +28,7 @@ class ClienteServiceTest {
     private ClienteService clienteService;
 
     @Test
-    @DisplayName("TU01 - Deve cadastrar cliente normalizando máscara do telefone (RF01/HU09)")
+    @DisplayName("Cadastra cliente removendo formatação do telefone")
     void deveCadastrarClienteNormalizandoTelefone() {
         when(clienteRepository.existsByTelefone("16991234567")).thenReturn(false);
         when(clienteRepository.save(any(Cliente.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -49,7 +49,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("TU02 - Deve impedir cadastro manual com telefone duplicado (RN05/UC06)")
+    @DisplayName("Impede cadastro manual com telefone já registrado")
     void deveImpedirCadastroManualComTelefoneDuplicado() {
         when(clienteRepository.existsByTelefone("16991234567")).thenReturn(true);
 
@@ -66,7 +66,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("TU03 - Deve reaproveitar cadastro existente no autoatendimento de agendamento (UC01/UC06)")
+    @DisplayName("Reaproveita cliente já cadastrado ao fazer novo agendamento")
     void deveReaproveitarClienteExistenteNoAgendamento() {
         Cliente existente = new Cliente("Condomínio Solar", "1636201122", "Av. Antiga, 10", PerfilCliente.EMPRESARIAL_CONDOMINIO);
         existente.setId(7L);
@@ -87,7 +87,7 @@ class ClienteServiceTest {
     }
 
     @Test
-    @DisplayName("TU04 - Deve rejeitar cliente com telefone inválido ou endereço em branco (Teste Negativo)")
+    @DisplayName("Rejeita cadastro com telefone inválido ou endereço vazio")
     void deveRejeitarTelefoneInvalidoOuEnderecoVazio() {
         assertThrows(RegraNegocioException.class, () -> clienteService.cadastrarManual(
                 "Cliente Teste", "12345", null, "Rua A, 10", PerfilCliente.RESIDENCIAL, null

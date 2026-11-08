@@ -79,7 +79,7 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT01 / TI01 - Aceitação: Agendar visita válida, bloquear vaga na lista livre e exibir na agenda (HU01/HU02/HU06/HU08)")
+    @DisplayName("Agenda visita válida, ocupa horário na listagem e permite consulta por protocolo")
     void deveAgendarVisitaBloquearHorarioEExibirNaAgenda() throws Exception {
         mockMvc.perform(get("/api/publico/catalogo"))
                 .andExpect(status().isOk())
@@ -110,13 +110,11 @@ class PowerPlusIntegrationAcceptanceTest {
 
         String protocolo = objectMapper.readTree(createRes.getResponse().getContentAsString()).get("protocolo").asText();
 
-        // Verifica que 14:00 deixou de aparecer nos horários livres (HU08)
         mockMvc.perform(get("/api/publico/horarios-livres").param("data", proximaDataUtil.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.horariosLivres", not(hasItem("14:00"))))
                 .andExpect(jsonPath("$.horariosLivres", hasItem("15:00")));
 
-        // Consulta pelo protocolo e pelo telefone (HU12)
         mockMvc.perform(get("/api/publico/agendamentos/protocolo/" + protocolo))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.agendamento.protocolo").value(protocolo))
@@ -128,7 +126,7 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT02 / TI02 - Negativo: Impedir segundo agendamento no mesmo horário com HTTP 409 (RN01/HU08)")
+    @DisplayName("Retorna erro 409 ao tentar agendar em horário já ocupado")
     void deveRetornar409AoTentarAgendarHorarioJaOcupado() throws Exception {
         String primeiro = String.format("""
                 {
@@ -167,7 +165,7 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT03 / TI03 - Negativo: Retornar HTTP 400 quando campos obrigatórios estiverem ausentes (HU02)")
+    @DisplayName("Retorna erro 400 quando campos obrigatórios estão vazios")
     void deveRetornar400QuandoCamposObrigatoriosVazios() throws Exception {
         String invalido = """
                 {
@@ -185,7 +183,7 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT04 / TI04 - Aceitação: Remarcar e cancelar agendamento liberando o horário anterior (HU04/UC02)")
+    @DisplayName("Remarca e cancela agendamento liberando os horários na agenda")
     void deveRemarcarECancelarLiberandoVagaNaAgenda() throws Exception {
         String payload = String.format("""
                 {
@@ -206,7 +204,6 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andReturn();
         String protocolo = objectMapper.readTree(res.getResponse().getContentAsString()).get("protocolo").asText();
 
-        // Remarca de 09:00 para 16:00
         String remarcacao = String.format("""
                 {"novaData": "%s", "novaHoraInicio": "16:00", "motivo": "Ajuste com zelador"}
                 """, proximaDataUtil);
@@ -216,13 +213,11 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.horaInicio").value("16:00"));
 
-        // 09:00 volta a ficar livre!
         mockMvc.perform(get("/api/publico/horarios-livres").param("data", proximaDataUtil.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.horariosLivres", hasItem("09:00")))
                 .andExpect(jsonPath("$.horariosLivres", not(hasItem("16:00"))));
 
-        // Cancela o agendamento das 16:00 -> 16:00 também volta a ficar livre!
         mockMvc.perform(post("/api/publico/agendamentos/" + protocolo + "/cancelar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"motivo\":\"Reunião extraordinária\"}"))
@@ -235,9 +230,8 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT05 / TI05 - Aceitação: Fluxo integrado de Chat FAQ, Transbordo Humano e Resposta do Proprietário (HU05/HU11/UC03)")
+    @DisplayName("Executa fluxo de chat automático e atendimento pelo proprietário")
     void deveExecutarFluxoCompletoDeChatETransbordoHumano() throws Exception {
-        // 1. Cliente tira dúvida comum sobre orçamento
         MvcResult faqRes = mockMvc.perform(post("/api/publico/chat/mensagens")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -249,7 +243,6 @@ class PowerPlusIntegrationAcceptanceTest {
 
         long conversaId = objectMapper.readTree(faqRes.getResponse().getContentAsString()).get("id").asLong();
 
-        // 2. Cliente solicita atendimento humano -> transbordo AGUARDANDO_HUMANO
         mockMvc.perform(post("/api/publico/chat/mensagens")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format("""
@@ -258,7 +251,6 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCodigo").value("AGUARDANDO_HUMANO"));
 
-        // 3. Proprietário autentica, consulta conversas e responde
         String token = autenticarProprietario();
         mockMvc.perform(post("/api/admin/conversas/" + conversaId + "/responder")
                         .header("Authorization", "Bearer " + token)
@@ -275,13 +267,11 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT06 / TI06 - Segurança & Operação Admin: Bloqueio 401 sem token, Dashboard, Status, Clientes e Bloqueios (RNF03/RN05/RN06)")
+    @DisplayName("Protege rotas do painel e executa operações administrativas da agenda")
     void deveProtegerRotasAdminEOperarFluxoCompletoDoProprietario() throws Exception {
-        // Sem token -> 401 Unauthorized (RNF03)
         mockMvc.perform(get("/api/admin/dashboard"))
                 .andExpect(status().isUnauthorized());
 
-        // Senha incorreta -> 401 Unauthorized
         mockMvc.perform(post("/api/admin/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"carlos.powerplus\",\"password\":\"senhaErrada\"}"))
@@ -289,7 +279,6 @@ class PowerPlusIntegrationAcceptanceTest {
 
         String token = autenticarProprietario();
 
-        // Cadastra cliente manualmente e valida bloqueio de duplicidade (RN05)
         String cliJson = """
                 {
                   "nome": "Clínica Odontológica Sorriso",
@@ -349,7 +338,6 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.agendamentos", hasSize(1)));
 
-        // Proprietário Leonardo aprova a solicitação antes de enviar lembrete e iniciar atendimento
         mockMvc.perform(post("/api/admin/agendamentos/" + agendamentoId + "/aprovar")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -361,14 +349,12 @@ class PowerPlusIntegrationAcceptanceTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // Tenta bloquear a data com agendamento ativo sem forçar -> 422 Regra de Negócio (RN06)
         mockMvc.perform(post("/api/admin/bloqueios")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format("{\"data\":\"%s\",\"motivo\":\"Folga\",\"forcarComConflito\":false}", proximaDataUtil)))
                 .andExpect(status().isUnprocessableEntity());
 
-        // Avança status para EM_ATENDIMENTO e depois CONCLUIDO e confere histórico de auditoria (RNF06)
         mockMvc.perform(patch("/api/admin/agendamentos/" + agendamentoId + "/status")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -404,7 +390,7 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT07 - Navegação multi-telas: Deve resolver rotas separadas do Portal do Cliente e do Painel Operacional")
+    @DisplayName("Resolve rotas das páginas do cliente e do painel administrativo")
     void deveResolverTodasAsRotasSeparadasDeTelasWeb() throws Exception {
         for (String rota : new String[]{
                 "/agendar", "/comprovante", "/acompanhar", "/atendimento",
@@ -420,7 +406,7 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     @Test
-    @DisplayName("CT08 / TI08 - Aceitação: Fluxo completo de Aprovar e Recusar solicitações pendentes pelo Leonardo")
+    @DisplayName("Aprova e recusa solicitações pendentes liberando horário quando recusado")
     void deveAprovarERecusarSolicitacoesLiberandoHorarioQuandoRecusado() throws Exception {
         String pedidoAprovar = String.format("""
                 {
@@ -464,7 +450,6 @@ class PowerPlusIntegrationAcceptanceTest {
 
         String token = autenticarProprietario();
 
-        // Aprova o das 13:00 -> permanece ocupado como CONFIRMADO
         mockMvc.perform(post("/api/admin/agendamentos/" + idAprovar + "/aprovar")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -472,7 +457,6 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCodigo").value("CONFIRMADO"));
 
-        // Recusa o das 15:00 -> muda para RECUSADO e libera imediatamente o horário 15:00!
         mockMvc.perform(post("/api/admin/agendamentos/" + idRecusar + "/recusar")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)

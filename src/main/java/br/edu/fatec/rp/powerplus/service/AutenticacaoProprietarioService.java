@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Serviço de autenticação do proprietário com hash BCrypt (RNF03 - Segurança).
- */
 @Service
 public class AutenticacaoProprietarioService {
 

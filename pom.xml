@@ -14,8 +14,8 @@
     <groupId>br.edu.fatec.rp.powerplus</groupId>
     <artifactId>power-plus-mvp</artifactId>
     <version>1.0.0</version>
-    <name>Power Plus - Sistema de Agendamento e Atendimento Automatizado</name>
-    <description>MVP desenvolvido no Projeto Integrador Fábrica de Software - Engenharia de Software II (FATEC Ribeirão Preto)</description>
+    <name>power-plus</name>
+    <description>Sistema de agendamento de servicos eletricos - Power Plus</description>
 
     <properties>
         <java.version>21</java.version>

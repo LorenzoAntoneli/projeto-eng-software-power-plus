@@ -18,9 +18,6 @@ public enum StatusAgendamento {
         return descricao;
     }
 
-    /**
-     * RN04 - Valida se a transição de estado operacional é permitida.
-     */
     public boolean podeTransitarPara(StatusAgendamento novoStatus) {
         if (novoStatus == null || this == novoStatus) {
             return false;

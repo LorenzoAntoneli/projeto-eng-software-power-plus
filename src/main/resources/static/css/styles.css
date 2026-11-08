@@ -92,7 +92,7 @@ a {
     width: 100%;
 }
 
-/* ==================== BARRA INSTITUCIONAL E CABEÇALHO DO PORTAL ==================== */
+/* Cabecalho */
 .top-utility-bar {
     background: var(--navy-900);
     color: #cbd5e1;
@@ -252,7 +252,7 @@ a {
     text-decoration: underline;
 }
 
-/* ==================== PORTAL DE AGENDAMENTO (ORDEM DE VISITA) ==================== */
+/* Pagina inicial de agendamento */
 .booking-workspace {
     display: grid;
     grid-template-columns: 1fr 330px;
@@ -440,7 +440,7 @@ a {
     text-decoration: underline;
 }
 
-/* ==================== FORMULÁRIOS E CAMPOS ==================== */
+/* Formularios */
 .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -554,7 +554,7 @@ input:focus, select:focus, textarea:focus {
     flex-wrap: wrap;
 }
 
-/* ==================== BOTÕES ==================== */
+/* Botoes */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -624,7 +624,7 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
 }
 
-/* ==================== GUIA DE COMPROVANTE (/comprovante) ==================== */
+/* Comprovante */
 .ticket-card {
     max-width: 720px;
     margin: 0 auto;
@@ -712,7 +712,7 @@ input:focus, select:focus, textarea:focus {
     gap: 10px;
 }
 
-/* ==================== CONSULTA & ORDENS DE SERVIÇO ==================== */
+/* Consulta de agendamentos */
 .split-lookup {
     display: grid;
     grid-template-columns: 340px 1fr;
@@ -876,7 +876,7 @@ input:focus, select:focus, textarea:focus {
     gap: 8px;
 }
 
-/* Tags Técnicas Retangulares (Sem pílulas ou bolinhas genéricas) */
+/* Tags de status */
 .status-badge {
     display: inline-flex;
     align-items: center;
@@ -1052,7 +1052,7 @@ input:focus, select:focus, textarea:focus {
     color: var(--ink-muted);
 }
 
-/* ==================== CENTRAL DE DÚVIDAS / CHAT ==================== */
+/* Chat de duvidas */
 .chat-shell {
     display: grid;
     grid-template-columns: 310px 1fr;
@@ -1187,7 +1187,7 @@ input:focus, select:focus, textarea:focus {
     gap: 10px;
 }
 
-/* ==================== SISTEMA INTERNO (/painel/*) ==================== */
+/* Painel interno */
 .login-page {
     min-height: 100vh;
     display: flex;
@@ -1631,7 +1631,7 @@ input:focus, select:focus, textarea:focus {
     flex-direction: column;
 }
 
-/* ==================== MODAL & NOTIFICAÇÃO FLUTUANTE ==================== */
+/* Modal e avisos */
 .modal-overlay {
     position: fixed;
     inset: 0;
