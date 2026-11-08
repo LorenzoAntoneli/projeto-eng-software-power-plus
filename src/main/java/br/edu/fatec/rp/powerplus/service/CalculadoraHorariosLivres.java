@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Componente puro para geração dos slots livres de agendamento (HU01/HU07/HU08).
- */
 @Component
 public class CalculadoraHorariosLivres {
 

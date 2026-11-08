@@ -89,9 +89,6 @@ public class DisponibilidadeService {
         return disponibilidadeRepository.findAllByOrderByDiaSemanaAsc();
     }
 
-    /**
-     * UC04 Fluxo Alternativo 3a / RN06: alerta quando já existe cliente marcado na data bloqueada.
-     */
     @Transactional
     public ResultadoBloqueio registrarBloqueioData(LocalDate data, String motivo, boolean forcarComConflito) {
         if (data == null || motivo == null || motivo.isBlank()) {

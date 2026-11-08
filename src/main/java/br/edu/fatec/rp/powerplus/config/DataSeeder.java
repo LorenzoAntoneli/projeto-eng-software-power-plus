@@ -10,10 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 
-/**
- * Carga inicial de dados fictícios/anonimizados para demonstração na Banca de Produto
- * (em conformidade com a seção 23 do Edital sobre Ética, Privacidade e LGPD).
- */
 @Component
 public class DataSeeder implements CommandLineRunner {
 
@@ -58,7 +54,7 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        // 1. Disponibilidade padrão Seg-Sex (08:00-18:00), Sáb (08:00-13:00), Dom (Inativo)
+        // Expediente padrao da semana
         for (DayOfWeek dia : DayOfWeek.values()) {
             if (dia == DayOfWeek.SUNDAY) {
                 disponibilidadeRepository.save(new DisponibilidadeSemanal(dia, false, LocalTime.of(8, 0), LocalTime.of(12, 0), 60));
@@ -74,12 +70,12 @@ public class DataSeeder implements CommandLineRunner {
         LocalDate segundoDiaUtil = proximoDiaAtivo(proximoDiaUtil.plusDays(1));
         LocalDate diaFolgaFutura = proximoDiaAtivo(segundoDiaUtil.plusDays(4));
 
-        bloqueioRepository.save(new BloqueioAgenda(diaFolgaFutura, "Curso NR-10 / Reciclagem Técnica"));
+        bloqueioRepository.save(new BloqueioAgenda(diaFolgaFutura, "Curso externo / reciclagem técnica"));
 
-        // 2. Clientes fictícios representativos das Personas (Residencial e Empresarial/Condomínio)
-        Cliente c1 = new Cliente("Mariana Ferreira (Fictício)", "16991234567",
+        // Clientes iniciais
+        Cliente c1 = new Cliente("Mariana Ferreira", "16991234567",
                 "Rua São Sebastião, 410 - Centro, Ribeirão Preto", PerfilCliente.RESIDENCIAL);
-        c1.setEmail("mariana.demo@exemplo.com");
+        c1.setEmail("mariana.ferreira@exemplo.com");
         c1.setObservacoes("Apartamento 42 - Interfone na portaria");
         clienteRepository.save(c1);
 
@@ -91,17 +87,17 @@ public class DataSeeder implements CommandLineRunner {
 
         Cliente c3 = new Cliente("Padaria Artesanal Pão Quente Ltda", "16992345678",
                 "Av. Independência, 890 - Sumaré, Ribeirão Preto", PerfilCliente.EMPRESARIAL_CONDOMINIO);
-        c3.setEmail("contato@paoquente-demo.com");
+        c3.setEmail("contato@paoquente.com");
         c3.setObservacoes("Quadro trifásico dos fornos industriais");
         clienteRepository.save(c3);
 
-        Cliente c4 = new Cliente("Lucas Andrade (Fictício)", "16997776655",
+        Cliente c4 = new Cliente("Lucas Andrade", "16997776655",
                 "Rua Conde Afonso Celso, 620 - Boulevard, Ribeirão Preto", PerfilCliente.RESIDENCIAL);
         clienteRepository.save(c4);
 
         LocalDateTime agora = LocalDateTime.now(clock);
 
-        // 3. Agendamentos de demonstração (passado concluído, hoje e próximos dias)
+        // Agendamentos iniciais
         LocalDate diaHojeAgenda = hoje.getDayOfWeek() == DayOfWeek.SUNDAY ? proximoDiaUtil : hoje;
 
         Agendamento a1 = criarSeed("PP-2026-0101", c1, diaHojeAgenda, LocalTime.of(9, 0),
@@ -128,7 +124,7 @@ public class DataSeeder implements CommandLineRunner {
                 TipoServico.REPARO_ELETRICO, c1.getEnderecoPadrao(),
                 "Tomada da lavanderia aquecendo ao ligar secadora", StatusAgendamento.AGUARDANDO_APROVACAO, agora.minusMinutes(15));
 
-        // 4. Conversa no Chat aguardando transbordo humano para demonstração ao vivo
+        // Conversa de exemplo no chat
         ConversaChat chat = new ConversaChat("Roberto (Síndico Cond. Ipê)", "1636258899", agora.minusMinutes(25));
         chat.adicionarMensagem("ASSISTENTE",
                 "Olá, Roberto! Sou o assistente virtual da Power Plus. Como posso ajudar?", agora.minusMinutes(25));
@@ -140,7 +136,7 @@ public class DataSeeder implements CommandLineRunner {
         chat.setStatus(StatusConversaChat.AGUARDANDO_HUMANO);
         conversaChatRepository.save(chat);
 
-        // 5. Notificações recentes
+        // Avisos iniciais
         notificacaoRepository.save(new NotificacaoRegistro(
                 TipoNotificacao.SOLICITACAO_RECEBIDA, "PROPRIETARIO",
                 "Aprovação pendente: " + c1.getNome(),

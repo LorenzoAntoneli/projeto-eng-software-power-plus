@@ -39,7 +39,7 @@ class ChatAssistenteServiceTest {
     }
 
     @Test
-    @DisplayName("TU13 - Deve consultar horários livres reais ao responder pergunta sobre agenda no chat (HU05/UC03)")
+    @DisplayName("Responde próximos horários livres quando o cliente pergunta sobre agenda")
     void deveResponderHorariosLivresReaisNoChat() {
         when(disponibilidadeService.consultarHorariosLivres(LocalDate.of(2026, 9, 10)))
                 .thenReturn(List.of(LocalTime.of(14, 0), LocalTime.of(16, 0)));
@@ -59,7 +59,7 @@ class ChatAssistenteServiceTest {
     }
 
     @Test
-    @DisplayName("TU14 - Deve encaminhar conversa para o proprietário quando assunto for complexo ou solicitado (HU11/UC03 2a)")
+    @DisplayName("Encaminha a conversa para o proprietário quando o assunto foge das dúvidas comuns")
     void deveEncaminharConversaParaProprietarioComHistorico() {
         when(conversaRepository.save(any(ConversaChat.class))).thenAnswer(inv -> {
             ConversaChat c = inv.getArgument(0);
@@ -77,7 +77,7 @@ class ChatAssistenteServiceTest {
     }
 
     @Test
-    @DisplayName("TU15 - Deve permitir que o proprietário assuma e responda conversa em transbordo (HU11)")
+    @DisplayName("Permite ao proprietário assumir e responder conversa pendente")
     void devePermitirProprietarioAssumirConversa() {
         ConversaChat existente = new ConversaChat("Síndico Roberto", "1636228899", LocalDateTime.of(2026, 9, 10, 9, 50));
         existente.setId(55L);

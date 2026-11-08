@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 import java.time.*;
 import java.util.List;
 
-/**
- * Componente extraído na etapa REFACTOR do ciclo TDD para centralizar
- * as políticas RN01, RN02, RN03 e RN04 sem duplicação entre agendamento e remarcação.
- */
 @Component
 public class PoliticaAgendamentoValidator {
 

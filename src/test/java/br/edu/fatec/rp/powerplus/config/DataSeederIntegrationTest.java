@@ -34,7 +34,7 @@ class DataSeederIntegrationTest {
     private ConversaChatRepository conversaChatRepository;
 
     @Test
-    @DisplayName("TI07 - Deve popular dados iniciais fictícios/anonimizados para demonstração do MVP")
+    @DisplayName("Carrega dados iniciais quando o seed está habilitado")
     void devePopularDadosDemonstracaoQuandoHabilitado() {
         assertTrue(disponibilidadeRepository.count() >= 7);
         assertTrue(clienteRepository.count() >= 4);

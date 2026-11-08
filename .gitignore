@@ -1,25 +1,24 @@
-# Compilação Maven e logs
+# Maven e temporarios
 target/
 *.log
 *.tmp
 
-# Banco de dados local H2 (execução local)
+# Banco local H2
 data/
 
-# IDEs e Sistema Operacional
+# IDEs e sistema
 .idea/
 *.iml
 .vscode/
 .DS_Store
 Thumbs.db
 
-# Documentos de referência originais da disciplina (mantidos localmente na pasta)
+# Arquivos locais de apoio
+docs/
 Edital do Projeto EngSFWII*.pdf
 Modelo_Portfolio_Engenharia_Software_II_ABNT.docx
 Documento_Power_Plus.docx
 ~$*.docx
-
-# Pacotes locais exportados para envio ao grupo
 PACOTE_PARA_ENVIAR_AO_GRUPO/
 PROTOTIPO_POWER_PLUS/
 Prototipo_Power_Plus.zip

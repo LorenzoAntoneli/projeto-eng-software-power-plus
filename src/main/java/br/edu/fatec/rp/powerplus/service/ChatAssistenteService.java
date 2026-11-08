@@ -117,7 +117,7 @@ public class ChatAssistenteService {
             return conversaRepository.save(conversa);
         }
 
-        // UC03 Fluxo Alternativo 2a: assunto específico/complexo -> transbordo automático com histórico
+        // Caso nao caia nas duvidas frequentes, encaminha a conversa para o proprietario
         return encaminharParaHumano(conversa, textoCliente, agora,
                 "Sua solicitação envolve detalhes específicos que precisam da avaliação direta do eletricista. " +
                 "Encaminhei nossa conversa com todo o histórico para o proprietário assumir o atendimento!");
