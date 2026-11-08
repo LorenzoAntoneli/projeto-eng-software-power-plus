@@ -123,6 +123,6 @@ Após a execução, o relatório visual completo de cobertura JaCoCo estará dis
 ## 6. Equipe de Desenvolvimento
 
 - **Lorenzo Henrique Antoneli**
-- **[INSERIR NOME COMPLETO DO INTEGRANTE 2]**
-- **[INSERIR NOME COMPLETO DO INTEGRANTE 3]**
-- **[INSERIR NOME COMPLETO DO INTEGRANTE 4]**
+- **Yuri de Souza Marcondes**
+- **Cauã Margatho**
+- **Diego da Silva Gallo**

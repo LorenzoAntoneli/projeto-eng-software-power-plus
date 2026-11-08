@@ -1,6 +1,6 @@
 # Roteiro Prático para a Banca de Produto – Power Plus (MVP v1.0.0)
 
-Este documento organiza de forma direta a apresentação final da equipe conforme a **Seção 21 (Banca de Produto)** do Edital da disciplina de Engenharia de Software II (Profa. Me. Eliza Bomfim).
+Este documento organiza de forma direta a apresentação final da equipe (**Lorenzo Henrique Antoneli**, **Yuri de Souza Marcondes**, **Cauã Margatho** e **Diego da Silva Gallo**) conforme a **Seção 21 (Banca de Produto)** do Edital da disciplina de Engenharia de Software II (Profa. Me. Eliza Bomfim).
 
 ---
 
@@ -40,22 +40,22 @@ Respeitando o limite de 5 a 7 funcionalidades do Edital (Seção 11.1), foram en
 - **Fora do MVP (justificado):** integração externa paga com WhatsApp Cloud API (controlada por *Feature Flag*), emissão fiscal e cobrança financeira integrada.
 
 ### 6. Demonstração Ao Vivo do MVP (Centro da Banca – 4 a 5 minutos)
-1. **Tela "Solicitar Visita" (`/` — Visão do Cliente):** usar um atalho rápido de data (`Amanhã`), escolher um horário livre, preencher os dados (com máscara automática de telefone) e clicar em **Solicitar agendamento**. Mostrar o comprovante gerado (`PP-2026-XXXX`) com o status **`Aguardando aprovação`** e explicar que o horário já ficou pré-reservado na agenda para evitar choque (`HU08`).
-2. **Tela "Painel do Leonardo" (`/painel/login` → `/painel/agenda`):** autenticar (`leonardo.powerplus` / `PowerPlus@2026`), mostrar no topo da tela a fila destacada **"Solicitações aguardando sua aprovação"** e clicar em **✓ Aprovar visita** no pedido recém-criado (e demonstrar também o botão **✕ Recusar** em outro pedido pendente, liberando a vaga na hora). Voltar à aba do comprovante do cliente e atualizar a página para mostrar que o status mudou em tempo real para **`Confirmado`**!
-3. **Tela "Atendimento Online" (`/atendimento` → `/painel/mensagens`):** clicar em *"Horários disponíveis"* (resposta automática consultando banco) e depois em *"Falar com Leonardo"* (demonstrando o transbordo `AGUARDANDO_HUMANO` com histórico preservado e resposta do proprietário).
-4. **Tela "Meus Agendamentos" (`/acompanhar`):** consultar o histórico do condomínio pelo telefone `1636258899` ou remarcar/cancelar um protocolo respeitando a antecedência mínima de 2h.
+1. **Tela "Solicitar Visita" (`/` — Visão do Cliente):** usar um atalho rápido de data (`Amanhã`), escolher um horário livre, preencher os dados (com máscara automática de telefone) e clicar em **Enviar solicitação de visita**. Mostrar a Guia de Atendimento gerada (`PP-2026-XXXX`) com o status **`Aguardando aprovação`** e explicar que o horário já ficou pré-reservado na agenda para evitar choque (`HU08`).
+2. **Tela "Painel do Leonardo" (`/painel/login` → `/painel/agenda`):** autenticar (`leonardo.powerplus` / `PowerPlus@2026`), mostrar no topo da tela a fila destacada **"Solicitações pendentes de aprovação"** e clicar em **Aprovar visita** no pedido recém-criado (e demonstrar também o botão **Recusar horário** em outro pedido pendente, liberando a vaga na hora). Voltar à aba da guia do cliente e atualizar a página para mostrar que o status mudou em tempo real para **`Confirmado`**!
+3. **Tela "Central de Dúvidas" (`/atendimento` → `/painel/mensagens`):** clicar em *"Consultar próximos horários vagos"* (resposta automática consultando banco) e depois em *"Encaminhar para o Leonardo"* (demonstrando o transbordo `AGUARDANDO_HUMANO` com histórico preservado e resposta do proprietário).
+4. **Tela "Consultar Protocolo" (`/acompanhar`):** consultar o histórico do condomínio pelo telefone `1636258899` ou remarcar/cancelar um protocolo respeitando a antecedência mínima de 2h.
 
 ### 7. A VALIDAÇÃO – Como o cliente participou e qual foi seu retorno?
 - Validação em duas rodadas com o proprietário **Leonardo** (protótipos navegáveis e versão funcional do MVP). Principais mudanças implementadas a partir do retorno real do cliente:
-  - **Exigência de aprovação manual de cada visita:** substituição da confirmação automática imediata pelo status **`Aguardando aprovação`**, com fila prioritária no topo da agenda e botões diretos **Aprovar visita** e **Recusar**;
-  - **Interface mais fácil de usar no dia a dia:** separação em telas independentes sem poluição visual, atalhos de data em 1 clique (`Amanhã`, `Próximo dia útil`, `Próximo sábado`), máscara automática de telefone, setas rápidas `◀ / Hoje / ▶`, filtros por status e botão direto para chamar o cliente no WhatsApp.
+  - **Exigência de aprovação manual de cada visita:** substituição da confirmação automática imediata pelo status **`Aguardando aprovação`**, com fila prioritária no topo da agenda e botões diretos **Aprovar visita** e **Recusar horário**;
+  - **Interface mais fácil de usar no dia a dia:** separação em 10 telas independentes com identidade visual corporativa própria (`P+`), atalhos de data em 1 clique (`Amanhã`, `Próximo dia útil`, `Próximo sábado`), máscara automática de telefone, controles `Dia anterior / Hoje / Próximo dia`, filtros por status e botão direto **Abrir WhatsApp**.
 
 ### 8. A QUALIDADE – Quais evidências demonstram que a solução funciona?
-- Suíte automatizada com **32 testes automatizados** (23 unitários com JUnit 5 + Mockito, incluindo os ciclos TDD de agendamento e aprovação, e 9 fluxos completos de integração/aceitação/segurança/negativos com Spring `MockMvc`), cobrindo **85,46% das linhas** e **85,23% das instruções** auditadas pelo plugin **JaCoCo**.
+- Suíte automatizada com **32 testes automatizados** (23 unitários com JUnit 5 + Mockito, incluindo os ciclos TDD de agendamento e aprovação, e 9 fluxos completos de integração/aceitação/segurança/negativos com Spring `MockMvc`), cobrindo **85,37% das linhas** e **85,15% das instruções** auditadas pelo plugin **JaCoCo**.
 
 ### 9. A ENGENHARIA E A EVOLUÇÃO – Quais técnicas foram aplicadas e o que foi refatorado?
 - **Requisitos:** 3Cs, verificação INVEST, Casos de Uso (`UC01`–`UC07`) e Matriz de Rastreabilidade ponta a ponta.
-- **TDD (`RED → GREEN → REFACTOR`):** commits rastreáveis na branch `feature/tdd-motor-agendamento` para prevenção de conflitos e antecedência mínima de 2h usando `Clock` injetável.
+- **TDD (`RED → GREEN → REFACTOR`):** commits rastreáveis nas branches `feature/tdd-motor-agendamento` e `feature/tdd-aprovacao-visita` para prevenção de conflitos, fluxo de aprovação/recusa e antecedência mínima de 2h usando `Clock` injetável.
 - **Refatoração de Code Smells:** extração de `PoliticaAgendamentoValidator` e `CalculadoraHorariosLivres` (*Extract Class* / SRP), substituição de strings mágicas por enums ricos (`StatusAgendamento.podeTransitarPara`), desacoplamento via DTOs `record` e `NotificacaoGateway` com *Feature Flag*.
 - **Git & CI/CD:** fluxo `main`, `develop` e `feature/*` + pipeline GitHub Actions validando build, testes e cobertura a cada push/PR.
 
