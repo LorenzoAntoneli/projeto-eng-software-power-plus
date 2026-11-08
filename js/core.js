@@ -1,5 +1,5 @@
 window.PP = (() => {
-    const STORAGE_KEY = 'powerplus_prototipo_db_v1';
+    const STORAGE_KEY = 'powerplus_prototipo_db_v2';
 
     const DIAS_PT = {
         MONDAY: 'Segunda-feira',
@@ -36,9 +36,11 @@ window.PP = (() => {
     ];
 
     const STATUS_DESC = {
+        AGUARDANDO_APROVACAO: 'Aguardando aprovação',
         CONFIRMADO: 'Confirmado',
         EM_ATENDIMENTO: 'Em atendimento',
         CONCLUIDO: 'Concluído',
+        RECUSADO: 'Recusado',
         CANCELADO: 'Cancelado',
         AUTOMATICO: 'Triagem automática',
         AGUARDANDO_HUMANO: 'Aguardando eletricista',
@@ -201,8 +203,26 @@ window.PP = (() => {
                     tipoServicoDescricao: 'Visita Técnica para Avaliação e Orçamento',
                     enderecoAtendimento: 'Av. Presidente Vargas, 1450 - Jardim Sumaré, Ribeirão Preto',
                     descricaoServico: 'Avaliação para infraestrutura de recarga veicular nas vagas.',
-                    statusCodigo: 'CONFIRMADO',
-                    statusDescricao: 'Confirmado',
+                    statusCodigo: 'AGUARDANDO_APROVACAO',
+                    statusDescricao: 'Aguardando aprovação',
+                    observacaoTecnica: ''
+                },
+                {
+                    id: 14,
+                    protocolo: 'PP-2026-0105',
+                    clienteId: 2,
+                    clienteNome: 'Mariana Ferreira Costa',
+                    clienteTelefone: '16991452210',
+                    clientePerfil: 'Residencial',
+                    data: amanha,
+                    horaInicio: '16:00',
+                    horaFim: '17:00',
+                    tipoServicoCodigo: 'REPARO_EMERGENCIAL',
+                    tipoServicoDescricao: 'Reparo de Curto, Queda de Fase ou Disjuntor',
+                    enderecoAtendimento: 'Rua Conde Afonso Celso, 812, Apto 34 - Jardim Paulista',
+                    descricaoServico: 'Tomada da lavanderia aquecendo ao ligar secadora.',
+                    statusCodigo: 'AGUARDANDO_APROVACAO',
+                    statusDescricao: 'Aguardando aprovação',
                     observacaoTecnica: ''
                 }
             ],
@@ -296,7 +316,7 @@ window.PP = (() => {
 
         const ocupados = new Set(
             db.agendamentos
-                .filter(a => a.data === isoDate && (a.statusCodigo === 'CONFIRMADO' || a.statusCodigo === 'EM_ATENDIMENTO'))
+                .filter(a => a.data === isoDate && (a.statusCodigo === 'AGUARDANDO_APROVACAO' || a.statusCodigo === 'CONFIRMADO' || a.statusCodigo === 'EM_ATENDIMENTO'))
                 .map(a => a.horaInicio)
         );
 
@@ -316,10 +336,10 @@ window.PP = (() => {
 
     function gerarRespostaAutomatica(db, texto, solicitarHumano) {
         const t = texto.toLowerCase();
-        if (solicitarHumano || t.includes('humano') || t.includes('propriet') || t.includes('carlos') || t.includes('eletricista') || t.includes('trifásico') || t.includes('trifasico')) {
+        if (solicitarHumano || t.includes('humano') || t.includes('propriet') || t.includes('leonardo') || t.includes('carlos') || t.includes('eletricista') || t.includes('trifásico') || t.includes('trifasico')) {
             return {
                 encaminhar: true,
-                resposta: 'Encaminhei sua mensagem diretamente para o eletricista Carlos Eduardo com todo o histórico acima. Ele responderá por aqui em instantes.'
+                resposta: 'Encaminhei sua mensagem diretamente para o eletricista Leonardo com todo o histórico acima. Ele responderá por aqui em instantes.'
             };
         }
         if (t.includes('horário') || t.includes('horario') || t.includes('vaga') || t.includes('dispon')) {
@@ -427,20 +447,20 @@ window.PP = (() => {
                 tipoServicoDescricao: servObj.descricao,
                 enderecoAtendimento: body.endereco.trim(),
                 descricaoServico: body.descricaoServico || '',
-                statusCodigo: 'CONFIRMADO',
-                statusDescricao: 'Confirmado',
+                statusCodigo: 'AGUARDANDO_APROVACAO',
+                statusDescricao: 'Aguardando aprovação',
                 observacaoTecnica: ''
             };
 
             db.agendamentos.push(novo);
             db.historicoStatus[protocolo] = [
-                { statusNovo: 'Confirmado', responsavel: 'CLIENTE_WEB', observacao: 'Agendamento realizado pelo site' }
+                { statusNovo: 'Aguardando aprovação', responsavel: 'CLIENTE_WEB', observacao: 'Solicitação registrada — aguardando aprovação do Leonardo' }
             ];
             db.notificacoes.unshift({
                 id: ++db.seqId,
                 destinatarioPapel: 'PROPRIETARIO',
-                titulo: 'Novo agendamento recebido',
-                mensagem: `${novo.clienteNome} reservou ${ formatarDataBr(novo.data) } às ${novo.horaInicio}.`,
+                titulo: 'Aprovação pendente: ' + novo.clienteNome,
+                mensagem: `${novo.clienteNome} solicitou ${ formatarDataBr(novo.data) } às ${novo.horaInicio}. Aprove ou recuse no painel.`,
                 protocoloReferencia: protocolo,
                 canalEnvio: 'SISTEMA_WEB',
                 lida: false
@@ -471,12 +491,14 @@ window.PP = (() => {
             const prot = decodeURIComponent(partes[partes.length - 2]).toUpperCase();
             const ag = db.agendamentos.find(a => a.protocolo.toUpperCase() === prot);
             if (!ag) throw new Error('Agendamento não encontrado.');
-            if (ag.statusCodigo !== 'CONFIRMADO') throw new Error('Apenas visitas confirmadas podem ser remarcadas.');
+            if (ag.statusCodigo !== 'CONFIRMADO' && ag.statusCodigo !== 'AGUARDANDO_APROVACAO') throw new Error('Apenas pedidos pendentes ou visitas confirmadas podem ser remarcados.');
             if (!body.novaHoraInicio) throw new Error('Selecione um novo horário disponível.');
 
             ag.data = body.novaData;
             ag.horaInicio = body.novaHoraInicio;
             ag.horaFim = addUmaHora(body.novaHoraInicio);
+            ag.statusCodigo = 'AGUARDANDO_APROVACAO';
+            ag.statusDescricao = 'Aguardando aprovação';
             (db.historicoStatus[ag.protocolo] = db.historicoStatus[ag.protocolo] || []).push({
                 statusNovo: `Remarcado (${formatarDataBr(ag.data)} ${ag.horaInicio})`,
                 responsavel: 'CLIENTE_WEB',
@@ -565,10 +587,10 @@ window.PP = (() => {
 
         // 9. Login Admin
         if (method === 'POST' && path === '/api/admin/auth/login') {
-            if (body.username === 'carlos.powerplus' && body.password === 'PowerPlus@2026') {
-                return { token: 'proto-session-ok', username: 'carlos.powerplus', nomeExibicao: 'Carlos Eduardo' };
+            if ((body.username === 'leonardo.powerplus' || body.username === 'carlos.powerplus') && body.password === 'PowerPlus@2026') {
+                return { token: 'proto-session-ok', username: body.username, nomeExibicao: 'Leonardo' };
             }
-            throw new Error('Usuário ou senha inválidos. Use carlos.powerplus / PowerPlus@2026');
+            throw new Error('Usuário ou senha inválidos. Use leonardo.powerplus / PowerPlus@2026');
         }
 
         if (method === 'POST' && path === '/api/admin/auth/logout') {
@@ -596,17 +618,24 @@ window.PP = (() => {
                 a => a.data >= iniIso && a.data <= fimIso && a.statusCodigo !== 'CANCELADO'
             ).length;
 
+            const pendentes = db.agendamentos
+                .filter(a => a.statusCodigo === 'AGUARDANDO_APROVACAO')
+                .sort((a, b) => (a.data + a.horaInicio).localeCompare(b.data + b.horaInicio));
+
             return {
                 dataReferencia: dataRef,
                 totalHoje: doDia.length,
+                aguardandoAprovacaoHoje: doDia.filter(a => a.statusCodigo === 'AGUARDANDO_APROVACAO').length,
                 confirmadosHoje: doDia.filter(a => a.statusCodigo === 'CONFIRMADO').length,
                 emAtendimentoHoje: doDia.filter(a => a.statusCodigo === 'EM_ATENDIMENTO').length,
                 concluidosHoje: doDia.filter(a => a.statusCodigo === 'CONCLUIDO').length,
-                canceladosHoje: doDia.filter(a => a.statusCodigo === 'CANCELADO').length,
+                canceladosHoje: doDia.filter(a => a.statusCodigo === 'CANCELADO' || a.statusCodigo === 'RECUSADO').length,
                 totalSemana,
+                pendentesAprovacaoTotal: pendentes.length,
                 chatsAguardandoHumano: db.conversas.filter(c => c.statusCodigo === 'AGUARDANDO_HUMANO').length,
                 notificacoesNaoLidas: db.notificacoes.filter(n => !n.lida).length,
                 whatsappFeatureFlagAtiva: false,
+                pendentesAprovacao: pendentes,
                 atendimentosHoje: doDia
             };
         }
@@ -630,6 +659,40 @@ window.PP = (() => {
                     .filter(a => a.data >= iniIso && a.data <= fimIso)
                     .sort((a, b) => (a.data + a.horaInicio).localeCompare(b.data + b.horaInicio))
             };
+        }
+
+        if (method === 'POST' && path.endsWith('/aprovar')) {
+            const partes = path.split('/');
+            const id = Number(partes[partes.length - 2]);
+            const ag = db.agendamentos.find(a => a.id === id);
+            if (!ag) throw new Error('Atendimento não encontrado.');
+            ag.statusCodigo = 'CONFIRMADO';
+            ag.statusDescricao = 'Confirmado';
+            if (body.observacao) ag.observacaoTecnica = body.observacao;
+            (db.historicoStatus[ag.protocolo] = db.historicoStatus[ag.protocolo] || []).push({
+                statusNovo: 'Confirmado',
+                responsavel: 'Leonardo',
+                observacao: body.observacao || 'Visita aprovada pelo Leonardo'
+            });
+            saveDb(db);
+            return ag;
+        }
+
+        if (method === 'POST' && path.endsWith('/recusar')) {
+            const partes = path.split('/');
+            const id = Number(partes[partes.length - 2]);
+            const ag = db.agendamentos.find(a => a.id === id);
+            if (!ag) throw new Error('Atendimento não encontrado.');
+            ag.statusCodigo = 'RECUSADO';
+            ag.statusDescricao = 'Recusado';
+            ag.observacaoTecnica = body.observacao || 'Horário indisponível para atendimento.';
+            (db.historicoStatus[ag.protocolo] = db.historicoStatus[ag.protocolo] || []).push({
+                statusNovo: 'Recusado',
+                responsavel: 'Leonardo',
+                observacao: ag.observacaoTecnica
+            });
+            saveDb(db);
+            return ag;
         }
 
         if (method === 'PATCH' && path.endsWith('/status')) {
@@ -776,7 +839,7 @@ window.PP = (() => {
 
     function setSession(token, nomeExibicao) {
         localStorage.setItem('pp_proto_token', token);
-        localStorage.setItem('pp_proto_owner', nomeExibicao || 'Carlos Eduardo');
+        localStorage.setItem('pp_proto_owner', nomeExibicao || 'Leonardo');
     }
 
     function clearSession() {
@@ -873,7 +936,7 @@ window.PP = (() => {
 
         const host = document.getElementById('boSidebarMount');
         if (host) {
-            const ownerName = localStorage.getItem('pp_proto_owner') || 'Carlos Eduardo';
+            const ownerName = localStorage.getItem('pp_proto_owner') || 'Leonardo';
             host.innerHTML = `
                 <div class="bo-brand">
                     <span class="brand-box" aria-hidden="true">
@@ -883,14 +946,15 @@ window.PP = (() => {
                     </span>
                     <div>
                         <div class="bo-title">Power Plus</div>
-                        <div class="bo-sub">Sistema Operacional</div>
+                        <div class="bo-sub">Painel do Leonardo</div>
                     </div>
                 </div>
 
                 <nav class="bo-nav" aria-label="Navegação do painel">
                     <a href="agenda.html" class="bo-link ${activeSlug === 'agenda' ? 'active' : ''}">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        <span>Agenda</span>
+                        <span>Agenda e aprovações</span>
+                        <span id="boCountAprovacoes" class="bo-badge">0</span>
                     </a>
                     <a href="expediente.html" class="bo-link ${activeSlug === 'expediente' ? 'active' : ''}">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -942,8 +1006,14 @@ window.PP = (() => {
 
     async function refreshSidebarCounters() {
         const dash = await api(`/api/admin/dashboard?data=${hojeIso()}`);
+        const elAprov = document.getElementById('boCountAprovacoes');
         const elChats = document.getElementById('boCountChats');
         const elAvisos = document.getElementById('boCountAvisos');
+        if (elAprov) {
+            const pend = dash.pendentesAprovacaoTotal ?? 0;
+            elAprov.textContent = pend;
+            elAprov.classList.toggle('has-alert', pend > 0);
+        }
         if (elChats) {
             elChats.textContent = dash.chatsAguardandoHumano;
             elChats.classList.toggle('has-alert', dash.chatsAguardandoHumano > 0);
@@ -972,3 +1042,4 @@ window.PP = (() => {
         refreshSidebarCounters
     };
 })();
+
