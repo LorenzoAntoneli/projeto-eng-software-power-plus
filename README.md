@@ -1,4 +1,8 @@
-# ⚡ Power Plus – Sistema de Agendamento de Clientes e Atendimento Automatizado
+<p>
+  <img src="src/main/resources/static/img/logo-powerplus.svg" alt="Power Plus Engenharia e Serviços Elétricos" height="50">
+</p>
+
+# Power Plus – Sistema de Agendamento de Clientes e Atendimento Automatizado
 
 [![Power Plus CI - Build, Testes JUnit e Cobertura JaCoCo](https://github.com/LorenzoAntoneli/projeto-eng-software-power-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/LorenzoAntoneli/projeto-eng-software-power-plus/actions/workflows/ci.yml)
 

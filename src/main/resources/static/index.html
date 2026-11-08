@@ -3,31 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendar Visita Técnica — Power Plus Serviços Elétricos</title>
+    <title>Solicitar Visita Técnica — Power Plus Serviços Elétricos</title>
+    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+    <div class="top-utility-bar">
+        <div class="shell top-utility-inner">
+            <div class="utility-meta">
+                <span>Atendimento em Ribeirão Preto e Região</span>
+                <span class="utility-sep">|</span>
+                <span>Normas NBR 5410 e NR-10</span>
+                <span class="utility-sep">|</span>
+                <span>Seg a Sex: 08h às 18h · Sáb: 08h às 13h</span>
+            </div>
+            <a href="/painel/login" class="utility-admin-link">Área Técnica</a>
+        </div>
+    </div>
+
     <header class="public-header">
         <div class="shell public-header-inner">
-            <a href="/" class="brand-id">
-                <span class="brand-box" aria-hidden="true">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
-                    </svg>
-                </span>
-                <span class="brand-copy">
-                    <span class="brand-name">Power Plus</span>
-                    <span class="brand-location">Instalações e Manutenção Elétrica · Ribeirão Preto</span>
-                </span>
+            <a href="/" class="brand-logo-link">
+                <img src="/img/logo-powerplus.svg" alt="Power Plus Engenharia e Serviços Elétricos" class="brand-logo-img">
             </a>
 
             <nav class="public-nav" aria-label="Navegação do cliente">
-                <a href="/" class="active">Agendar visita</a>
-                <a href="/acompanhar">Meus agendamentos</a>
-                <a href="/atendimento">Atendimento</a>
+                <a href="/" class="active">Solicitar Visita</a>
+                <a href="/acompanhar">Consultar Protocolo</a>
+                <a href="/atendimento">Central de Dúvidas</a>
             </nav>
         </div>
     </header>
@@ -35,152 +41,149 @@
     <main class="public-page">
         <div class="shell">
             <div class="page-head">
-                <h1>Solicitar visita técnica</h1>
-                <p>Escolha um horário livre em 2 passos rápidos. Seu pedido fica pré-reservado e o Leonardo confirma a visita em seguida.</p>
+                <div class="page-eyebrow">Abertura de Chamado Online</div>
+                <h1>Agendamento de Visita Técnica</h1>
+                <p>Selecione o serviço elétrico e um horário vago na agenda. O horário escolhido fica pré-reservado até a confirmação do eletricista Leonardo.</p>
             </div>
 
-            <div class="booking-container">
-                <aside class="booking-summary-rail">
-                    <div class="tech-card">
-                        <div class="tech-initials">LE</div>
-                        <div>
-                            <div class="tech-name">Leonardo</div>
-                            <div class="tech-cred">Proprietário e Eletricista · NR-10</div>
-                        </div>
-                    </div>
-
-                    <div class="rail-section">
-                        <div class="rail-heading">Resumo da solicitação</div>
-                        <div class="rail-item">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                            <span id="railServico">—</span>
-                        </div>
-                        <div class="rail-item">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            <span id="railData">—</span>
-                        </div>
-                        <div class="rail-item">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span id="railHorario" class="mono">Selecione um horário</span>
-                        </div>
-                        <div class="rail-item">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                            <span>Ribeirão Preto e região</span>
-                        </div>
-                    </div>
-
-                    <div class="rail-section">
-                        <div class="rail-note">
-                            <strong>Aprovação pelo eletricista</strong>
-                            O horário escolhido é pré-reservado na hora com status <em>Aguardando aprovação</em> até o Leonardo confirmar a visita.
-                        </div>
-                        <div class="rail-note">
-                            <strong>Política de alteração</strong>
-                            Remarcações ou cancelamentos podem ser feitos online até 2 horas antes da visita.
-                        </div>
-                    </div>
-
-                    <div class="rail-bottom">
-                        Precisa tirar dúvida antes de marcar?<br>
-                        <a href="/atendimento">Ir para o atendimento online →</a>
-                    </div>
-                </aside>
-
+            <div class="booking-workspace">
                 <div class="booking-stage">
                     <div class="stepper-bar">
                         <div class="step-pill active" id="stepPill1">
                             <span class="step-num">1</span>
-                            <span>Serviço e horário</span>
+                            <span>Serviço, Data e Horário</span>
                         </div>
-                        <div class="step-line"></div>
                         <div class="step-pill" id="stepPill2">
                             <span class="step-num">2</span>
-                            <span>Identificação e endereço</span>
+                            <span>Dados do Solicitante e Endereço</span>
                         </div>
                     </div>
 
-                    <form id="formAgendamento" novalidate>
-                        <!-- ETAPA 1 -->
-                        <div id="etapa1">
-                            <div class="grid-2">
+                    <div class="booking-form-body">
+                        <form id="formAgendamento" novalidate>
+                            <!-- ETAPA 1 -->
+                            <div id="etapa1">
+                                <div class="grid-2">
+                                    <div class="field">
+                                        <label for="agTipoServico">Natureza do serviço</label>
+                                        <select id="agTipoServico" required></select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="agData">Data pretendida</label>
+                                        <input type="date" id="agData" required>
+                                        <div class="quick-date-chips" id="atalhosData"></div>
+                                    </div>
+                                </div>
+
+                                <div class="field" style="margin-top:8px">
+                                    <div class="field-label-row">
+                                        <label>Janelas disponíveis para chegada (duração estimada de 1h)</label>
+                                        <span class="hint">Agenda atualizada em tempo real</span>
+                                    </div>
+                                    <div id="slotsContainer" class="slots-grid">
+                                        <span class="hint">Consultando agenda disponível...</span>
+                                    </div>
+                                    <input type="hidden" id="agHoraInicio">
+                                </div>
+
+                                <div class="stage-actions">
+                                    <span class="hint" id="msgEtapa1">Selecione um dos horários acima para preencher seus dados.</span>
+                                    <button type="button" class="btn btn-primary" id="btnAvancarEtapa2">Avançar para identificação</button>
+                                </div>
+                            </div>
+
+                            <!-- ETAPA 2 -->
+                            <div id="etapa2" class="hidden">
+                                <div class="review-summary-bar" id="resumoEtapa2"></div>
+                                <div class="grid-2">
+                                    <div class="field">
+                                        <label for="agNome">Nome do responsável, empresa ou condomínio</label>
+                                        <input type="text" id="agNome" placeholder="Ex.: Mariana Ferreira ou Condomínio Solar" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="agPerfil">Tipo de imóvel</label>
+                                        <select id="agPerfil" required></select>
+                                    </div>
+                                </div>
+
+                                <div class="grid-2">
+                                    <div class="field">
+                                        <label for="agTelefone">Telefone / WhatsApp com DDD</label>
+                                        <input type="tel" id="agTelefone" placeholder="(16) 99123-4567" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="agEmail">E-mail <span class="opt">(opcional)</span></label>
+                                        <input type="email" id="agEmail" placeholder="contato@exemplo.com.br">
+                                    </div>
+                                </div>
+
                                 <div class="field">
-                                    <label for="agTipoServico">Serviço solicitado</label>
-                                    <select id="agTipoServico" required></select>
+                                    <label for="agEndereco">Endereço completo do atendimento</label>
+                                    <input type="text" id="agEndereco" placeholder="Rua/Avenida, número, complemento e bairro" required>
                                 </div>
+
                                 <div class="field">
-                                    <label for="agData">Data desejada</label>
-                                    <input type="date" id="agData" required>
-                                    <div class="quick-date-chips" id="atalhosData"></div>
+                                    <label for="agDescricao">Relato técnico ou observação <span class="opt">(opcional)</span></label>
+                                    <textarea id="agDescricao" rows="2" placeholder="Ex.: Disjuntor geral desarmando ao ligar chuveiro; revisão em quadro trifásico..."></textarea>
+                                </div>
+
+                                <div class="stage-actions">
+                                    <button type="button" class="btn btn-secondary" id="btnVoltarEtapa1">Voltar aos horários</button>
+                                    <button type="submit" class="btn btn-primary" id="btnSubmitReserva">Enviar solicitação de visita</button>
                                 </div>
                             </div>
-
-                            <div class="field" style="margin-top:6px">
-                                <div class="field-label-row">
-                                    <label>Horários vagos na data</label>
-                                    <span class="hint">Seg–Sex 08h às 18h · Sáb 08h às 13h</span>
-                                </div>
-                                <div id="slotsContainer" class="slots-grid">
-                                    <span class="hint">Consultando agenda...</span>
-                                </div>
-                                <input type="hidden" id="agHoraInicio">
-                            </div>
-
-                            <div class="stage-actions">
-                                <span class="hint" id="msgEtapa1">Escolha um horário disponível para prosseguir.</span>
-                                <button type="button" class="btn btn-primary" id="btnAvancarEtapa2">Continuar →</button>
-                            </div>
-                        </div>
-
-                        <!-- ETAPA 2 -->
-                        <div id="etapa2" class="hidden">
-                            <div class="review-summary-bar" id="resumoEtapa2"></div>
-                            <div class="grid-2">
-                                <div class="field">
-                                    <label for="agNome">Nome completo ou condomínio</label>
-                                    <input type="text" id="agNome" placeholder="Ex.: Mariana Ferreira" required>
-                                </div>
-                                <div class="field">
-                                    <label for="agPerfil">Categoria do imóvel</label>
-                                    <select id="agPerfil" required></select>
-                                </div>
-                            </div>
-
-                            <div class="grid-2">
-                                <div class="field">
-                                    <label for="agTelefone">Telefone / WhatsApp com DDD</label>
-                                    <input type="tel" id="agTelefone" placeholder="(16) 99123-4567" required>
-                                </div>
-                                <div class="field">
-                                    <label for="agEmail">E-mail <span class="opt">(opcional)</span></label>
-                                    <input type="email" id="agEmail" placeholder="contato@exemplo.com.br">
-                                </div>
-                            </div>
-
-                            <div class="field">
-                                <label for="agEndereco">Endereço completo da visita</label>
-                                <input type="text" id="agEndereco" placeholder="Rua, número, complemento e bairro" required>
-                            </div>
-
-                            <div class="field">
-                                <label for="agDescricao">Descrição do problema ou equipamento <span class="opt">(opcional)</span></label>
-                                <textarea id="agDescricao" rows="2" placeholder="Ex.: Disjuntor geral desarmando; revisão em quadro trifásico..."></textarea>
-                            </div>
-
-                            <div class="stage-actions">
-                                <button type="button" class="btn btn-secondary" id="btnVoltarEtapa1">← Alterar horário</button>
-                                <button type="submit" class="btn btn-primary" id="btnSubmitReserva">Solicitar agendamento</button>
-                            </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
+
+                <aside class="booking-order-sheet" aria-label="Resumo do agendamento">
+                    <div class="sheet-head">
+                        <span class="sheet-head-title">Ficha de Solicitação</span>
+                        <span class="sheet-head-tag">Pré-reserva</span>
+                    </div>
+                    <div class="sheet-body">
+                        <div class="sheet-dl">
+                            <div class="sheet-row">
+                                <div class="sheet-dt">Serviço selecionado</div>
+                                <div class="sheet-dd" id="railServico">—</div>
+                            </div>
+                            <div class="sheet-row">
+                                <div class="sheet-dt">Data programada</div>
+                                <div class="sheet-dd" id="railData">—</div>
+                            </div>
+                            <div class="sheet-row">
+                                <div class="sheet-dt">Horário escolhido</div>
+                                <div class="sheet-dd mono" id="railHorario">Aguardando seleção</div>
+                            </div>
+                            <div class="sheet-row">
+                                <div class="sheet-dt">Responsável técnico</div>
+                                <div class="sheet-dd">Leonardo · Eletricista (NR-10)</div>
+                            </div>
+                        </div>
+
+                        <div class="sheet-policy-box">
+                            <strong>Confirmação da visita</strong>
+                            Ao concluir o envio, o horário fica bloqueado provisoriamente com status <em>Aguardando aprovação</em> até a validação do Leonardo.
+                        </div>
+
+                        <div class="sheet-policy-box">
+                            <strong>Remarcação e cancelamento</strong>
+                            Alterações podem ser feitas gratuitamente pelo número de protocolo com até 2 horas de antecedência.
+                        </div>
+                    </div>
+                    <div class="sheet-footer">
+                        Precisa tirar dúvidas antes de agendar?<br>
+                        <a href="/atendimento">Acessar Central de Dúvidas</a>
+                    </div>
+                </aside>
             </div>
         </div>
     </main>
 
     <footer class="public-footer">
         <div class="shell public-footer-inner">
-            <span>Power Plus Serviços Elétricos · Ribeirão Preto, SP</span>
-            <a href="/painel/login" class="footer-internal-link">Acesso interno (Equipe)</a>
+            <span>Power Plus Engenharia e Serviços Elétricos · Ribeirão Preto, SP</span>
+            <a href="/painel/login" class="footer-internal-link">Acesso Operacional (Equipe)</a>
         </div>
     </footer>
 

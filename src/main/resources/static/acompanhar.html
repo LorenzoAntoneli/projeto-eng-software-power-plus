@@ -3,31 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meus Agendamentos — Power Plus</title>
+    <title>Consultar Protocolo — Power Plus</title>
+    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+    <div class="top-utility-bar">
+        <div class="shell top-utility-inner">
+            <div class="utility-meta">
+                <span>Atendimento em Ribeirão Preto e Região</span>
+                <span class="utility-sep">|</span>
+                <span>Normas NBR 5410 e NR-10</span>
+                <span class="utility-sep">|</span>
+                <span>Seg a Sex: 08h às 18h · Sáb: 08h às 13h</span>
+            </div>
+            <a href="/painel/login" class="utility-admin-link">Área Técnica</a>
+        </div>
+    </div>
+
     <header class="public-header">
         <div class="shell public-header-inner">
-            <a href="/" class="brand-id">
-                <span class="brand-box" aria-hidden="true">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
-                    </svg>
-                </span>
-                <span class="brand-copy">
-                    <span class="brand-name">Power Plus</span>
-                    <span class="brand-location">Instalações e Manutenção Elétrica · Ribeirão Preto</span>
-                </span>
+            <a href="/" class="brand-logo-link">
+                <img src="/img/logo-powerplus.svg" alt="Power Plus Engenharia e Serviços Elétricos" class="brand-logo-img">
             </a>
 
             <nav class="public-nav" aria-label="Navegação do cliente">
-                <a href="/">Agendar visita</a>
-                <a href="/acompanhar" class="active">Meus agendamentos</a>
-                <a href="/atendimento">Atendimento</a>
+                <a href="/">Solicitar Visita</a>
+                <a href="/acompanhar" class="active">Consultar Protocolo</a>
+                <a href="/atendimento">Central de Dúvidas</a>
             </nav>
         </div>
     </header>
@@ -35,26 +41,31 @@
     <main class="public-page">
         <div class="shell">
             <div class="page-head">
-                <h1>Consultar ou alterar agendamento</h1>
-                <p>Informe o código de protocolo da visita ou pesquise todas as ordens vinculadas ao seu telefone.</p>
+                <div class="page-eyebrow">Acompanhamento de Ordem</div>
+                <h1>Consultar, remarcar ou cancelar visita</h1>
+                <p>Pesquise pelo número de protocolo gerado na solicitação ou liste todos os chamados vinculados ao seu telefone.</p>
             </div>
 
             <div class="split-lookup">
                 <div class="surface-box">
+                    <div class="box-header">
+                        <h2>Localizar atendimento</h2>
+                    </div>
+
                     <div class="field">
-                        <label for="inputBuscaProtocolo">Protocolo do agendamento</label>
+                        <label for="inputBuscaProtocolo">Código de protocolo</label>
                         <div class="inline-input-btn">
-                            <input type="text" id="inputBuscaProtocolo" class="mono" placeholder="PP-2026-0102">
-                            <button type="button" class="btn btn-primary" id="btnBuscarProtocolo">Consultar</button>
+                            <input type="text" id="inputBuscaProtocolo" class="code-ref" placeholder="PP-2026-0105">
+                            <button type="button" class="btn btn-primary" id="btnBuscarProtocolo">Buscar</button>
                         </div>
                         <div class="quick-examples">
-                            <span>Testar rápido:</span>
-                            <button type="button" class="example-tag mono" data-prot="PP-2026-0105">PP-2026-0105 (Pendente)</button>
-                            <button type="button" class="example-tag mono" data-prot="PP-2026-0102">PP-2026-0102 (Confirmado)</button>
+                            <span>Exemplos cadastrados:</span>
+                            <button type="button" class="example-tag code-ref" data-prot="PP-2026-0105">PP-2026-0105</button>
+                            <button type="button" class="example-tag code-ref" data-prot="PP-2026-0102">PP-2026-0102</button>
                         </div>
                     </div>
 
-                    <div class="divider-label"><span>ou histórico por telefone</span></div>
+                    <div class="divider-label"><span>ou busca por telefone</span></div>
 
                     <div class="field">
                         <label for="inputBuscaTelefone">Telefone ou WhatsApp</label>
@@ -63,7 +74,7 @@
                             <button type="button" class="btn btn-secondary" id="btnBuscarTelefone">Listar</button>
                         </div>
                         <div class="quick-examples">
-                            <span>Condomínio cadastrado:</span>
+                            <span>Cliente exemplo:</span>
                             <button type="button" class="example-tag mono" data-tel="1636258899">(16) 3625-8899</button>
                         </div>
                     </div>
@@ -71,10 +82,10 @@
 
                 <div class="surface-box">
                     <div class="box-header">
-                        <h2>Detalhes do atendimento</h2>
+                        <h2>Dados da ordem de visita</h2>
                     </div>
                     <div id="resultadoConsulta" class="empty-placeholder">
-                        Pesquise por protocolo ou telefone ao lado para visualizar o status, remarcar ou cancelar sua visita.
+                        Informe o número de protocolo ou o telefone ao lado para verificar o status de aprovação, remarcar ou cancelar o atendimento.
                     </div>
                 </div>
             </div>
@@ -85,7 +96,7 @@
     <div id="modalRemarcar" class="modal-overlay hidden">
         <div class="modal-window">
             <div class="modal-top">
-                <h3>Remarcar visita <span id="remProtocoloTitulo" class="mono"></span></h3>
+                <h3>Remarcar protocolo <span id="remProtocoloTitulo" class="code-ref"></span></h3>
                 <button type="button" class="modal-close" id="btnFecharRemarcar">×</button>
             </div>
             <form id="formRemarcarCliente">
@@ -96,17 +107,17 @@
                         <input type="date" id="remNovaData" required>
                     </div>
                     <div class="field">
-                        <label for="remNovoHorario">Novo horário vago</label>
+                        <label for="remNovoHorario">Horário disponível</label>
                         <select id="remNovoHorario" required></select>
                     </div>
                 </div>
                 <div class="field">
-                    <label for="remMotivo">Observação <span class="opt">(opcional)</span></label>
-                    <input type="text" id="remMotivo" placeholder="Ex.: Mudança de horário comercial">
+                    <label for="remMotivo">Justificativa <span class="opt">(opcional)</span></label>
+                    <input type="text" id="remMotivo" placeholder="Ex.: Alteração de horário na portaria">
                 </div>
                 <div class="modal-actions-row">
-                    <button type="button" class="btn btn-secondary" id="btnCancelarModalRemarcar">Voltar</button>
-                    <button type="submit" class="btn btn-primary">Salvar novo horário</button>
+                    <button type="button" class="btn btn-secondary" id="btnCancelarModalRemarcar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Confirmar novo horário</button>
                 </div>
             </form>
         </div>
@@ -114,8 +125,8 @@
 
     <footer class="public-footer">
         <div class="shell public-footer-inner">
-            <span>Power Plus Serviços Elétricos · Ribeirão Preto, SP</span>
-            <a href="/painel/login" class="footer-internal-link">Acesso interno (Equipe)</a>
+            <span>Power Plus Engenharia e Serviços Elétricos · Ribeirão Preto, SP</span>
+            <a href="/painel/login" class="footer-internal-link">Acesso Operacional (Equipe)</a>
         </div>
     </footer>
 
@@ -123,4 +134,3 @@
     <script src="/js/cliente-acompanhar.js"></script>
 </body>
 </html>
-
