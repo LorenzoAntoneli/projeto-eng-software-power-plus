@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const cls = m.remetente === 'CLIENTE' ? 'theirs' : (m.remetente === 'PROPRIETARIO' ? 'mine' : 'owner-reply');
                     const autor = m.remetente === 'CLIENTE'
                         ? c.nomeCliente
-                        : (m.remetente === 'PROPRIETARIO' ? 'Você (Carlos)' : 'Triagem Automática');
+                        : (m.remetente === 'PROPRIETARIO' ? 'Você (Leonardo)' : 'Triagem Automática');
                     return `
                         <div class="chat-msg ${cls}">
                             <div class="chat-author">${PP.esc(autor)}</div>

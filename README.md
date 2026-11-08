@@ -25,8 +25,8 @@ Antes desta solução, o agendamento ocorria manualmente por WhatsApp e ligaçõ
 Aplicação web responsiva (acessível via smartphone e computador) estruturada em **6 funcionalidades principais** conforme a Regra 11.1 do Edital:
 1. **Gestão de Clientes e Histórico (`RF01`, `RF07`, `HU09`, `HU12`, `UC06`)**: Cadastro automático e manual com normalização de telefone, alerta de duplicidade (`RN05`) e consulta de histórico por cliente residencial ou empresarial/condomínio.
 2. **Configuração de Disponibilidade e Bloqueios (`RF02`, `HU07`, `UC04`)**: Definição de dias/janelas de atendimento semanal e bloqueio de folgas/feriados com alerta de conflitos existentes (`RN06`).
-3. **Autoatendimento de Agendamento Sem Conflitos (`RF03`, `RF04`, `HU01`, `HU02`, `HU08`, `UC01`)**: Exibição exclusiva de slots livres reais, geração de protocolo único (`PP-2026-XXXX`) e bloqueio contra dupla reserva (`RN01`).
-4. **Remarcação, Cancelamento e Máquina de Status Auditada (`RF05`, `RF09`, `HU04`, `UC02`)**: Autoatendimento de remarcação e cancelamento com antecedência mínima de 2 horas (`RN03`), liberação automática de vaga e transições válidas auditadas (`RN04`, `RNF06`).
+3. **Autoatendimento de Solicitação e Aprovação Sem Conflitos (`RF03`, `RF04`, `HU01`, `HU02`, `HU03`, `HU08`, `UC01`)**: Exibição exclusiva de slots livres reais, geração de protocolo único (`PP-2026-XXXX`), pré-reserva imediata com status **Aguardando aprovação** e fluxo direto para o proprietário **Aprovar** ou **Recusar** cada visita (`RN01`).
+4. **Remarcação, Cancelamento e Máquina de Status Auditada (`RF05`, `RF09`, `HU04`, `UC02`)**: Autoatendimento de remarcação e cancelamento com antecedência mínima de 2 horas (`RN03`), liberação automática de vaga em caso de cancelamento ou recusa e transições válidas auditadas (`RN04`, `RNF06`).
 5. **Agenda Diária/Semanal e Dashboard Operacional (`RF06`, `RF08`, `HU06`, `HU10`, `UC05`, `UC07`)**: Painel autenticado (`BCrypt` – `RNF03`) com KPIs do dia, visão diária e semanal, central de notificações e disparo de lembretes.
 6. **Chat de Atendimento Automatizado com Transbordo Humano (`RF10`, `HU05`, `HU11`, `UC03`)**: Assistente virtual integrado que responde dúvidas frequentes, consulta horários livres em tempo real e encaminha casos complexos ao proprietário com todo o histórico da conversa.
 
@@ -61,19 +61,20 @@ No terminal (PowerShell, CMD ou Bash), na raiz do projeto:
 
 Acesse no navegador:
 - **Portal do Cliente (Telas Públicas Separadas):**
-  - `http://localhost:8080/` — Agendamento de Visita em 2 etapas
+  - `http://localhost:8080/` — Solicitação de Visita em 2 etapas rápidas (com pré-reserva `Aguardando aprovação`)
   - `http://localhost:8080/acompanhar` — Consulta por protocolo/telefone, remarcação e cancelamento
-  - `http://localhost:8080/comprovante?protocolo=PP-2026-0102` — Ordem / Comprovante imprimível
-  - `http://localhost:8080/atendimento` — Central de Atendimento (triagem + transbordo em tempo real)
-- **Sistema Operacional Interno (Telas do Proprietário):**
-  - `http://localhost:8080/painel/login` — Autenticação (`carlos.powerplus` / `PowerPlus@2026`)
-  - `http://localhost:8080/painel/agenda` — Agenda Diária e Semanal
+  - `http://localhost:8080/comprovante?protocolo=PP-2026-0105` — Comprovante com status atualizado em tempo real
+  - `http://localhost:8080/atendimento` — Central de Atendimento (triagem + transbordo para o Leonardo)
+- **Painel Operacional do Leonardo (Telas Internas):**
+  - `http://localhost:8080/painel/login` — Autenticação (`leonardo.powerplus` / `PowerPlus@2026`)
+  - `http://localhost:8080/painel/agenda` — Fila de solicitações pendentes (**Aprovar** / **Recusar**) + Agenda Diária e Semanal
   - `http://localhost:8080/painel/expediente` — Horários semanais e bloqueio de datas
   - `http://localhost:8080/painel/clientes` — Base de clientes e histórico de serviços
   - `http://localhost:8080/painel/mensagens` — Inbox de atendimento humano ao vivo
   - `http://localhost:8080/painel/avisos` — Registro de envios e avisos
 - **Protocolos/Dados de Demonstração (Seed Fictício LGPD):**
-  - Protocolo ativo para testar consulta/remarcação: `PP-2026-0102` ou `PP-2026-0103`
+  - Solicitação aguardando aprovação do Leonardo: `PP-2026-0105` ou `PP-2026-0104`
+  - Visitas já aprovadas/confirmadas: `PP-2026-0102` ou `PP-2026-0103`
   - Telefone empresarial com histórico: `1636258899`
 
 ---

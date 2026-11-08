@@ -40,19 +40,18 @@ Respeitando o limite de 5 a 7 funcionalidades do Edital (Seção 11.1), foram en
 - **Fora do MVP (justificado):** integração externa paga com WhatsApp Cloud API (controlada por *Feature Flag*), emissão fiscal e cobrança financeira integrada.
 
 ### 6. Demonstração Ao Vivo do MVP (Centro da Banca – 4 a 5 minutos)
-1. **Aba "Agendar Visita" (Visão do Cliente):** selecionar uma data, mostrar os horários livres carregados em tempo real, preencher um atendimento residencial e exibir o **protocolo gerado** (`PP-2026-XXXX`). Mostrar que o horário escolhido desapareceu imediatamente das opções livres (`HU08`).
-2. **Aba "Chat Assistente":** clicar em *"Ver próximos horários livres"* (resposta automática consultando banco) e depois em *"Falar com o Proprietário"* (demonstrando o transbordo `AGUARDANDO_HUMANO` com histórico preservado).
-3. **Aba "Painel do Proprietário":** autenticar (`carlos.powerplus` / `PowerPlus@2026`), exibir os indicadores do Dashboard, alternar entre **Visão Diária** e **Visão Semanal**, concluir um atendimento registrando observação técnica, responder o chat encaminhado na aba **Chats Encaminhados** e mostrar o alerta ao tentar bloquear uma data que já possui visita confirmada.
-4. **Aba "Meus Agendamentos":** consultar o histórico do condomínio pelo telefone `1636258899` ou remarcar um protocolo ativo.
+1. **Tela "Solicitar Visita" (`/` — Visão do Cliente):** usar um atalho rápido de data (`Amanhã`), escolher um horário livre, preencher os dados (com máscara automática de telefone) e clicar em **Solicitar agendamento**. Mostrar o comprovante gerado (`PP-2026-XXXX`) com o status **`Aguardando aprovação`** e explicar que o horário já ficou pré-reservado na agenda para evitar choque (`HU08`).
+2. **Tela "Painel do Leonardo" (`/painel/login` → `/painel/agenda`):** autenticar (`leonardo.powerplus` / `PowerPlus@2026`), mostrar no topo da tela a fila destacada **"Solicitações aguardando sua aprovação"** e clicar em **✓ Aprovar visita** no pedido recém-criado (e demonstrar também o botão **✕ Recusar** em outro pedido pendente, liberando a vaga na hora). Voltar à aba do comprovante do cliente e atualizar a página para mostrar que o status mudou em tempo real para **`Confirmado`**!
+3. **Tela "Atendimento Online" (`/atendimento` → `/painel/mensagens`):** clicar em *"Horários disponíveis"* (resposta automática consultando banco) e depois em *"Falar com Leonardo"* (demonstrando o transbordo `AGUARDANDO_HUMANO` com histórico preservado e resposta do proprietário).
+4. **Tela "Meus Agendamentos" (`/acompanhar`):** consultar o histórico do condomínio pelo telefone `1636258899` ou remarcar/cancelar um protocolo respeitando a antecedência mínima de 2h.
 
 ### 7. A VALIDAÇÃO – Como o cliente participou e qual foi seu retorno?
-- Validação em duas rodadas (protótipos de tela e versão funcional do MVP). Principais ajustes incorporados a partir do retorno do cliente:
-  - Destaque imediato da seleção de **Data, Horário Livre e Tipo de Serviço** no topo do formulário;
-  - Identificação visual por cores de status e perfil (Residencial vs. Condomínio) nos cartões da agenda semanal;
-  - Inclusão de atalho explícito *"Falar com o Proprietário"* no chat automatizado.
+- Validação em duas rodadas com o proprietário **Leonardo** (protótipos navegáveis e versão funcional do MVP). Principais mudanças implementadas a partir do retorno real do cliente:
+  - **Exigência de aprovação manual de cada visita:** substituição da confirmação automática imediata pelo status **`Aguardando aprovação`**, com fila prioritária no topo da agenda e botões diretos **Aprovar visita** e **Recusar**;
+  - **Interface mais fácil de usar no dia a dia:** separação em telas independentes sem poluição visual, atalhos de data em 1 clique (`Amanhã`, `Próximo dia útil`, `Próximo sábado`), máscara automática de telefone, setas rápidas `◀ / Hoje / ▶`, filtros por status e botão direto para chamar o cliente no WhatsApp.
 
 ### 8. A QUALIDADE – Quais evidências demonstram que a solução funciona?
-- Suíte automatizada com **25 testes automatizados** (18 unitários com JUnit 5 + Mockito e 7 fluxos completos de integração/aceitação/segurança/negativos com Spring `MockMvc`), cobrindo mais de **85% das instruções e linhas** auditadas pelo plugin **JaCoCo**.
+- Suíte automatizada com **32 testes automatizados** (23 unitários com JUnit 5 + Mockito, incluindo os ciclos TDD de agendamento e aprovação, e 9 fluxos completos de integração/aceitação/segurança/negativos com Spring `MockMvc`), cobrindo **85,46% das linhas** e **85,23% das instruções** auditadas pelo plugin **JaCoCo**.
 
 ### 9. A ENGENHARIA E A EVOLUÇÃO – Quais técnicas foram aplicadas e o que foi refatorado?
 - **Requisitos:** 3Cs, verificação INVEST, Casos de Uso (`UC01`–`UC07`) e Matriz de Rastreabilidade ponta a ponta.

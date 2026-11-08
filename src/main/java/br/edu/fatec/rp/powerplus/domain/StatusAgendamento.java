@@ -1,9 +1,11 @@
 package br.edu.fatec.rp.powerplus.domain;
 
 public enum StatusAgendamento {
+    AGUARDANDO_APROVACAO("Aguardando aprovação"),
     CONFIRMADO("Confirmado"),
     EM_ATENDIMENTO("Em Atendimento"),
     CONCLUIDO("Concluído"),
+    RECUSADO("Recusado"),
     CANCELADO("Cancelado");
 
     private final String descricao;
@@ -24,16 +26,19 @@ public enum StatusAgendamento {
             return false;
         }
         return switch (this) {
+            case AGUARDANDO_APROVACAO -> novoStatus == CONFIRMADO
+                    || novoStatus == RECUSADO
+                    || novoStatus == CANCELADO;
             case CONFIRMADO -> novoStatus == EM_ATENDIMENTO
                     || novoStatus == CONCLUIDO
                     || novoStatus == CANCELADO;
             case EM_ATENDIMENTO -> novoStatus == CONCLUIDO
                     || novoStatus == CANCELADO;
-            case CONCLUIDO, CANCELADO -> false;
+            case CONCLUIDO, RECUSADO, CANCELADO -> false;
         };
     }
 
     public boolean ocupaHorarioNaAgenda() {
-        return this == CONFIRMADO || this == EM_ATENDIMENTO;
+        return this == AGUARDANDO_APROVACAO || this == CONFIRMADO || this == EM_ATENDIMENTO;
     }
 }

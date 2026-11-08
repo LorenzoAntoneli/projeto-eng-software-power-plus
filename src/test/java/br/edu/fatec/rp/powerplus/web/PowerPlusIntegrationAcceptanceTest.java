@@ -68,7 +68,7 @@ class PowerPlusIntegrationAcceptanceTest {
 
     private String autenticarProprietario() throws Exception {
         String loginJson = """
-                {"username":"carlos.powerplus","password":"PowerPlus@2026"}
+                {"username":"leonardo.powerplus","password":"PowerPlus@2026"}
                 """;
         MvcResult res = mockMvc.perform(post("/api/admin/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +104,8 @@ class PowerPlusIntegrationAcceptanceTest {
                         .content(payload))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.protocolo", startsWith("PP-")))
-                .andExpect(jsonPath("$.statusCodigo").value("CONFIRMADO"))
+                .andExpect(jsonPath("$.statusCodigo").value("AGUARDANDO_APROVACAO"))
+                .andExpect(jsonPath("$.statusDescricao").value("Aguardando aprovação"))
                 .andReturn();
 
         String protocolo = objectMapper.readTree(createRes.getResponse().getContentAsString()).get("protocolo").asText();
@@ -339,6 +340,7 @@ class PowerPlusIntegrationAcceptanceTest {
                         .param("data", proximaDataUtil.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalHoje").value(1))
+                .andExpect(jsonPath("$.pendentesAprovacaoTotal").value(1))
                 .andExpect(jsonPath("$.whatsappFeatureFlagAtiva").value(false));
 
         mockMvc.perform(get("/api/admin/agenda/semana")
@@ -346,6 +348,14 @@ class PowerPlusIntegrationAcceptanceTest {
                         .param("dataReferencia", proximaDataUtil.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.agendamentos", hasSize(1)));
+
+        // Proprietário Leonardo aprova a solicitação antes de enviar lembrete e iniciar atendimento
+        mockMvc.perform(post("/api/admin/agendamentos/" + agendamentoId + "/aprovar")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"observacao\":\"Visita aprovada pelo Leonardo\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusCodigo").value("CONFIRMADO"));
 
         mockMvc.perform(post("/api/admin/agendamentos/" + agendamentoId + "/lembrete")
                         .header("Authorization", "Bearer " + token))
@@ -376,7 +386,7 @@ class PowerPlusIntegrationAcceptanceTest {
         mockMvc.perform(get("/api/admin/agendamentos/" + agendamentoId + "/historico")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)));
+                .andExpect(jsonPath("$", hasSize(4)));
 
         mockMvc.perform(get("/api/admin/clientes/" + clienteId + "/historico")
                         .header("Authorization", "Bearer " + token))
@@ -407,5 +417,73 @@ class PowerPlusIntegrationAcceptanceTest {
         mockMvc.perform(get("/painel"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/painel/agenda"));
+    }
+
+    @Test
+    @DisplayName("CT08 / TI08 - Aceitação: Fluxo completo de Aprovar e Recusar solicitações pendentes pelo Leonardo")
+    void deveAprovarERecusarSolicitacoesLiberandoHorarioQuandoRecusado() throws Exception {
+        String pedidoAprovar = String.format("""
+                {
+                  "nomeCliente": "Fernanda Souza",
+                  "telefone": "(16) 99444-5566",
+                  "endereco": "Rua Duque de Caxias, 320",
+                  "perfilCliente": "RESIDENCIAL",
+                  "data": "%s",
+                  "horaInicio": "13:00",
+                  "tipoServico": "INSTALACAO_ELETRICA"
+                }
+                """, proximaDataUtil);
+
+        String pedidoRecusar = String.format("""
+                {
+                  "nomeCliente": "Oficina Mecânica Rápida",
+                  "telefone": "(16) 3633-7788",
+                  "endereco": "Av. Saudade, 750",
+                  "perfilCliente": "EMPRESARIAL_CONDOMINIO",
+                  "data": "%s",
+                  "horaInicio": "15:00",
+                  "tipoServico": "REPARO_ELETRICO"
+                }
+                """, proximaDataUtil);
+
+        MvcResult r1 = mockMvc.perform(post("/api/publico/agendamentos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(pedidoAprovar))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.statusCodigo").value("AGUARDANDO_APROVACAO"))
+                .andReturn();
+        long idAprovar = objectMapper.readTree(r1.getResponse().getContentAsString()).get("id").asLong();
+
+        MvcResult r2 = mockMvc.perform(post("/api/publico/agendamentos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(pedidoRecusar))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.statusCodigo").value("AGUARDANDO_APROVACAO"))
+                .andReturn();
+        long idRecusar = objectMapper.readTree(r2.getResponse().getContentAsString()).get("id").asLong();
+
+        String token = autenticarProprietario();
+
+        // Aprova o das 13:00 -> permanece ocupado como CONFIRMADO
+        mockMvc.perform(post("/api/admin/agendamentos/" + idAprovar + "/aprovar")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"observacao\":\"Confirmado na rota da tarde\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusCodigo").value("CONFIRMADO"));
+
+        // Recusa o das 15:00 -> muda para RECUSADO e libera imediatamente o horário 15:00!
+        mockMvc.perform(post("/api/admin/agendamentos/" + idRecusar + "/recusar")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"observacao\":\"Manutenção emergencial externa no horário\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusCodigo").value("RECUSADO"))
+                .andExpect(jsonPath("$.statusDescricao").value("Recusado"));
+
+        mockMvc.perform(get("/api/publico/horarios-livres").param("data", proximaDataUtil.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.horariosLivres", not(hasItem("13:00"))))
+                .andExpect(jsonPath("$.horariosLivres", hasItem("15:00")));
     }
 }

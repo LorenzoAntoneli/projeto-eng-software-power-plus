@@ -110,7 +110,7 @@ public class DataSeeder implements CommandLineRunner {
         a1.setObservacaoTecnica("Instalado disjuntor bipolar 40A + cabo 6mm².");
         agendamentoRepository.save(a1);
         historicoRepository.save(new HistoricoStatusAgendamento(a1, StatusAgendamento.CONFIRMADO, StatusAgendamento.CONCLUIDO,
-                "Carlos Eduardo (Proprietário Power Plus)", "Serviço concluído e testado", agora.minusHours(1)));
+                "Leonardo (Proprietário Power Plus)", "Serviço concluído e testado", agora.minusHours(1)));
 
         Agendamento a2 = criarSeed("PP-2026-0102", c2, diaHojeAgenda, LocalTime.of(14, 0),
                 TipoServico.MANUTENCAO_PREVENTIVA, c2.getEnderecoPadrao(),
@@ -122,7 +122,11 @@ public class DataSeeder implements CommandLineRunner {
 
         Agendamento a4 = criarSeed("PP-2026-0104", c4, segundoDiaUtil, LocalTime.of(15, 0),
                 TipoServico.VISTORIA_ORCAMENTO, c4.getEnderecoPadrao(),
-                "Orçamento para pontos de ar-condicionado nos quartos", StatusAgendamento.CONFIRMADO, agora.minusHours(1));
+                "Orçamento para pontos de ar-condicionado nos quartos", StatusAgendamento.AGUARDANDO_APROVACAO, agora.minusMinutes(40));
+
+        Agendamento a5 = criarSeed("PP-2026-0105", c1, proximoDiaUtil, LocalTime.of(16, 0),
+                TipoServico.REPARO_ELETRICO, c1.getEnderecoPadrao(),
+                "Tomada da lavanderia aquecendo ao ligar secadora", StatusAgendamento.AGUARDANDO_APROVACAO, agora.minusMinutes(15));
 
         // 4. Conversa no Chat aguardando transbordo humano para demonstração ao vivo
         ConversaChat chat = new ConversaChat("Roberto (Síndico Cond. Ipê)", "1636258899", agora.minusMinutes(25));
@@ -137,6 +141,12 @@ public class DataSeeder implements CommandLineRunner {
         conversaChatRepository.save(chat);
 
         // 5. Notificações recentes
+        notificacaoRepository.save(new NotificacaoRegistro(
+                TipoNotificacao.SOLICITACAO_RECEBIDA, "PROPRIETARIO",
+                "Aprovação pendente: " + c1.getNome(),
+                "Protocolo " + a5.getProtocolo() + " aguarda sua aprovação para às 16:00 – Reparo Elétrico.",
+                a5.getProtocolo(), "SISTEMA_INTERNO", agora.minusMinutes(15)
+        ));
         notificacaoRepository.save(new NotificacaoRegistro(
                 TipoNotificacao.CONFIRMACAO, "PROPRIETARIO",
                 "Novo agendamento confirmado: " + c2.getNome(),
@@ -161,8 +171,14 @@ public class DataSeeder implements CommandLineRunner {
         a.setAtualizadoEm(criadoEm);
         Agendamento salvo = agendamentoRepository.save(a);
         historicoRepository.save(new HistoricoStatusAgendamento(
-                salvo, null, StatusAgendamento.CONFIRMADO, "CLIENTE (Autoatendimento)",
-                "Agendamento registrado", criadoEm
+                salvo, null, status == StatusAgendamento.AGUARDANDO_APROVACAO
+                        ? StatusAgendamento.AGUARDANDO_APROVACAO
+                        : StatusAgendamento.CONFIRMADO,
+                "CLIENTE (Autoatendimento)",
+                status == StatusAgendamento.AGUARDANDO_APROVACAO
+                        ? "Solicitação enviada — aguardando aprovação do proprietário"
+                        : "Agendamento registrado e aprovado",
+                criadoEm
         ));
         return salvo;
     }

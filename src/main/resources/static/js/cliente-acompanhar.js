@@ -7,7 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const remNovoHorario = document.getElementById('remNovoHorario');
 
     function renderOrdem(a, historico = null) {
-        const alteravel = a.statusCodigo === 'CONFIRMADO';
+        const alteravel = a.statusCodigo === 'CONFIRMADO' || a.statusCodigo === 'AGUARDANDO_APROVACAO';
+        let resumoStatus = '';
+        if (a.statusCodigo === 'AGUARDANDO_APROVACAO') {
+            resumoStatus = '<div class="ticket-notice pending" style="margin-bottom:12px">Solicitação recebida e horário pré-reservado — aguardando aprovação do Leonardo.</div>';
+        } else if (a.statusCodigo === 'CONFIRMADO') {
+            resumoStatus = '<div class="ticket-notice confirmed" style="margin-bottom:12px">Visita aprovada e confirmada pelo Leonardo.</div>';
+        } else if (a.statusCodigo === 'RECUSADO') {
+            resumoStatus = `<div class="ticket-notice refused" style="margin-bottom:12px">Solicitação recusada neste horário${a.observacaoTecnica ? `: ${PP.esc(a.observacaoTecnica)}` : '.'}</div>`;
+        }
         const histHtml = historico && historico.length
             ? `<div class="order-history">
                 <strong style="color:var(--ink)">Registro de movimentações</strong>
@@ -24,19 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <span class="status-badge st-${a.statusCodigo}">${PP.esc(a.statusDescricao)}</span>
                 </div>
+                ${resumoStatus}
                 <div class="order-meta">
                     <div><strong>Serviço:</strong> ${PP.esc(a.tipoServicoDescricao)}</div>
                     <div><strong>Cliente:</strong> ${PP.esc(a.clienteNome)} (${PP.esc(a.clientePerfil)})</div>
                     <div style="grid-column:1/-1"><strong>Endereço:</strong> ${PP.esc(a.enderecoAtendimento)}</div>
-                    ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Parecer técnico:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
+                    ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Observação do eletricista:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
                 </div>
                 ${histHtml}
                 <div class="order-foot">
                     <a href="/comprovante?protocolo=${encodeURIComponent(a.protocolo)}" class="btn btn-secondary btn-sm">Ver comprovante</a>
                     ${alteravel ? `
-                        <button type="button" class="btn btn-secondary btn-sm" data-remarcar="${PP.esc(a.protocolo)}" data-data="${a.data}">Remarcar horário</button>
-                        <button type="button" class="btn btn-danger btn-sm" data-cancelar="${PP.esc(a.protocolo)}">Cancelar visita</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-remarcar="${PP.esc(a.protocolo)}" data-data="${a.data}">Trocar horário</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-cancelar="${PP.esc(a.protocolo)}">Cancelar pedido</button>
                     ` : ''}
+                    ${a.statusCodigo === 'RECUSADO' ? `<a href="/" class="btn btn-primary btn-sm">Escolher outro horário</a>` : ''}
                 </div>
             </div>
         `;

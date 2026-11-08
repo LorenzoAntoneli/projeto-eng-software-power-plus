@@ -69,23 +69,25 @@ public class AgendamentoService {
                 endereco.trim(),
                 descricao != null && !descricao.isBlank() ? descricao.trim() : null
         );
+        novo.setStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
         novo.setCriadoEm(agora);
         novo.setAtualizadoEm(agora);
         Agendamento salvo = agendamentoRepository.save(novo);
 
         historicoRepository.save(new HistoricoStatusAgendamento(
-                salvo, null, StatusAgendamento.CONFIRMADO, "CLIENTE (Autoatendimento)",
-                "Agendamento criado com sucesso", agora
+                salvo, null, StatusAgendamento.AGUARDANDO_APROVACAO, "CLIENTE (Autoatendimento)",
+                "Solicitação registrada — aguardando aprovação do proprietário", agora
         ));
-        notificacaoGateway.notificarAgendamentoConfirmado(salvo);
+        notificacaoGateway.notificarSolicitacaoRecebida(salvo);
         return salvo;
     }
 
     @Transactional
     public Agendamento remarcarPeloCliente(String protocolo, LocalDate novaData, LocalTime novaHoraInicio, String motivo) {
         Agendamento agendamento = buscarPorProtocolo(protocolo);
-        if (agendamento.getStatus() != StatusAgendamento.CONFIRMADO) {
-            throw new RegraNegocioException("Apenas agendamentos confirmados podem ser remarcados.");
+        if (agendamento.getStatus() != StatusAgendamento.CONFIRMADO
+                && agendamento.getStatus() != StatusAgendamento.AGUARDANDO_APROVACAO) {
+            throw new RegraNegocioException("Apenas solicitações pendentes ou agendamentos confirmados podem ser remarcados.");
         }
 
         validador.validarAntecedenciaAutoatendimento(agendamento);
@@ -93,16 +95,19 @@ public class AgendamentoService {
 
         String horarioAnterior = agendamento.getDataHoraInicio().format(FMT_DATA_HORA);
         LocalDateTime agora = LocalDateTime.now(clock);
+        StatusAgendamento statusAnterior = agendamento.getStatus();
 
         agendamento.setData(novaData);
         agendamento.setHoraInicio(novaHoraInicio);
         agendamento.setHoraFim(novaHoraFim);
+        agendamento.setStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
         agendamento.setAtualizadoEm(agora);
         Agendamento salvo = agendamentoRepository.save(agendamento);
 
         historicoRepository.save(new HistoricoStatusAgendamento(
-                salvo, StatusAgendamento.CONFIRMADO, StatusAgendamento.CONFIRMADO, "CLIENTE",
-                "Remarcado de " + horarioAnterior + (motivo != null && !motivo.isBlank() ? " (" + motivo.trim() + ")" : ""),
+                salvo, statusAnterior, StatusAgendamento.AGUARDANDO_APROVACAO, "CLIENTE",
+                "Remarcado de " + horarioAnterior + (motivo != null && !motivo.isBlank() ? " (" + motivo.trim() + ")" : "")
+                        + " — aguardando aprovação",
                 agora
         ));
         notificacaoGateway.notificarAgendamentoRemarcado(salvo, horarioAnterior);
@@ -140,8 +145,9 @@ public class AgendamentoService {
         LocalDateTime agora = LocalDateTime.now(clock);
         StatusAgendamento anterior = agendamento.getStatus();
         agendamento.setStatus(novoStatus);
-        if (observacao != null && !observacao.isBlank()) {
-            agendamento.setObservacaoTecnica(observacao.trim());
+        String obsLimpa = (observacao != null && !observacao.isBlank()) ? observacao.trim() : null;
+        if (obsLimpa != null) {
+            agendamento.setObservacaoTecnica(obsLimpa);
         }
         agendamento.setAtualizadoEm(agora);
         Agendamento salvo = agendamentoRepository.save(agendamento);
@@ -149,12 +155,33 @@ public class AgendamentoService {
         historicoRepository.save(new HistoricoStatusAgendamento(
                 salvo, anterior, novoStatus,
                 responsavel != null && !responsavel.isBlank() ? responsavel : "PROPRIETARIO",
-                observacao, agora
+                obsLimpa, agora
         ));
-        if (novoStatus == StatusAgendamento.CANCELADO) {
+        if (anterior == StatusAgendamento.AGUARDANDO_APROVACAO && novoStatus == StatusAgendamento.CONFIRMADO) {
+            notificacaoGateway.notificarAgendamentoConfirmado(salvo);
+        } else if (novoStatus == StatusAgendamento.RECUSADO) {
+            notificacaoGateway.notificarAgendamentoRecusado(salvo,
+                    obsLimpa != null ? obsLimpa : "Solicitação recusada pelo proprietário");
+        } else if (novoStatus == StatusAgendamento.CANCELADO) {
             notificacaoGateway.notificarAgendamentoCancelado(salvo, "PROPRIETARIO");
         }
         return salvo;
+    }
+
+    @Transactional
+    public Agendamento aprovarSolicitacao(Long agendamentoId, String responsavel, String observacao) {
+        String obs = (observacao != null && !observacao.isBlank())
+                ? observacao.trim()
+                : "Visita aprovada pelo proprietário";
+        return atualizarStatusOperacional(agendamentoId, StatusAgendamento.CONFIRMADO, responsavel, obs);
+    }
+
+    @Transactional
+    public Agendamento recusarSolicitacao(Long agendamentoId, String responsavel, String motivo) {
+        String obs = (motivo != null && !motivo.isBlank())
+                ? motivo.trim()
+                : "Horário indisponível para atendimento";
+        return atualizarStatusOperacional(agendamentoId, StatusAgendamento.RECUSADO, responsavel, obs);
     }
 
     @Transactional
@@ -203,5 +230,15 @@ public class AgendamentoService {
     @Transactional(readOnly = true)
     public List<HistoricoStatusAgendamento> listarHistoricoStatus(Long agendamentoId) {
         return historicoRepository.findByAgendamentoIdOrderByDataHoraAsc(agendamentoId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Agendamento> listarPendentesAprovacao() {
+        return agendamentoRepository.findByStatusOrderByDataAscHoraInicioAsc(StatusAgendamento.AGUARDANDO_APROVACAO);
+    }
+
+    @Transactional(readOnly = true)
+    public long contarPendentesAprovacao() {
+        return agendamentoRepository.countByStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
     }
 }

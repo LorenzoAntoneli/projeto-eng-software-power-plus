@@ -70,23 +70,30 @@ public class ProprietarioAdminController {
 
         List<Agendamento> doDia = agendamentoService.listarAgendaDia(hoje);
         List<Agendamento> daSemana = agendamentoService.listarAgendaPeriodo(inicioSemana, fimSemana);
+        List<Agendamento> pendentes = agendamentoService.listarPendentesAprovacao();
 
+        long aguardandoHoje = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.AGUARDANDO_APROVACAO).count();
         long confirmados = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.CONFIRMADO).count();
         long emAtendimento = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.EM_ATENDIMENTO).count();
         long concluidos = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.CONCLUIDO).count();
-        long cancelados = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.CANCELADO).count();
+        long cancelados = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.CANCELADO
+                || a.getStatus() == StatusAgendamento.RECUSADO).count();
 
         return new DashboardResumoResponse(
                 hoje,
                 doDia.size(),
+                aguardandoHoje,
                 confirmados,
                 emAtendimento,
                 concluidos,
                 cancelados,
-                daSemana.stream().filter(a -> a.getStatus() != StatusAgendamento.CANCELADO).count(),
+                daSemana.stream().filter(a -> a.getStatus().ocupaHorarioNaAgenda()
+                        || a.getStatus() == StatusAgendamento.CONCLUIDO).count(),
+                pendentes.size(),
                 chatService.contarAguardandoHumano(),
                 notificacaoService.contarNaoLidasProprietario(),
                 notificacaoService.isIntegracaoWhatsAppAtiva(),
+                pendentes.stream().map(AgendamentoResponse::from).toList(),
                 doDia.stream().map(AgendamentoResponse::from).toList()
         );
     }
@@ -133,6 +140,30 @@ public class ProprietarioAdminController {
         var sessao = authService.validarToken(authHeader);
         Agendamento salvo = agendamentoService.atualizarStatusOperacional(
                 id, req.novoStatus(), sessao.nomeExibicao(), req.observacao()
+        );
+        return AgendamentoResponse.from(salvo);
+    }
+
+    @PostMapping("/agendamentos/{id}/aprovar")
+    public AgendamentoResponse aprovarSolicitacao(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable Long id,
+            @RequestBody(required = false) DecisaoAprovacaoRequest req) {
+        var sessao = authService.validarToken(authHeader);
+        Agendamento salvo = agendamentoService.aprovarSolicitacao(
+                id, sessao.nomeExibicao(), req != null ? req.observacao() : null
+        );
+        return AgendamentoResponse.from(salvo);
+    }
+
+    @PostMapping("/agendamentos/{id}/recusar")
+    public AgendamentoResponse recusarSolicitacao(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable Long id,
+            @RequestBody(required = false) DecisaoAprovacaoRequest req) {
+        var sessao = authService.validarToken(authHeader);
+        Agendamento salvo = agendamentoService.recusarSolicitacao(
+                id, sessao.nomeExibicao(), req != null ? req.observacao() : null
         );
         return AgendamentoResponse.from(salvo);
     }
