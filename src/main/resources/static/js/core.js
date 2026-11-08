@@ -22,7 +22,7 @@ window.PP = (() => {
 
     function setSession(token, nomeExibicao) {
         localStorage.setItem('pp_owner_token', token);
-        localStorage.setItem('pp_owner_name', nomeExibicao || 'Carlos Eduardo');
+        localStorage.setItem('pp_owner_name', nomeExibicao || 'Leonardo');
     }
 
     function clearSession() {
@@ -159,7 +159,7 @@ window.PP = (() => {
 
         const host = document.getElementById('boSidebarMount');
         if (host) {
-            const ownerName = localStorage.getItem('pp_owner_name') || 'Carlos Eduardo';
+            const ownerName = localStorage.getItem('pp_owner_name') || 'Leonardo';
             host.innerHTML = `
                 <div class="bo-brand">
                     <span class="brand-box" aria-hidden="true">
@@ -169,14 +169,15 @@ window.PP = (() => {
                     </span>
                     <div>
                         <div class="bo-title">Power Plus</div>
-                        <div class="bo-sub">Sistema Operacional</div>
+                        <div class="bo-sub">Painel do Leonardo</div>
                     </div>
                 </div>
 
                 <nav class="bo-nav" aria-label="Navegação do painel">
                     <a href="/painel/agenda" class="bo-link ${activeSlug === 'agenda' ? 'active' : ''}">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        <span>Agenda</span>
+                        <span>Agenda e aprovações</span>
+                        <span id="boCountAprovacoes" class="bo-badge">0</span>
                     </a>
                     <a href="/painel/expediente" class="bo-link ${activeSlug === 'expediente' ? 'active' : ''}">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -224,9 +225,15 @@ window.PP = (() => {
     async function refreshSidebarCounters() {
         try {
             const dash = await api(`/api/admin/dashboard?data=${hojeIso()}`);
+            const elAprov = document.getElementById('boCountAprovacoes');
             const elChats = document.getElementById('boCountChats');
             const elAvisos = document.getElementById('boCountAvisos');
             const elCanal = document.getElementById('boCanalStatus');
+            if (elAprov) {
+                const pend = dash.pendentesAprovacaoTotal ?? 0;
+                elAprov.textContent = pend;
+                elAprov.classList.toggle('has-alert', pend > 0);
+            }
             if (elChats) {
                 elChats.textContent = dash.chatsAguardandoHumano;
                 elChats.classList.toggle('has-alert', dash.chatsAguardandoHumano > 0);

@@ -32,7 +32,7 @@ public class AutenticacaoProprietarioService {
 
     public AutenticacaoProprietarioService(UsuarioProprietarioRepository usuarioRepository,
                                            Clock clock,
-                                           @Value("${powerplus.auth.owner-username:carlos.powerplus}") String defaultUsername,
+                                           @Value("${powerplus.auth.owner-username:leonardo.powerplus}") String defaultUsername,
                                            @Value("${powerplus.auth.owner-default-password:PowerPlus@2026}") String defaultPassword) {
         this.usuarioRepository = usuarioRepository;
         this.clock = clock;
@@ -42,13 +42,16 @@ public class AutenticacaoProprietarioService {
 
     @Transactional
     public void garantirUsuarioPadrao() {
-        if (usuarioRepository.findByUsernameIgnoreCase(defaultUsername).isEmpty()) {
+        garantirUsuario(defaultUsername, "Leonardo (Proprietário Power Plus)");
+        if (!"carlos.powerplus".equalsIgnoreCase(defaultUsername)) {
+            garantirUsuario("carlos.powerplus", "Leonardo (Proprietário Power Plus)");
+        }
+    }
+
+    private void garantirUsuario(String username, String nomeExibicao) {
+        if (usuarioRepository.findByUsernameIgnoreCase(username).isEmpty()) {
             String hash = passwordEncoder.encode(defaultPassword);
-            usuarioRepository.save(new UsuarioProprietario(
-                    defaultUsername,
-                    "Carlos Eduardo (Proprietário Power Plus)",
-                    hash
-            ));
+            usuarioRepository.save(new UsuarioProprietario(username, nomeExibicao, hash));
         }
     }
 

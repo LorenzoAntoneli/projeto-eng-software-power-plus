@@ -231,4 +231,14 @@ public class AgendamentoService {
     public List<HistoricoStatusAgendamento> listarHistoricoStatus(Long agendamentoId) {
         return historicoRepository.findByAgendamentoIdOrderByDataHoraAsc(agendamentoId);
     }
+
+    @Transactional(readOnly = true)
+    public List<Agendamento> listarPendentesAprovacao() {
+        return agendamentoRepository.findByStatusOrderByDataAscHoraInicioAsc(StatusAgendamento.AGUARDANDO_APROVACAO);
+    }
+
+    @Transactional(readOnly = true)
+    public long contarPendentesAprovacao() {
+        return agendamentoRepository.countByStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
+    }
 }
