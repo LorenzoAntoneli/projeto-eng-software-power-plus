@@ -99,7 +99,7 @@ window.PP = (() => {
                 { id: 7, diaSemana: 'SUNDAY', ativo: false, horaInicio: '08:00', horaFim: '12:00', duracaoSlotMinutos: 60 }
             ],
             bloqueios: [
-                { id: 1, data: bloqueada, motivo: 'Reciclagem técnica NR-10' }
+                { id: 1, data: bloqueada, motivo: 'Manutenção externa agendada' }
             ],
             clientes: [
                 {
