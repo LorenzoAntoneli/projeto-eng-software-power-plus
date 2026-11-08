@@ -590,7 +590,7 @@ window.PP = (() => {
             if ((body.username === 'leonardo.powerplus' || body.username === 'carlos.powerplus') && body.password === 'PowerPlus@2026') {
                 return { token: 'proto-session-ok', username: body.username, nomeExibicao: 'Leonardo' };
             }
-            throw new Error('Usuário ou senha inválidos. Use leonardo.powerplus / PowerPlus@2026');
+            throw new Error('Credenciais inválidas.');
         }
 
         if (method === 'POST' && path === '/api/admin/auth/logout') {
