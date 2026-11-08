@@ -3,31 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atendimento Online — Power Plus</title>
+    <title>Central de Dúvidas — Power Plus</title>
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <div class="top-utility-bar">
+        <div class="shell top-utility-inner">
+            <div class="utility-meta">
+                <span>Atendimento em Ribeirão Preto e Região</span>
+                <span class="utility-sep">|</span>
+                <span>Normas NBR 5410 e NR-10</span>
+                <span class="utility-sep">|</span>
+                <span>Seg a Sex: 08h às 18h · Sáb: 08h às 13h</span>
+            </div>
+            <a href="painel/login.html" class="utility-admin-link">Área Técnica</a>
+        </div>
+    </div>
+
     <header class="public-header">
         <div class="shell public-header-inner">
-            <a href="index.html" class="brand-id">
-                <span class="brand-box" aria-hidden="true">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
-                    </svg>
-                </span>
-                <span class="brand-copy">
-                    <span class="brand-name">Power Plus</span>
-                    <span class="brand-location">Instalações e Manutenção Elétrica · Ribeirão Preto</span>
-                </span>
+            <a href="index.html" class="brand-logo-link">
+                <img src="img/logo-powerplus.svg" alt="Power Plus Engenharia e Serviços Elétricos" class="brand-logo-img">
             </a>
 
             <nav class="public-nav" aria-label="Navegação do cliente">
-                <a href="index.html">Agendar visita</a>
-                <a href="acompanhar.html">Meus agendamentos</a>
-                <a href="atendimento.html" class="active">Atendimento</a>
+                <a href="index.html">Solicitar Visita</a>
+                <a href="acompanhar.html">Consultar Protocolo</a>
+                <a href="atendimento.html" class="active">Central de Dúvidas</a>
             </nav>
         </div>
     </header>
@@ -35,16 +41,17 @@
     <main class="public-page">
         <div class="shell">
             <div class="page-head">
-                <h1>Central de atendimento</h1>
-                <p>Consulte informações rápidas sobre horários, orçamentos e serviços ou fale diretamente com o eletricista responsável.</p>
+                <div class="page-eyebrow">Suporte ao Cliente</div>
+                <h1>Central de Dúvidas e Orçamentos</h1>
+                <p>Consulte orientações sobre horários, cobertura e funcionamento de orçamentos ou encaminhe sua mensagem diretamente para o eletricista Leonardo.</p>
             </div>
 
             <div class="chat-shell">
                 <aside class="chat-topics-pane">
                     <div>
-                        <div class="rail-heading" style="margin-bottom:10px">Seus dados para contato</div>
+                        <div class="rail-heading" style="margin-bottom:10px">Identificação para retorno</div>
                         <div class="field">
-                            <label for="chatNomeCliente">Nome</label>
+                            <label for="chatNomeCliente">Seu nome ou condomínio</label>
                             <input type="text" id="chatNomeCliente" placeholder="Ex.: Roberto Almeida">
                         </div>
                         <div class="field">
@@ -54,52 +61,48 @@
                     </div>
 
                     <div>
-                        <div class="rail-heading" style="margin-bottom:8px">Dúvidas frequentes</div>
+                        <div class="rail-heading" style="margin-bottom:8px">Assuntos rápidos</div>
                         <button type="button" class="topic-button" data-prompt="Quais horários disponíveis vocês têm para os próximos dias?">
-                            <span>Próximos horários vagos</span>
-                            <span>→</span>
+                            Consultar próximos horários vagos
                         </button>
                         <button type="button" class="topic-button" data-prompt="Como funciona o orçamento e valor da visita técnica?">
-                            <span>Orçamento e avaliação</span>
-                            <span>→</span>
+                            Funcionamento de visita e orçamento
                         </button>
                         <button type="button" class="topic-button" data-prompt="Quais serviços elétricos vocês atendem para residência e condomínio?">
-                            <span>Serviços atendidos</span>
-                            <span>→</span>
+                            Escopo de serviços elétricos
                         </button>
                         <button type="button" class="topic-button" data-prompt="Quais bairros de Ribeirão Preto vocês atendem e qual a garantia?">
-                            <span>Região atendida e garantia</span>
-                            <span>→</span>
+                            Área de atendimento e prazo de garantia
                         </button>
                     </div>
 
                     <div class="handoff-panel">
-                        <span>Caso complexo ou demanda de condomínio?</span>
-                        <button type="button" class="btn btn-secondary btn-full" id="btnSolicitarEletricista">
-                            Falar com Leonardo (Eletricista)
+                        <span>Demanda específica de quadro trifásico, empresa ou condomínio?</span>
+                        <button type="button" class="btn btn-primary btn-full" id="btnSolicitarEletricista">
+                            Encaminhar para o Leonardo
                         </button>
                     </div>
                 </aside>
 
                 <div class="chat-conversation-pane">
                     <div class="chat-top-bar">
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <strong style="font-size:0.92rem">Canal de Atendimento</strong>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                            <strong style="font-size:0.9rem;color:var(--navy-900)">Atendimento Online Power Plus</strong>
                             <span id="chatStatusPill" class="status-badge st-AUTOMATICO">Triagem automática</span>
                         </div>
-                        <button type="button" class="btn btn-secondary btn-sm" id="btnReiniciarChat">Nova conversa</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnReiniciarChat">Limpar conversa</button>
                     </div>
 
                     <div id="chatMessagesStream" class="chat-stream">
                         <div class="chat-msg theirs">
-                            <div class="chat-author">Atendimento Power Plus</div>
-                            <div class="chat-bubble">Olá! Escolha um assunto ao lado ou escreva sua dúvida abaixo. Se precisar tratar detalhes técnicos específicos, clique em "Falar com Leonardo" para encaminharmos sua conversa.</div>
+                            <div class="chat-author">Triagem Power Plus</div>
+                            <div class="chat-bubble">Bom dia! Selecione um dos assuntos na coluna ao lado ou descreva sua necessidade abaixo. Caso precise falar diretamente com o eletricista responsável, utilize o botão "Encaminhar para o Leonardo".</div>
                         </div>
                     </div>
 
                     <form id="formChatCliente" class="chat-form-bar">
-                        <input type="text" id="chatInputMsg" placeholder="Escreva sua mensagem..." required>
-                        <button type="submit" class="btn btn-primary">Enviar</button>
+                        <input type="text" id="chatInputMsg" placeholder="Digite sua pergunta ou descrição do serviço..." required>
+                        <button type="submit" class="btn btn-primary">Enviar mensagem</button>
                     </form>
                 </div>
             </div>
@@ -108,8 +111,8 @@
 
     <footer class="public-footer">
         <div class="shell public-footer-inner">
-            <span>Power Plus Serviços Elétricos · Ribeirão Preto, SP</span>
-            <a href="painel/login.html" class="footer-internal-link">Acesso interno (Equipe)</a>
+            <span>Power Plus Engenharia e Serviços Elétricos · Ribeirão Preto, SP</span>
+            <a href="painel/login.html" class="footer-internal-link">Acesso Operacional (Equipe)</a>
         </div>
     </footer>
 
@@ -117,4 +120,3 @@
     <script src="js/cliente-atendimento.js"></script>
 </body>
 </html>
-

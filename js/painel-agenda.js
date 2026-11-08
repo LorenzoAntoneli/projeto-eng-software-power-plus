@@ -21,28 +21,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     function linkWhatsApp(telefone, protocolo) {
         const limpo = String(telefone || '').replace(/\D/g, '');
         if (limpo.length < 10) return '';
-        const texto = encodeURIComponent(`Olá! Aqui é o Leonardo da Power Plus sobre o atendimento ${protocolo}.`);
-        return `<a class="phone-quick-link" href="https://wa.me/55${limpo}?text=${texto}" target="_blank" rel="noopener">WhatsApp ↗</a>`;
+        const texto = encodeURIComponent(`Olá! Aqui é o Leonardo da Power Plus referente ao protocolo ${protocolo}.`);
+        return `<a class="phone-quick-link" href="https://wa.me/55${limpo}?text=${texto}" target="_blank" rel="noopener">Abrir WhatsApp</a>`;
     }
 
     function renderBotoesAcao(a) {
         if (a.statusCodigo === 'AGUARDANDO_APROVACAO') {
             return `
-                <button type="button" class="btn btn-approve btn-sm" data-aprovar="${a.id}" data-prot="${PP.esc(a.protocolo)}">✓ Aprovar visita</button>
-                <button type="button" class="btn btn-danger btn-sm" data-recusar="${a.id}" data-prot="${PP.esc(a.protocolo)}">✕ Recusar</button>
+                <button type="button" class="btn btn-approve btn-sm" data-aprovar="${a.id}" data-prot="${PP.esc(a.protocolo)}">Aprovar visita</button>
+                <button type="button" class="btn btn-danger btn-sm" data-recusar="${a.id}" data-prot="${PP.esc(a.protocolo)}">Recusar horário</button>
             `;
         }
         if (a.statusCodigo === 'CONFIRMADO') {
             return `
-                <button type="button" class="btn btn-primary btn-sm" data-status="${a.id}" data-alvo="EM_ATENDIMENTO">Iniciar atendimento</button>
-                <button type="button" class="btn btn-secondary btn-sm" data-status="${a.id}" data-alvo="CONCLUIDO">Concluir serviço</button>
-                <button type="button" class="btn btn-secondary btn-sm" data-lembrete="${a.id}">Enviar lembrete</button>
+                <button type="button" class="btn btn-primary btn-sm" data-status="${a.id}" data-alvo="EM_ATENDIMENTO">Iniciar execução</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-status="${a.id}" data-alvo="CONCLUIDO">Concluir ordem</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-lembrete="${a.id}">Disparar lembrete</button>
                 <button type="button" class="btn btn-danger btn-sm" data-status="${a.id}" data-alvo="CANCELADO">Cancelar</button>
             `;
         }
         if (a.statusCodigo === 'EM_ATENDIMENTO') {
             return `
-                <button type="button" class="btn btn-primary btn-sm" data-status="${a.id}" data-alvo="CONCLUIDO">Concluir serviço</button>
+                <button type="button" class="btn btn-primary btn-sm" data-status="${a.id}" data-alvo="CONCLUIDO">Concluir ordem</button>
                 <button type="button" class="btn btn-danger btn-sm" data-status="${a.id}" data-alvo="CANCELADO">Cancelar</button>
             `;
         }
@@ -54,24 +54,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         const prefixoData = exibirDataNoTopo ? `${PP.formatarDataBr(a.data)} · ` : '';
 
         return `
-            <div class="order-item">
+            <div class="order-item os-${a.statusCodigo}">
                 <div class="order-head">
                     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-                        <strong class="mono" style="font-size:0.95rem">${prefixoData}${a.horaInicio}–${a.horaFim}</strong>
-                        <span style="font-weight:600">${PP.esc(a.clienteNome)}</span>
+                        <strong class="mono" style="font-size:0.95rem;color:var(--navy-900)">${prefixoData}${a.horaInicio} às ${a.horaFim}</strong>
+                        <span style="font-weight:700">${PP.esc(a.clienteNome)}</span>
                         <span class="hint">${PP.esc(a.clientePerfil)}</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:10px">
-                        <span class="hint mono">${PP.esc(a.protocolo)}</span>
+                        <span class="hint code-ref">${PP.esc(a.protocolo)}</span>
                         <span class="status-badge st-${a.statusCodigo}">${PP.esc(a.statusDescricao)}</span>
                     </div>
                 </div>
                 <div class="order-meta">
                     <div><strong>Serviço:</strong> ${PP.esc(a.tipoServicoDescricao)}</div>
-                    <div><strong>Telefone:</strong> <span class="mono">${PP.esc(a.clienteTelefone)}</span>${linkWhatsApp(a.clienteTelefone, a.protocolo)}</div>
-                    <div style="grid-column:1/-1"><strong>Local:</strong> ${PP.esc(a.enderecoAtendimento)}</div>
-                    ${a.descricaoServico ? `<div style="grid-column:1/-1"><strong>Descrição do cliente:</strong> ${PP.esc(a.descricaoServico)}</div>` : ''}
-                    ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Observação técnica:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
+                    <div><strong>Contato:</strong> <span class="mono">${PP.esc(a.clienteTelefone)}</span>${linkWhatsApp(a.clienteTelefone, a.protocolo)}</div>
+                    <div style="grid-column:1/-1"><strong>Endereço:</strong> ${PP.esc(a.enderecoAtendimento)}</div>
+                    ${a.descricaoServico ? `<div style="grid-column:1/-1"><strong>Relato do cliente:</strong> ${PP.esc(a.descricaoServico)}</div>` : ''}
+                    ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Parecer técnico:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
                 </div>
                 ${botoes ? `<div class="order-foot">${botoes}</div>` : ''}
             </div>
@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         filaAprovacaoMount.innerHTML = `
             <div class="approval-queue-box">
                 <div class="approval-queue-head">
-                    <h2>Solicitações aguardando sua aprovação (${pendentes.length})</h2>
-                    <span class="hint">Aprove para confirmar ao cliente ou recuse para liberar o horário na agenda.</span>
+                    <h2>Solicitações pendentes de aprovação (${pendentes.length})</h2>
+                    <span class="hint">Aprove para confirmar a visita ao cliente ou recuse para liberar imediatamente o horário.</span>
                 </div>
                 ${pendentes.map(p => renderCardDia(p, true)).join('')}
             </div>
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const kpiPend = document.getElementById('kpiPendentesAprovacao');
         if (kpiPend) {
             kpiPend.textContent = dash.pendentesAprovacaoTotal ?? 0;
-            kpiPend.style.color = (dash.pendentesAprovacaoTotal > 0) ? 'var(--amber)' : 'var(--ink)';
+            kpiPend.style.color = (dash.pendentesAprovacaoTotal > 0) ? 'var(--accent)' : 'var(--navy-900)';
         }
         document.getElementById('kpiDiaTotal').textContent = dash.totalHoje;
         document.getElementById('kpiDiaPendentes').textContent = dash.confirmadosHoje + dash.emAtendimentoHoje;
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : dash.atendimentosHoje.filter(a => a.statusCodigo === filtroStatus);
 
             if (!listaFiltrada.length) {
-                container.innerHTML = `<div class="empty-placeholder">Nenhuma visita encontrada para ${PP.formatarDataBr(data)} neste filtro. Use os botões <strong>◀ / ▶</strong> ou altere para a visão <strong>Semana</strong>.</div>`;
+                container.innerHTML = `<div class="empty-placeholder">Nenhuma ordem programada para ${PP.formatarDataBr(data)} neste filtro. Utilize os controles <strong>Dia anterior / Próximo dia</strong> ou alterne para a visão <strong>Semana</strong>.</div>`;
                 return;
             }
             container.innerHTML = listaFiltrada.map(a => renderCardDia(a, false)).join('');
@@ -141,15 +141,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="week-column">
                         <div class="week-day-header">${PP.formatarDataExtenso(iso).split(' de ')[0]} · ${iso.slice(8,10)}/${iso.slice(5,7)}</div>
                         ${itens.length === 0
-                            ? '<span class="hint">Livre</span>'
+                            ? '<span class="hint">Sem ordens</span>'
                             : itens.map(a => `
                                 <div class="week-slot-card" style="cursor:pointer" data-jump-date="${a.data}">
                                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:4px">
                                         <strong class="mono">${a.horaInicio}</strong>
-                                        <span class="status-badge st-${a.statusCodigo}" style="font-size:0.66rem;padding:1px 6px">${PP.esc(a.statusDescricao)}</span>
+                                        <span class="status-badge st-${a.statusCodigo}" style="font-size:0.62rem;padding:1px 5px">${PP.esc(a.statusDescricao)}</span>
                                     </div>
-                                    <div style="font-weight:600;margin-bottom:2px">${PP.esc(a.clienteNome)}</div>
-                                    <div class="hint" style="font-size:0.74rem">${PP.esc(a.tipoServicoDescricao)}</div>
+                                    <div style="font-weight:700;margin-bottom:2px">${PP.esc(a.clienteNome)}</div>
+                                    <div class="hint" style="font-size:0.73rem">${PP.esc(a.tipoServicoDescricao)}</div>
                                 </div>
                               `).join('')}
                     </div>
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         method: 'POST',
                         body: JSON.stringify({ observacao: 'Visita aprovada pelo Leonardo.' })
                     });
-                    PP.toast(`Visita ${prot} aprovada e confirmada!`);
+                    PP.toast(`Ordem ${prot} aprovada e confirmada.`);
                     await atualizarAgenda();
                     await PP.refreshSidebarCounters();
                 } catch (err) {
@@ -196,9 +196,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const prot = btn.dataset.prot;
                 const motivo = await PP.openDialog({
                     title: `Recusar solicitação ${prot}`,
-                    description: 'O horário voltará a ficar livre imediatamente na agenda pública e o cliente verá o motivo informado.',
-                    inputLabel: 'Motivo da recusa',
-                    defaultValue: 'Indisponibilidade técnica neste horário — por favor escolha outro horário livre.',
+                    description: 'O horário voltará a ficar livre na agenda pública e o solicitante visualizará a justificativa informada.',
+                    inputLabel: 'Justificativa da recusa',
+                    defaultValue: 'Indisponibilidade técnica neste horário — por favor selecione outra janela disponível.',
                     confirmLabel: 'Confirmar recusa'
                 });
                 if (motivo === null) return;
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         method: 'POST',
                         body: JSON.stringify({ observacao: motivo })
                     });
-                    PP.toast(`Solicitação ${prot} recusada e vaga liberada.`);
+                    PP.toast(`Solicitação ${prot} recusada e horário liberado.`);
                     await atualizarAgenda();
                     await PP.refreshSidebarCounters();
                 } catch (err) {
@@ -224,20 +224,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (novoStatus === 'CONCLUIDO') {
                     const res = await PP.openDialog({
-                        title: 'Concluir atendimento',
-                        description: 'Registre opcionalmente o parecer técnico do serviço executado.',
+                        title: 'Concluir ordem de serviço',
+                        description: 'Registre opcionalmente o parecer técnico do atendimento executado.',
                         inputLabel: 'Parecer / nota técnica',
                         defaultValue: 'Serviço executado e testado conforme especificações.',
-                        confirmLabel: 'Concluir visita'
+                        confirmLabel: 'Concluir ordem'
                     });
                     if (res === null) return;
                     observacao = res;
                 } else if (novoStatus === 'CANCELADO') {
                     const res = await PP.openDialog({
-                        title: 'Cancelar atendimento',
-                        description: 'O horário voltará a ficar livre na agenda pública.',
+                        title: 'Cancelar ordem de serviço',
+                        description: 'O horário voltará a ficar disponível na agenda pública.',
                         inputLabel: 'Motivo do cancelamento',
-                        defaultValue: 'Ajuste operacional na agenda',
+                        defaultValue: 'Readequação de roteiro técnico',
                         confirmLabel: 'Confirmar cancelamento'
                     });
                     if (res === null) return;
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         method: 'PATCH',
                         body: JSON.stringify({ novoStatus, observacao })
                     });
-                    PP.toast('Status atualizado com sucesso.');
+                    PP.toast('Situação da ordem atualizada.');
                     await atualizarAgenda();
                     await PP.refreshSidebarCounters();
                 } catch (err) {

@@ -3,31 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprovante de Agendamento — Power Plus</title>
+    <title>Guia de Solicitação Técnica — Power Plus</title>
+    <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <div class="top-utility-bar">
+        <div class="shell top-utility-inner">
+            <div class="utility-meta">
+                <span>Atendimento em Ribeirão Preto e Região</span>
+                <span class="utility-sep">|</span>
+                <span>Normas NBR 5410 e NR-10</span>
+                <span class="utility-sep">|</span>
+                <span>Seg a Sex: 08h às 18h · Sáb: 08h às 13h</span>
+            </div>
+            <a href="painel/login.html" class="utility-admin-link">Área Técnica</a>
+        </div>
+    </div>
+
     <header class="public-header">
         <div class="shell public-header-inner">
-            <a href="index.html" class="brand-id">
-                <span class="brand-box" aria-hidden="true">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
-                    </svg>
-                </span>
-                <span class="brand-copy">
-                    <span class="brand-name">Power Plus</span>
-                    <span class="brand-location">Instalações e Manutenção Elétrica · Ribeirão Preto</span>
-                </span>
+            <a href="index.html" class="brand-logo-link">
+                <img src="img/logo-powerplus.svg" alt="Power Plus Engenharia e Serviços Elétricos" class="brand-logo-img">
             </a>
 
             <nav class="public-nav" aria-label="Navegação do cliente">
-                <a href="index.html">Agendar visita</a>
-                <a href="acompanhar.html">Meus agendamentos</a>
-                <a href="atendimento.html">Atendimento</a>
+                <a href="index.html">Solicitar Visita</a>
+                <a href="acompanhar.html">Consultar Protocolo</a>
+                <a href="atendimento.html">Central de Dúvidas</a>
             </nav>
         </div>
     </header>
@@ -36,7 +42,7 @@
         <div class="shell">
             <div id="ticketMount" class="ticket-card">
                 <div class="ticket-body">
-                    <p class="hint">Carregando comprovante...</p>
+                    <p class="hint">Carregando dados da guia de atendimento...</p>
                 </div>
             </div>
         </div>
@@ -44,8 +50,8 @@
 
     <footer class="public-footer">
         <div class="shell public-footer-inner">
-            <span>Power Plus Serviços Elétricos · Ribeirão Preto, SP</span>
-            <a href="painel/login.html" class="footer-internal-link">Acesso interno (Equipe)</a>
+            <span>Power Plus Engenharia e Serviços Elétricos · Ribeirão Preto, SP</span>
+            <a href="painel/login.html" class="footer-internal-link">Acesso Operacional (Equipe)</a>
         </div>
     </footer>
 
@@ -53,4 +59,3 @@
     <script src="js/cliente-comprovante.js"></script>
 </body>
 </html>
-

@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expediente e Folgas — Painel Power Plus</title>
+    <title>Expediente e Bloqueios — Gestão Power Plus</title>
+    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -16,39 +17,40 @@
         <main class="backoffice-main">
             <div class="bo-header">
                 <div>
-                    <h1>Expediente e bloqueios</h1>
-                    <p>Configure a grade semanal disponível para agendamento online e registre ausências ou feriados.</p>
+                    <div class="page-eyebrow">Parâmetros de Agenda</div>
+                    <h1>Expediente semanal e bloqueios</h1>
+                    <p>Defina os dias e horários abertos para agendamento online e cadastre folgas técnicas ou feriados.</p>
                 </div>
             </div>
 
             <div class="bo-split">
                 <div class="surface-box">
                     <div class="box-header">
-                        <h2>Janelas semanais de atendimento</h2>
+                        <h2>Grade padrão por dia da semana</h2>
                     </div>
                     <div id="mountDisponibilidade"></div>
                 </div>
 
                 <div class="surface-box">
                     <div class="box-header">
-                        <h2>Bloquear data específica</h2>
+                        <h2>Registrar bloqueio de data</h2>
                     </div>
                     <form id="formBloqueioData">
                         <div class="grid-2">
                             <div class="field">
-                                <label for="bloqData">Data</label>
+                                <label for="bloqData">Data a bloquear</label>
                                 <input type="date" id="bloqData" required>
                             </div>
                             <div class="field">
-                                <label for="bloqMotivo">Motivo</label>
-                                <input type="text" id="bloqMotivo" placeholder="Ex.: Feriado / Curso NR-10" required>
+                                <label for="bloqMotivo">Justificativa</label>
+                                <input type="text" id="bloqMotivo" placeholder="Ex.: Feriado / Obra externa" required>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:4px">Bloquear data</button>
+                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:4px">Registrar bloqueio</button>
                     </form>
 
                     <div style="height:1px;background:var(--border);margin:20px 0"></div>
-                    <div class="rail-heading" style="margin-bottom:10px">Datas bloqueadas</div>
+                    <div class="rail-heading" style="margin-bottom:10px">Datas bloqueadas na agenda</div>
                     <div id="mountBloqueios"></div>
                 </div>
             </div>
@@ -59,4 +61,3 @@
     <script src="../js/painel-expediente.js"></script>
 </body>
 </html>
-

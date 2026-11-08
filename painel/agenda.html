@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda e Aprovações — Painel Power Plus</title>
+    <title>Agenda e Aprovações — Gestão Power Plus</title>
+    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -16,13 +17,14 @@
         <main class="backoffice-main">
             <div class="bo-header">
                 <div>
+                    <div class="page-eyebrow">Controle de Campo</div>
                     <h1>Agenda e aprovação de visitas</h1>
-                    <p>Aprove novos pedidos em 1 clique e acompanhe as visitas do dia ou da semana.</p>
+                    <p>Valide as solicitações recebidas pelo portal e acompanhe o roteiro diário ou semanal de atendimentos.</p>
                 </div>
                 <div class="bo-toolbar">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnDiaAnterior" title="Dia anterior">◀</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnDiaAnterior" title="Dia anterior">Dia anterior</button>
                     <input type="date" id="adminDataRef" style="width:auto;padding:6px 10px;font-size:0.83rem">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btnProximoDia" title="Próximo dia">▶</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnProximoDia" title="Próximo dia">Próximo dia</button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnHoje">Hoje</button>
                     <div class="segmented">
                         <button type="button" class="seg-item active" id="btnModoDia">Dia</button>
@@ -32,21 +34,21 @@
             </div>
 
             <div class="kpi-strip">
-                <div class="kpi-box">
-                    <div class="kpi-title">Aguardando aprovação</div>
-                    <div class="kpi-num mono" id="kpiPendentesAprovacao">0</div>
+                <div class="kpi-box kpi-warn">
+                    <div class="kpi-title">Pendentes de aprovação</div>
+                    <div class="kpi-num" id="kpiPendentesAprovacao">0</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-title">Visitas na data</div>
-                    <div class="kpi-num mono" id="kpiDiaTotal">0</div>
+                    <div class="kpi-title">Ordens na data</div>
+                    <div class="kpi-num" id="kpiDiaTotal">0</div>
                 </div>
-                <div class="kpi-box">
+                <div class="kpi-box kpi-info">
                     <div class="kpi-title">Confirmadas / em curso</div>
-                    <div class="kpi-num mono" id="kpiDiaPendentes">0</div>
+                    <div class="kpi-num" id="kpiDiaPendentes">0</div>
                 </div>
-                <div class="kpi-box">
+                <div class="kpi-box kpi-ok">
                     <div class="kpi-title">Concluídas na data</div>
-                    <div class="kpi-num mono" id="kpiDiaConcluidas">0</div>
+                    <div class="kpi-num" id="kpiDiaConcluidas">0</div>
                 </div>
             </div>
 
@@ -54,13 +56,13 @@
 
             <div class="surface-box">
                 <div class="filter-bar" id="filtroStatusBar">
-                    <button type="button" class="date-chip active" data-filtro="TODOS">Todos os status</button>
+                    <button type="button" class="date-chip active" data-filtro="TODOS">Todas as ordens</button>
                     <button type="button" class="date-chip" data-filtro="AGUARDANDO_APROVACAO">Aguardando aprovação</button>
-                    <button type="button" class="date-chip" data-filtro="CONFIRMADO">Confirmados</button>
-                    <button type="button" class="date-chip" data-filtro="CONCLUIDO">Concluídos</button>
+                    <button type="button" class="date-chip" data-filtro="CONFIRMADO">Confirmadas</button>
+                    <button type="button" class="date-chip" data-filtro="CONCLUIDO">Concluídas</button>
                 </div>
                 <div id="agendaContainer">
-                    <p class="hint">Carregando agenda...</p>
+                    <p class="hint">Carregando ordens programadas...</p>
                 </div>
             </div>
         </main>
