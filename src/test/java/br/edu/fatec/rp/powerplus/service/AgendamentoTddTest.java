@@ -222,4 +222,106 @@ class AgendamentoTddTest {
         assertEquals(LocalTime.of(17, 0), remarcado.getHoraFim());
         verify(notificacaoGateway).notificarAgendamentoRemarcado(eq(remarcado), eq("11/09/2026 10:00"));
     }
+
+    @Test
+    @DisplayName("TU19 [TDD - Aprovação] - Deve registrar pedido do cliente como 'Aguardando aprovação' pré-reservando horário")
+    void deveCriarSolicitacaoComStatusAguardandoAprovacao() {
+        LocalDate sexta = LocalDate.of(2026, 9, 11);
+        LocalTime horario = LocalTime.of(14, 0);
+        Cliente cli = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
+
+        when(bloqueioRepository.existsByData(sexta)).thenReturn(false);
+        when(disponibilidadeRepository.findByDiaSemana(DayOfWeek.FRIDAY)).thenReturn(Optional.of(
+                new DisponibilidadeSemanal(DayOfWeek.FRIDAY, true, LocalTime.of(8, 0), LocalTime.of(18, 0), 60)
+        ));
+        when(agendamentoRepository.existeConflitoNoHorario(eq(sexta), eq(horario), anyCollection(), isNull()))
+                .thenReturn(false);
+        when(clienteService.obterOuCadastrarNoAgendamento(anyString(), anyString(), any(), anyString(), any()))
+                .thenReturn(cli);
+        when(agendamentoRepository.save(any(Agendamento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Agendamento criado = agendamentoService.agendarAutoatendimento(
+                "Mariana Costa", "(16) 99111-0000", "mariana@exemplo.com",
+                "Rua A, 10", PerfilCliente.RESIDENCIAL, sexta, horario,
+                TipoServico.INSTALACAO_ELETRICA, "Instalar chuveiro 220V"
+        );
+
+        assertEquals(StatusAgendamento.AGUARDANDO_APROVACAO, criado.getStatus());
+        assertEquals("Aguardando aprovação", criado.getStatus().getDescricao());
+        assertTrue(criado.getStatus().ocupaHorarioNaAgenda());
+        verify(notificacaoGateway).notificarSolicitacaoRecebida(eq(criado));
+        verify(notificacaoGateway, never()).notificarAgendamentoConfirmado(any());
+    }
+
+    @Test
+    @DisplayName("TU20 [TDD - Aprovação] - Deve aprovar visita pendente mudando para CONFIRMADO e notificando cliente")
+    void deveAprovarSolicitacaoPendenteConfirmandoVisitaENotificandoCliente() {
+        Cliente cliente = new Cliente("Mariana Costa", "16991110000", "Rua A, 10", PerfilCliente.RESIDENCIAL);
+        Agendamento pendente = new Agendamento(
+                "PP-2026-0020", cliente, LocalDate.of(2026, 9, 11),
+                LocalTime.of(14, 0), LocalTime.of(15, 0),
+                TipoServico.INSTALACAO_ELETRICA, "Rua A, 10", "Instalar chuveiro"
+        );
+        pendente.setId(20L);
+        pendente.setStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
+
+        when(agendamentoRepository.findById(20L)).thenReturn(Optional.of(pendente));
+        when(agendamentoRepository.save(any(Agendamento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Agendamento aprovado = agendamentoService.aprovarSolicitacao(20L, "Leonardo", "Visita confirmada na rota da tarde");
+
+        assertEquals(StatusAgendamento.CONFIRMADO, aprovado.getStatus());
+        assertTrue(aprovado.getStatus().ocupaHorarioNaAgenda());
+        verify(historicoRepository).save(any(HistoricoStatusAgendamento.class));
+        verify(notificacaoGateway).notificarAgendamentoConfirmado(eq(aprovado));
+    }
+
+    @Test
+    @DisplayName("TU21 [TDD - Recusa] - Deve recusar visita pendente liberando imediatamente a vaga na agenda")
+    void deveRecusarSolicitacaoPendenteLiberandoHorarioNaAgenda() {
+        Cliente cliente = new Cliente("Roberto Almeida", "16992223344", "Av. B, 500", PerfilCliente.EMPRESARIAL_CONDOMINIO);
+        Agendamento pendente = new Agendamento(
+                "PP-2026-0021", cliente, LocalDate.of(2026, 9, 11),
+                LocalTime.of(16, 0), LocalTime.of(17, 0),
+                TipoServico.MANUTENCAO_PREVENTIVA, "Av. B, 500", "Quadro de bombas"
+        );
+        pendente.setId(21L);
+        pendente.setStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
+
+        when(agendamentoRepository.findById(21L)).thenReturn(Optional.of(pendente));
+        when(agendamentoRepository.save(any(Agendamento.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Agendamento recusado = agendamentoService.recusarSolicitacao(21L, "Leonardo", "Manutenção emergencial em subestação neste horário");
+
+        assertEquals(StatusAgendamento.RECUSADO, recusado.getStatus());
+        assertEquals("Recusado", recusado.getStatus().getDescricao());
+        assertFalse(recusado.getStatus().ocupaHorarioNaAgenda());
+        verify(historicoRepository).save(any(HistoricoStatusAgendamento.class));
+        verify(notificacaoGateway).notificarAgendamentoRecusado(eq(recusado), contains("emergencial"));
+    }
+
+    @Test
+    @DisplayName("TU22 [TDD - Negativo] - Deve impedir concluir visita que ainda está Aguardando aprovação ou aprovar visita recusada")
+    void deveImpedirConclusaoSemAprovacaoPreviaOuAprovarRecusada() {
+        Cliente cliente = new Cliente("Paulo Silva", "16998887766", "Rua C, 30", PerfilCliente.RESIDENCIAL);
+        Agendamento pendente = new Agendamento(
+                "PP-2026-0022", cliente, LocalDate.of(2026, 9, 12),
+                LocalTime.of(9, 0), LocalTime.of(10, 0),
+                TipoServico.VISTORIA_ORCAMENTO, "Rua C, 30", "Vistoria"
+        );
+        pendente.setId(22L);
+        pendente.setStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
+
+        when(agendamentoRepository.findById(22L)).thenReturn(Optional.of(pendente));
+
+        assertThrows(RegraNegocioException.class, () -> agendamentoService.atualizarStatusOperacional(
+                22L, StatusAgendamento.CONCLUIDO, "Leonardo", "Sem aprovar antes"
+        ));
+
+        pendente.setStatus(StatusAgendamento.RECUSADO);
+        assertThrows(RegraNegocioException.class, () -> agendamentoService.aprovarSolicitacao(
+                22L, "Leonardo", "Tentar aprovar recusada"
+        ));
+        verify(agendamentoRepository, never()).save(any());
+    }
 }

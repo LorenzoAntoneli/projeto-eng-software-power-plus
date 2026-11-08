@@ -24,6 +24,10 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
 
     List<Agendamento> findByClienteTelefoneOrderByDataDescHoraInicioDesc(String telefoneNormalizado);
 
+    List<Agendamento> findByStatusOrderByDataAscHoraInicioAsc(StatusAgendamento status);
+
+    long countByStatus(StatusAgendamento status);
+
     @Query("SELECT COUNT(a) > 0 FROM Agendamento a WHERE a.data = :data AND a.horaInicio = :horaInicio " +
            "AND a.status IN :statusAtivos AND (:ignorarId IS NULL OR a.id <> :ignorarId)")
     boolean existeConflitoNoHorario(@Param("data") LocalDate data,

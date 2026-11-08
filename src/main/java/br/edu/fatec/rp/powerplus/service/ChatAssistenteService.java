@@ -77,7 +77,7 @@ public class ChatAssistenteService {
 
         if (solicitarHumano || pedeAtendimentoHumano(normalizado)) {
             return encaminharParaHumano(conversa, textoCliente, agora,
-                    "Perfeito! Encaminhei todo o histórico desta conversa para o Carlos (proprietário da Power Plus). " +
+                    "Perfeito! Encaminhei todo o histórico desta conversa para o Leonardo (proprietário da Power Plus). " +
                     "Ele responderá por aqui ou pelo seu telefone em instantes.");
         }
 
@@ -184,7 +184,7 @@ public class ChatAssistenteService {
 
     private boolean pedeAtendimentoHumano(String normalizado) {
         return contemAlgum(normalizado, "falar com eletricista", "falar com proprietario",
-                "falar com humano", "atendente", "pessoa real", "carlos", "ligar");
+                "falar com humano", "atendente", "pessoa real", "leonardo", "carlos", "ligar");
     }
 
     private boolean contemAlgum(String texto, String... termos) {

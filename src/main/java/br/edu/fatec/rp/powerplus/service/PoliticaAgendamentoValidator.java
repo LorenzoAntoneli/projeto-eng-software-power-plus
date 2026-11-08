@@ -22,7 +22,7 @@ public class PoliticaAgendamentoValidator {
 
     public static final long ANTECEDENCIA_MINIMA_MINUTOS = 120L;
     public static final List<StatusAgendamento> STATUS_QUE_OCUPAM_AGENDA =
-            List.of(StatusAgendamento.CONFIRMADO, StatusAgendamento.EM_ATENDIMENTO);
+            List.of(StatusAgendamento.AGUARDANDO_APROVACAO, StatusAgendamento.CONFIRMADO, StatusAgendamento.EM_ATENDIMENTO);
 
     private final AgendamentoRepository agendamentoRepository;
     private final DisponibilidadeSemanalRepository disponibilidadeRepository;

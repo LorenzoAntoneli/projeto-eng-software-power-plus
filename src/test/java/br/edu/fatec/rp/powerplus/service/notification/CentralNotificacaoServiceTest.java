@@ -71,6 +71,12 @@ class CentralNotificacaoServiceTest {
     @Test
     @DisplayName("TU18 - Deve cobrir transições da máquina de estados StatusAgendamento (RN04)")
     void deveValidarTodasAsTransicoesDoEnumStatusAgendamento() {
+        assertTrue(StatusAgendamento.AGUARDANDO_APROVACAO.podeTransitarPara(StatusAgendamento.CONFIRMADO));
+        assertTrue(StatusAgendamento.AGUARDANDO_APROVACAO.podeTransitarPara(StatusAgendamento.RECUSADO));
+        assertTrue(StatusAgendamento.AGUARDANDO_APROVACAO.podeTransitarPara(StatusAgendamento.CANCELADO));
+        assertFalse(StatusAgendamento.AGUARDANDO_APROVACAO.podeTransitarPara(StatusAgendamento.CONCLUIDO));
+        assertFalse(StatusAgendamento.AGUARDANDO_APROVACAO.podeTransitarPara(StatusAgendamento.EM_ATENDIMENTO));
+
         assertTrue(StatusAgendamento.CONFIRMADO.podeTransitarPara(StatusAgendamento.EM_ATENDIMENTO));
         assertTrue(StatusAgendamento.CONFIRMADO.podeTransitarPara(StatusAgendamento.CONCLUIDO));
         assertTrue(StatusAgendamento.CONFIRMADO.podeTransitarPara(StatusAgendamento.CANCELADO));
@@ -83,10 +89,32 @@ class CentralNotificacaoServiceTest {
 
         assertFalse(StatusAgendamento.CONCLUIDO.podeTransitarPara(StatusAgendamento.CANCELADO));
         assertFalse(StatusAgendamento.CANCELADO.podeTransitarPara(StatusAgendamento.EM_ATENDIMENTO));
+        assertFalse(StatusAgendamento.RECUSADO.podeTransitarPara(StatusAgendamento.CONFIRMADO));
 
+        assertTrue(StatusAgendamento.AGUARDANDO_APROVACAO.ocupaHorarioNaAgenda());
         assertTrue(StatusAgendamento.CONFIRMADO.ocupaHorarioNaAgenda());
         assertTrue(StatusAgendamento.EM_ATENDIMENTO.ocupaHorarioNaAgenda());
         assertFalse(StatusAgendamento.CONCLUIDO.ocupaHorarioNaAgenda());
+        assertFalse(StatusAgendamento.RECUSADO.ocupaHorarioNaAgenda());
         assertFalse(StatusAgendamento.CANCELADO.ocupaHorarioNaAgenda());
+    }
+
+    @Test
+    @DisplayName("TU23 - Deve registrar notificações de solicitação pendente e de recusa ao cliente e ao proprietário")
+    void deveRegistrarNotificacoesDeSolicitacaoERecusa() {
+        CentralNotificacaoService service = new CentralNotificacaoService(repository, clock, false);
+        Cliente cli = new Cliente("Roberto", "16992223344", "Av. Z, 100", PerfilCliente.EMPRESARIAL_CONDOMINIO);
+        Agendamento ag = new Agendamento("PP-2026-0205", cli, LocalDate.of(2026, 9, 14),
+                LocalTime.of(15, 0), LocalTime.of(16, 0), TipoServico.QUADRO_DISJUNTORES, "Av. Z, 100", "QGBT");
+        ag.setStatus(StatusAgendamento.AGUARDANDO_APROVACAO);
+
+        service.notificarSolicitacaoRecebida(ag);
+        service.notificarAgendamentoRecusado(ag, "Atendimento emergencial externo");
+
+        ArgumentCaptor<NotificacaoRegistro> captor = ArgumentCaptor.forClass(NotificacaoRegistro.class);
+        verify(repository, times(4)).save(captor.capture());
+        List<NotificacaoRegistro> salvas = captor.getAllValues();
+        assertEquals(TipoNotificacao.SOLICITACAO_RECEBIDA, salvas.get(0).getTipo());
+        assertEquals(TipoNotificacao.RECUSA, salvas.get(2).getTipo());
     }
 }

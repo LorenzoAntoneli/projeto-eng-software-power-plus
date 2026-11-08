@@ -760,7 +760,7 @@ input:focus, select:focus, textarea:focus {
     border-color: #c6f0da;
 }
 
-.st-EM_ATENDIMENTO, .st-AGUARDANDO_HUMANO {
+.st-AGUARDANDO_APROVACAO, .st-EM_ATENDIMENTO, .st-AGUARDANDO_HUMANO {
     background: var(--amber-soft);
     color: var(--amber);
     border-color: #fde68a;
@@ -772,10 +772,128 @@ input:focus, select:focus, textarea:focus {
     border-color: #dfded8;
 }
 
-.st-CANCELADO {
+.st-CANCELADO, .st-RECUSADO {
     background: var(--red-soft);
     color: var(--red);
     border-color: #fecaca;
+}
+
+.btn-approve {
+    background: var(--green);
+    color: #ffffff;
+    border-color: var(--green);
+}
+
+.btn-approve:hover {
+    background: #0a633f;
+    border-color: #0a633f;
+}
+
+.approval-queue-box {
+    background: #fffdf5;
+    border: 1px solid #f5d076;
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 18px;
+}
+
+.approval-queue-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.approval-queue-head h2 {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #78350f;
+}
+
+.quick-date-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.date-chip {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition: all 0.12s;
+}
+
+.date-chip:hover, .date-chip.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #ffffff;
+}
+
+.review-summary-bar {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 0.84rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ticket-notice {
+    margin-bottom: 18px;
+    padding: 12px 15px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    border: 1px solid var(--border);
+}
+
+.ticket-notice.pending {
+    background: var(--amber-soft);
+    border-color: #fde68a;
+    color: #78350f;
+}
+
+.ticket-notice.confirmed {
+    background: var(--green-soft);
+    border-color: #c6f0da;
+    color: #065f46;
+}
+
+.ticket-notice.refused {
+    background: var(--red-soft);
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.phone-quick-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--green);
+    font-weight: 500;
+    font-size: 0.78rem;
+    margin-left: 6px;
+    text-decoration: underline;
 }
 
 /* ==================== CENTRAL DE ATENDIMENTO / CHAT ==================== */

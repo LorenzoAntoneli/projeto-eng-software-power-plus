@@ -35,22 +35,22 @@
     <main class="public-page">
         <div class="shell">
             <div class="page-head">
-                <h1>Agendar visita técnica</h1>
-                <p>Escolha um horário disponível na agenda e informe o local do atendimento.</p>
+                <h1>Solicitar visita técnica</h1>
+                <p>Escolha um horário livre em 2 passos rápidos. Seu pedido fica pré-reservado e o Leonardo confirma a visita em seguida.</p>
             </div>
 
             <div class="booking-container">
                 <aside class="booking-summary-rail">
                     <div class="tech-card">
-                        <div class="tech-initials">CE</div>
+                        <div class="tech-initials">LE</div>
                         <div>
-                            <div class="tech-name">Carlos Eduardo</div>
-                            <div class="tech-cred">Eletricista Responsável · NR-10</div>
+                            <div class="tech-name">Leonardo</div>
+                            <div class="tech-cred">Proprietário e Eletricista · NR-10</div>
                         </div>
                     </div>
 
                     <div class="rail-section">
-                        <div class="rail-heading">Resumo da reserva</div>
+                        <div class="rail-heading">Resumo da solicitação</div>
                         <div class="rail-item">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                             <span id="railServico">—</span>
@@ -71,8 +71,8 @@
 
                     <div class="rail-section">
                         <div class="rail-note">
-                            <strong>Reserva imediata</strong>
-                            O horário escolhido é bloqueado na hora para impedir duplicidade na agenda.
+                            <strong>Aprovação pelo eletricista</strong>
+                            O horário escolhido é pré-reservado na hora com status <em>Aguardando aprovação</em> até o Leonardo confirmar a visita.
                         </div>
                         <div class="rail-note">
                             <strong>Política de alteração</strong>
@@ -108,8 +108,9 @@
                                     <select id="agTipoServico" required></select>
                                 </div>
                                 <div class="field">
-                                    <label for="agData">Data da visita</label>
+                                    <label for="agData">Data desejada</label>
                                     <input type="date" id="agData" required>
+                                    <div class="quick-date-chips" id="atalhosData"></div>
                                 </div>
                             </div>
 
@@ -132,6 +133,7 @@
 
                         <!-- ETAPA 2 -->
                         <div id="etapa2" class="hidden">
+                            <div class="review-summary-bar" id="resumoEtapa2"></div>
                             <div class="grid-2">
                                 <div class="field">
                                     <label for="agNome">Nome completo ou condomínio</label>
@@ -166,7 +168,7 @@
 
                             <div class="stage-actions">
                                 <button type="button" class="btn btn-secondary" id="btnVoltarEtapa1">← Alterar horário</button>
-                                <button type="submit" class="btn btn-primary" id="btnSubmitReserva">Confirmar agendamento</button>
+                                <button type="submit" class="btn btn-primary" id="btnSubmitReserva">Solicitar agendamento</button>
                             </div>
                         </div>
                     </form>

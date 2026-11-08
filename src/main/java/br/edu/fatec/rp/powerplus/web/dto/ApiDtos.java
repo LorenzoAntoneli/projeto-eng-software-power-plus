@@ -48,6 +48,8 @@ public final class ApiDtos {
 
     public record CancelarAgendamentoRequest(String motivo) {}
 
+    public record DecisaoAprovacaoRequest(String observacao) {}
+
     public record AtualizarStatusRequest(
             @NotNull(message = "Informe o novo status.") StatusAgendamento novoStatus,
             String observacao
@@ -277,14 +279,17 @@ public final class ApiDtos {
     public record DashboardResumoResponse(
             LocalDate dataReferencia,
             long totalHoje,
+            long aguardandoAprovacaoHoje,
             long confirmadosHoje,
             long emAtendimentoHoje,
             long concluidosHoje,
             long canceladosHoje,
             long totalSemana,
+            long pendentesAprovacaoTotal,
             long chatsAguardandoHumano,
             long notificacoesNaoLidas,
             boolean whatsappFeatureFlagAtiva,
+            List<AgendamentoResponse> pendentesAprovacao,
             List<AgendamentoResponse> atendimentosHoje
     ) {}
 }

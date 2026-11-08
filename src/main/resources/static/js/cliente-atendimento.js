@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const cls = m.remetente === 'CLIENTE' ? 'mine' : (m.remetente === 'PROPRIETARIO' ? 'owner-reply' : 'theirs');
             const autor = m.remetente === 'CLIENTE'
                 ? 'Você'
-                : (m.remetente === 'PROPRIETARIO' ? 'Carlos Eduardo · Eletricista' : 'Atendimento Power Plus');
+                : (m.remetente === 'PROPRIETARIO' ? 'Leonardo · Eletricista' : 'Atendimento Power Plus');
             return `
                 <div class="chat-msg ${cls}">
                     <div class="chat-author">${autor}</div>
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('btnSolicitarEletricista').addEventListener('click', () => {
-        enviar('Gostaria de falar diretamente com o eletricista Carlos sobre minha demanda.', true);
+        enviar('Gostaria de falar diretamente com o eletricista Leonardo sobre minha demanda.', true);
     });
 
     document.getElementById('btnReiniciarChat').addEventListener('click', () => {
