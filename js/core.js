@@ -632,6 +632,14 @@ window.PP = (() => {
                 .filter(a => a.statusCodigo === 'AGUARDANDO_APROVACAO')
                 .sort((a, b) => (a.data + a.horaInicio).localeCompare(b.data + b.horaInicio));
 
+            const futurosOuHoje = db.agendamentos
+                .filter(a => a.data >= dataRef)
+                .sort((a, b) => (a.data + a.horaInicio).localeCompare(b.data + b.horaInicio));
+            const passados = db.agendamentos
+                .filter(a => a.data < dataRef)
+                .sort((a, b) => (b.data + b.horaInicio).localeCompare(a.data + a.horaInicio));
+            const todosAgendamentos = [...futurosOuHoje, ...passados];
+
             return {
                 dataReferencia: dataRef,
                 totalHoje: doDia.length,
@@ -646,7 +654,8 @@ window.PP = (() => {
                 notificacoesNaoLidas: db.notificacoes.filter(n => !n.lida).length,
                 whatsappFeatureFlagAtiva: false,
                 pendentesAprovacao: pendentes,
-                atendimentosHoje: doDia
+                atendimentosHoje: doDia,
+                todosAgendamentos
             };
         }
 

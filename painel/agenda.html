@@ -27,7 +27,8 @@
                     <button type="button" class="btn btn-secondary btn-sm" id="btnProximoDia" title="Próximo dia">Próximo dia</button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnHoje">Hoje</button>
                     <div class="segmented">
-                        <button type="button" class="seg-item active" id="btnModoDia">Dia</button>
+                        <button type="button" class="seg-item active" id="btnModoGeral">Lista geral</button>
+                        <button type="button" class="seg-item" id="btnModoDia">Dia</button>
                         <button type="button" class="seg-item" id="btnModoSemana">Semana</button>
                     </div>
                 </div>
@@ -39,7 +40,7 @@
                     <div class="kpi-num" id="kpiPendentesAprovacao">0</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-title">Ordens na data</div>
+                    <div class="kpi-title" id="kpiTituloTotal">Total de ordens</div>
                     <div class="kpi-num" id="kpiDiaTotal">0</div>
                 </div>
                 <div class="kpi-box kpi-info">
@@ -47,7 +48,7 @@
                     <div class="kpi-num" id="kpiDiaPendentes">0</div>
                 </div>
                 <div class="kpi-box kpi-ok">
-                    <div class="kpi-title">Concluídas na data</div>
+                    <div class="kpi-title" id="kpiTituloConcluidas">Concluídas</div>
                     <div class="kpi-num" id="kpiDiaConcluidas">0</div>
                 </div>
             </div>
@@ -59,6 +60,7 @@
                     <button type="button" class="date-chip active" data-filtro="TODOS">Todas as ordens</button>
                     <button type="button" class="date-chip" data-filtro="AGUARDANDO_APROVACAO">Aguardando aprovação</button>
                     <button type="button" class="date-chip" data-filtro="CONFIRMADO">Confirmadas</button>
+                    <button type="button" class="date-chip" data-filtro="EM_ATENDIMENTO">Em atendimento</button>
                     <button type="button" class="date-chip" data-filtro="CONCLUIDO">Concluídas</button>
                 </div>
                 <div id="agendaContainer">

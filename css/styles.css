@@ -845,7 +845,7 @@ input:focus, select:focus, textarea:focus {
 
 .order-meta {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 6px 18px;
     font-size: 0.85rem;
     color: var(--ink-secondary);
@@ -1770,7 +1770,7 @@ input:focus, select:focus, textarea:focus {
     .public-nav a {
         padding: 8px 10px;
     }
-    .stepper-bar, .grid-2, .ticket-kv-grid, .week-board, .kpi-strip {
+    .stepper-bar, .grid-2, .ticket-kv-grid, .week-board, .kpi-strip, .order-meta {
         grid-template-columns: 1fr;
     }
     .ticket-kv-cell {
