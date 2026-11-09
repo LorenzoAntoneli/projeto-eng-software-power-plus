@@ -87,7 +87,7 @@ window.PP = (() => {
         const bloqueada = proximoDiaUtilOffset(9);
 
         return {
-            seqProtocolo: 105,
+            seqProtocolo: 106,
             seqId: 50,
             disponibilidades: [
                 { id: 1, diaSemana: 'MONDAY', ativo: true, horaInicio: '08:00', horaFim: '18:00', duracaoSlotMinutos: 60 },
@@ -238,7 +238,10 @@ window.PP = (() => {
                     { statusNovo: 'Confirmado', responsavel: 'CLIENTE_WEB', observacao: 'Reserva online realizada' }
                 ],
                 'PP-2026-0104': [
-                    { statusNovo: 'Confirmado', responsavel: 'PROPRIETARIO', observacao: 'Visita agendada para o síndico' }
+                    { statusNovo: 'Aguardando aprovação', responsavel: 'CLIENTE_WEB', observacao: 'Solicitação registrada — aguardando aprovação do Leonardo' }
+                ],
+                'PP-2026-0105': [
+                    { statusNovo: 'Aguardando aprovação', responsavel: 'CLIENTE_WEB', observacao: 'Solicitação registrada — aguardando aprovação do Leonardo' }
                 ]
             },
             conversas: [
@@ -432,7 +435,13 @@ window.PP = (() => {
             }
 
             const servObj = TIPOS_SERVICO.find(s => s.codigo === body.tipoServico) || TIPOS_SERVICO[0];
-            const protocolo = `PP-2026-0${db.seqProtocolo++}`;
+            const anoProt = (body.data || hojeIso()).slice(0, 4);
+            let numProt = Math.max(Number(db.seqProtocolo) || 106, db.agendamentos.length + 101);
+            while (db.agendamentos.some(a => a.protocolo.toUpperCase() === `PP-${anoProt}-${String(numProt).padStart(4, '0')}`)) {
+                numProt++;
+            }
+            db.seqProtocolo = numProt + 1;
+            const protocolo = `PP-${anoProt}-${String(numProt).padStart(4, '0')}`;
             const novo = {
                 id: ++db.seqId,
                 protocolo,
@@ -480,6 +489,7 @@ window.PP = (() => {
         // 5. Consulta por telefone
         if (method === 'GET' && path === '/api/publico/agendamentos/cliente') {
             const fone = normalizarFone(params.get('telefone'));
+            if (fone.length < 10) throw new Error('Informe um telefone válido com DDD para consulta.');
             return db.agendamentos
                 .filter(a => normalizarFone(a.clienteTelefone) === fone)
                 .sort((a, b) => (b.data + b.horaInicio).localeCompare(a.data + a.horaInicio));

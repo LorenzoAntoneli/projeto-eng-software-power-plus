@@ -6,6 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const remNovaData = document.getElementById('remNovaData');
     const remNovoHorario = document.getElementById('remNovoHorario');
 
+    function aplicarMascaraTelefone(valor) {
+        const digitos = String(valor || '').replace(/\D/g, '').slice(0, 11);
+        if (digitos.length <= 2) return digitos;
+        if (digitos.length <= 6) return `(${digitos.slice(0, 2)}) ${digitos.slice(2)}`;
+        if (digitos.length <= 10) return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 6)}-${digitos.slice(6)}`;
+        return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
+    }
+
+    if (inputTel) {
+        inputTel.addEventListener('input', () => {
+            inputTel.value = aplicarMascaraTelefone(inputTel.value);
+        });
+    }
+
     function renderOrdem(a, historico = null) {
         const alteravel = a.statusCodigo === 'CONFIRMADO' || a.statusCodigo === 'AGUARDANDO_APROVACAO';
         let resumoStatus = '';
@@ -37,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div><strong>Serviço:</strong> ${PP.esc(a.tipoServicoDescricao)}</div>
                     <div><strong>Solicitante:</strong> ${PP.esc(a.clienteNome)} (${PP.esc(a.clientePerfil)})</div>
                     <div style="grid-column:1/-1"><strong>Endereço:</strong> ${PP.esc(a.enderecoAtendimento)}</div>
+                    ${a.descricaoServico ? `<div style="grid-column:1/-1"><strong>Relato registrado:</strong> ${PP.esc(a.descricaoServico)}</div>` : ''}
                     ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Parecer técnico:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
                 </div>
                 ${histHtml}
@@ -62,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function buscarProtocolo(prot) {
-        const codigo = (prot ?? inputProt.value).trim();
+        const codigo = (prot ?? inputProt.value).trim().toUpperCase();
         if (!codigo) return PP.toast('Informe o código de protocolo para busca.', true);
         inputProt.value = codigo;
         try {
@@ -79,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function buscarTelefone(tel) {
         const fone = (tel ?? inputTel.value).trim();
         if (!fone) return PP.toast('Informe o telefone com DDD.', true);
-        inputTel.value = fone;
+        inputTel.value = aplicarMascaraTelefone(fone) || fone;
         try {
             const lista = await PP.api(`/api/publico/agendamentos/cliente?telefone=${encodeURIComponent(fone)}`);
             if (!lista.length) {
@@ -97,10 +112,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function carregarHorariosRemarcacao() {
-        const res = await PP.api(`/api/publico/horarios-livres?data=${remNovaData.value}`);
-        remNovoHorario.innerHTML = res.horariosLivres.length
-            ? res.horariosLivres.map(h => `<option value="${h}">${h}</option>`).join('')
-            : '<option value="">Sem horários vagos nesta data</option>';
+        if (!remNovaData.value) {
+            remNovoHorario.innerHTML = '<option value="">Selecione uma data</option>';
+            return;
+        }
+        try {
+            const res = await PP.api(`/api/publico/horarios-livres?data=${remNovaData.value}`);
+            remNovoHorario.innerHTML = res.horariosLivres.length
+                ? res.horariosLivres.map(h => `<option value="${h}">${h}</option>`).join('')
+                : '<option value="">Sem horários vagos nesta data</option>';
+        } catch (_) {
+            remNovoHorario.innerHTML = '<option value="">Sem horários vagos nesta data</option>';
+        }
     }
 
     async function abrirRemarcacao(protocolo, dataAtual) {
@@ -109,6 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
         remNovaData.min = PP.hojeIso();
         remNovaData.value = dataAtual >= PP.hojeIso() ? dataAtual : PP.amanhaUtilIso();
         await carregarHorariosRemarcacao();
+        if (!remNovoHorario.value && remNovaData.value === PP.hojeIso()) {
+            remNovaData.value = PP.amanhaUtilIso();
+            await carregarHorariosRemarcacao();
+        }
         modalRemarcar.classList.remove('hidden');
     }
 
@@ -141,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnBuscarProtocolo').addEventListener('click', () => buscarProtocolo());
     document.getElementById('btnBuscarTelefone').addEventListener('click', () => buscarTelefone());
     inputProt.addEventListener('keydown', ev => { if (ev.key === 'Enter') buscarProtocolo(); });
-    inputTel.addEventListener('keydown', ev => { if (ev.key === 'Enter') buscarTelefone()); });
+    inputTel.addEventListener('keydown', ev => { if (ev.key === 'Enter') buscarTelefone(); });
 
     document.querySelectorAll('[data-prot]').forEach(b => b.addEventListener('click', () => buscarProtocolo(b.dataset.prot)));
     document.querySelectorAll('[data-tel]').forEach(b => b.addEventListener('click', () => buscarTelefone(b.dataset.tel)));
