@@ -290,6 +290,7 @@ public final class ApiDtos {
             long notificacoesNaoLidas,
             boolean whatsappFeatureFlagAtiva,
             List<AgendamentoResponse> pendentesAprovacao,
-            List<AgendamentoResponse> atendimentosHoje
+            List<AgendamentoResponse> atendimentosHoje,
+            List<AgendamentoResponse> todosAgendamentos
     ) {}
 }

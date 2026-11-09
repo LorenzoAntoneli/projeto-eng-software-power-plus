@@ -5,12 +5,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('agendaContainer');
     const filaAprovacaoMount = document.getElementById('filaAprovacaoMount');
     const filtroBar = document.getElementById('filtroStatusBar');
+    const btnGeral = document.getElementById('btnModoGeral');
     const btnDia = document.getElementById('btnModoDia');
     const btnSemana = document.getElementById('btnModoSemana');
-    let modo = 'DIA';
+    let modo = 'GERAL';
     let filtroStatus = 'TODOS';
 
     inputData.value = PP.hojeIso();
+
+    function definirModo(novoModo) {
+        modo = novoModo;
+        btnGeral?.classList.toggle('active', modo === 'GERAL');
+        btnDia?.classList.toggle('active', modo === 'DIA');
+        btnSemana?.classList.toggle('active', modo === 'SEMANA');
+    }
+
+    function definirFiltroStatus(novoFiltro) {
+        filtroStatus = novoFiltro;
+        filtroBar?.querySelectorAll('[data-filtro]').forEach(c => {
+            c.classList.toggle('active', c.dataset.filtro === filtroStatus);
+        });
+    }
+
+    function formatarTelefoneBr(valor) {
+        const d = String(valor || '').replace(/\D/g, '');
+        if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+        if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+        return valor || '';
+    }
 
     function deslocarDataIso(isoAtual, dias) {
         const d = new Date((isoAtual || PP.hojeIso()) + 'T12:00:00');
@@ -28,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderBotoesAcao(a) {
         if (a.statusCodigo === 'AGUARDANDO_APROVACAO') {
             return `
-                <button type="button" class="btn btn-approve btn-sm" data-aprovar="${a.id}" data-prot="${PP.esc(a.protocolo)}">Aprovar visita</button>
+                <button type="button" class="btn btn-approve btn-sm" data-aprovar="${a.id}" data-prot="${PP.esc(a.protocolo)}" data-data="${a.data}">Aprovar visita</button>
                 <button type="button" class="btn btn-danger btn-sm" data-recusar="${a.id}" data-prot="${PP.esc(a.protocolo)}">Recusar horário</button>
             `;
         }
@@ -68,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div class="order-meta">
                     <div><strong>Serviço:</strong> ${PP.esc(a.tipoServicoDescricao)}</div>
-                    <div><strong>Contato:</strong> <span class="mono">${PP.esc(a.clienteTelefone)}</span>${linkWhatsApp(a.clienteTelefone, a.protocolo)}</div>
+                    <div><strong>Contato:</strong> <span class="mono">${PP.esc(formatarTelefoneBr(a.clienteTelefone))}</span>${linkWhatsApp(a.clienteTelefone, a.protocolo)}</div>
                     <div style="grid-column:1/-1"><strong>Endereço:</strong> ${PP.esc(a.enderecoAtendimento)}</div>
                     ${a.descricaoServico ? `<div style="grid-column:1/-1"><strong>Relato do cliente:</strong> ${PP.esc(a.descricaoServico)}</div>` : ''}
                     ${a.observacaoTecnica ? `<div style="grid-column:1/-1"><strong>Parecer técnico:</strong> ${PP.esc(a.observacaoTecnica)}</div>` : ''}
@@ -99,29 +121,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function atualizarAgenda() {
         const data = inputData.value || PP.hojeIso();
         const dash = await PP.api(`/api/admin/dashboard?data=${data}`);
+        const todos = dash.todosAgendamentos || dash.atendimentosHoje || [];
 
         const kpiPend = document.getElementById('kpiPendentesAprovacao');
         if (kpiPend) {
             kpiPend.textContent = dash.pendentesAprovacaoTotal ?? 0;
             kpiPend.style.color = (dash.pendentesAprovacaoTotal > 0) ? 'var(--accent)' : 'var(--navy-900)';
         }
-        document.getElementById('kpiDiaTotal').textContent = dash.totalHoje;
-        document.getElementById('kpiDiaPendentes').textContent = dash.confirmadosHoje + dash.emAtendimentoHoje;
-        document.getElementById('kpiDiaConcluidas').textContent = dash.concluidosHoje;
+
+        const kpiTitTotal = document.getElementById('kpiTituloTotal');
+        const kpiTitConc = document.getElementById('kpiTituloConcluidas');
+        if (modo === 'GERAL') {
+            if (kpiTitTotal) kpiTitTotal.textContent = 'Total de ordens';
+            if (kpiTitConc) kpiTitConc.textContent = 'Concluídas';
+            document.getElementById('kpiDiaTotal').textContent = todos.length;
+            document.getElementById('kpiDiaPendentes').textContent = todos.filter(
+                a => a.statusCodigo === 'CONFIRMADO' || a.statusCodigo === 'EM_ATENDIMENTO'
+            ).length;
+            document.getElementById('kpiDiaConcluidas').textContent = todos.filter(
+                a => a.statusCodigo === 'CONCLUIDO'
+            ).length;
+        } else {
+            if (kpiTitTotal) kpiTitTotal.textContent = 'Ordens na data';
+            if (kpiTitConc) kpiTitConc.textContent = 'Concluídas na data';
+            document.getElementById('kpiDiaTotal').textContent = dash.totalHoje;
+            document.getElementById('kpiDiaPendentes').textContent = dash.confirmadosHoje + dash.emAtendimentoHoje;
+            document.getElementById('kpiDiaConcluidas').textContent = dash.concluidosHoje;
+        }
 
         renderFilaAprovacao(dash.pendentesAprovacao || []);
 
-        if (modo === 'DIA') {
+        if (modo === 'GERAL' || modo === 'DIA') {
             if (filtroBar) filtroBar.classList.remove('hidden');
+            const baseLista = modo === 'GERAL' ? todos : dash.atendimentosHoje;
             const listaFiltrada = filtroStatus === 'TODOS'
-                ? dash.atendimentosHoje
-                : dash.atendimentosHoje.filter(a => a.statusCodigo === filtroStatus);
+                ? baseLista
+                : baseLista.filter(a => a.statusCodigo === filtroStatus);
 
             if (!listaFiltrada.length) {
-                container.innerHTML = `<div class="empty-placeholder">Nenhuma ordem programada para ${PP.formatarDataBr(data)} neste filtro. Utilize os controles <strong>Dia anterior / Próximo dia</strong> ou alterne para a visão <strong>Semana</strong>.</div>`;
+                container.innerHTML = modo === 'GERAL'
+                    ? '<div class="empty-placeholder">Nenhuma ordem encontrada neste filtro de status.</div>'
+                    : `<div class="empty-placeholder">Nenhuma ordem programada para ${PP.formatarDataBr(data)} neste filtro. Clique em <strong>Lista geral</strong> para visualizar todas as datas ou alterne para <strong>Semana</strong>.</div>`;
                 return;
             }
-            container.innerHTML = listaFiltrada.map(a => renderCardDia(a, false)).join('');
+            container.innerHTML = listaFiltrada.map(a => renderCardDia(a, true)).join('');
             bindAcoesContainer(container);
         } else {
             if (filtroBar) filtroBar.classList.add('hidden');
@@ -160,9 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.querySelectorAll('[data-jump-date]').forEach(card => {
                 card.addEventListener('click', () => {
                     inputData.value = card.dataset.jumpDate;
-                    modo = 'DIA';
-                    btnDia.classList.add('active');
-                    btnSemana.classList.remove('active');
+                    definirModo('DIA');
                     atualizarAgenda();
                 });
             });
@@ -174,13 +215,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.addEventListener('click', async () => {
                 const id = btn.dataset.aprovar;
                 const prot = btn.dataset.prot;
+                const dataVisita = btn.dataset.data;
                 btn.disabled = true;
                 try {
                     await PP.api(`/api/admin/agendamentos/${id}/aprovar`, {
                         method: 'POST',
                         body: JSON.stringify({ observacao: 'Visita aprovada pelo Leonardo.' })
                     });
-                    PP.toast(`Ordem ${prot} aprovada e confirmada.`);
+                    if (modo === 'DIA' && dataVisita && inputData.value !== dataVisita) {
+                        inputData.value = dataVisita;
+                    }
+                    if (filtroStatus === 'AGUARDANDO_APROVACAO') {
+                        definirFiltroStatus('TODOS');
+                    }
+                    PP.toast(`Ordem ${prot} aprovada e confirmada na agenda.`);
                     await atualizarAgenda();
                     await PP.refreshSidebarCounters();
                 } catch (err) {
@@ -271,45 +319,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    inputData.addEventListener('change', atualizarAgenda);
+    inputData.addEventListener('change', () => {
+        if (modo === 'GERAL') definirModo('DIA');
+        atualizarAgenda();
+    });
     document.getElementById('btnDiaAnterior')?.addEventListener('click', () => {
         inputData.value = deslocarDataIso(inputData.value, -1);
+        if (modo === 'GERAL') definirModo('DIA');
         atualizarAgenda();
     });
     document.getElementById('btnProximoDia')?.addEventListener('click', () => {
         inputData.value = deslocarDataIso(inputData.value, 1);
+        if (modo === 'GERAL') definirModo('DIA');
         atualizarAgenda();
     });
     document.getElementById('btnHoje').addEventListener('click', () => {
         inputData.value = PP.hojeIso();
+        definirModo('DIA');
+        atualizarAgenda();
+    });
+    btnGeral?.addEventListener('click', () => {
+        definirModo('GERAL');
         atualizarAgenda();
     });
     btnDia.addEventListener('click', () => {
-        modo = 'DIA';
-        btnDia.classList.add('active');
-        btnSemana.classList.remove('active');
+        definirModo('DIA');
         atualizarAgenda();
     });
     btnSemana.addEventListener('click', () => {
-        modo = 'SEMANA';
-        btnSemana.classList.add('active');
-        btnDia.classList.remove('active');
+        definirModo('SEMANA');
         atualizarAgenda();
     });
     filtroBar?.querySelectorAll('[data-filtro]').forEach(chip => {
         chip.addEventListener('click', () => {
-            filtroStatus = chip.dataset.filtro;
-            filtroBar.querySelectorAll('[data-filtro]').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
+            definirFiltroStatus(chip.dataset.filtro);
             atualizarAgenda();
         });
     });
 
-    const dashInicial = await PP.api(`/api/admin/dashboard?data=${inputData.value}`);
-    if (dashInicial.totalHoje === 0 && dashInicial.totalSemana > 0) {
-        modo = 'SEMANA';
-        btnSemana.classList.add('active');
-        btnDia.classList.remove('active');
-    }
     await atualizarAgenda();
 });
