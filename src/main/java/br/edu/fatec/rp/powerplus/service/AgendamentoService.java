@@ -58,6 +58,10 @@ public class AgendamentoService {
         LocalDateTime agora = LocalDateTime.now(clock);
         long proximoNumero = Math.max(sequencialProtocolo.incrementAndGet(), agendamentoRepository.count() + 101);
         String protocolo = String.format("PP-%d-%04d", data.getYear(), proximoNumero);
+        while (agendamentoRepository.findByProtocoloIgnoreCase(protocolo).isPresent()) {
+            proximoNumero++;
+            protocolo = String.format("PP-%d-%04d", data.getYear(), proximoNumero);
+        }
 
         Agendamento novo = new Agendamento(
                 protocolo,

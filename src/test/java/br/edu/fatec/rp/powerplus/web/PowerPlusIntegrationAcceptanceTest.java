@@ -115,10 +115,15 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andExpect(jsonPath("$.horariosLivres", not(hasItem("14:00"))))
                 .andExpect(jsonPath("$.horariosLivres", hasItem("15:00")));
 
-        mockMvc.perform(get("/api/publico/agendamentos/protocolo/" + protocolo))
+        mockMvc.perform(get("/api/publico/agendamentos/protocolo/" + protocolo.toLowerCase()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.agendamento.protocolo").value(protocolo))
                 .andExpect(jsonPath("$.historico", hasSize(1)));
+
+        mockMvc.perform(get("/js/cliente-acompanhar.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("if (ev.key === 'Enter') buscarTelefone();")))
+                .andExpect(content().string(not(containsString("buscarTelefone()); });"))));
 
         mockMvc.perform(get("/api/publico/agendamentos/cliente").param("telefone", "(16) 99123-4567"))
                 .andExpect(status().isOk())

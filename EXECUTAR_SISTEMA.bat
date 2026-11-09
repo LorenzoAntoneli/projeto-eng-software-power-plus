@@ -9,6 +9,16 @@ if exist "%USERPROFILE%\tools\jdk21\bin\java.exe" (
 
 where java >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
+    for /d %%D in ("%USERPROFILE%\.jdks\jdk-21*") do (
+        if exist "%%D\bin\java.exe" (
+            set "JAVA_HOME=%%D"
+            set "PATH=%%D\bin;%PATH%"
+        )
+    )
+)
+
+where java >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
     echo Java 21 nao encontrado no PATH.
     pause
     exit /b 1
