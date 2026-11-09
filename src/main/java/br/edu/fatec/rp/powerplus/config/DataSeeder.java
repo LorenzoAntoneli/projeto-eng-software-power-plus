@@ -2,19 +2,26 @@ package br.edu.fatec.rp.powerplus.config;
 
 import br.edu.fatec.rp.powerplus.domain.*;
 import br.edu.fatec.rp.powerplus.repository.*;
-import br.edu.fatec.rp.powerplus.service.AutenticacaoProprietarioService;
+import br.edu.fatec.rp.powerplus.service.AutenticacaoService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
+/**
+ * Cria o usuário padrão do eletricista e preenche dados iniciais de demonstração
+ * caso o banco de dados H2 ainda esteja vazio.
+ */
 @Component
 public class DataSeeder implements CommandLineRunner {
 
     private final boolean seedEnabled;
-    private final AutenticacaoProprietarioService authService;
+    private final AutenticacaoService authService;
     private final DisponibilidadeSemanalRepository disponibilidadeRepository;
     private final BloqueioAgendaRepository bloqueioRepository;
     private final ClienteRepository clienteRepository;
@@ -22,18 +29,16 @@ public class DataSeeder implements CommandLineRunner {
     private final HistoricoStatusRepository historicoRepository;
     private final ConversaChatRepository conversaChatRepository;
     private final NotificacaoRegistroRepository notificacaoRepository;
-    private final Clock clock;
 
     public DataSeeder(@Value("${powerplus.seed.enabled:true}") boolean seedEnabled,
-                      AutenticacaoProprietarioService authService,
+                      AutenticacaoService authService,
                       DisponibilidadeSemanalRepository disponibilidadeRepository,
                       BloqueioAgendaRepository bloqueioRepository,
                       ClienteRepository clienteRepository,
                       AgendamentoRepository agendamentoRepository,
                       HistoricoStatusRepository historicoRepository,
                       ConversaChatRepository conversaChatRepository,
-                      NotificacaoRegistroRepository notificacaoRepository,
-                      Clock clock) {
+                      NotificacaoRegistroRepository notificacaoRepository) {
         this.seedEnabled = seedEnabled;
         this.authService = authService;
         this.disponibilidadeRepository = disponibilidadeRepository;
@@ -43,7 +48,6 @@ public class DataSeeder implements CommandLineRunner {
         this.historicoRepository = historicoRepository;
         this.conversaChatRepository = conversaChatRepository;
         this.notificacaoRepository = notificacaoRepository;
-        this.clock = clock;
     }
 
     @Override
@@ -54,136 +58,92 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        // Expediente padrao da semana
+        // 1. Expediente padrão da semana (Seg–Sex 08h–18h, Sáb 08h–13h, Dom fechado)
         for (DayOfWeek dia : DayOfWeek.values()) {
-            if (dia == DayOfWeek.SUNDAY) {
-                disponibilidadeRepository.save(new DisponibilidadeSemanal(dia, false, LocalTime.of(8, 0), LocalTime.of(12, 0), 60));
-            } else if (dia == DayOfWeek.SATURDAY) {
-                disponibilidadeRepository.save(new DisponibilidadeSemanal(dia, true, LocalTime.of(8, 0), LocalTime.of(13, 0), 60));
-            } else {
-                disponibilidadeRepository.save(new DisponibilidadeSemanal(dia, true, LocalTime.of(8, 0), LocalTime.of(18, 0), 60));
-            }
+            boolean ativo = dia != DayOfWeek.SUNDAY;
+            LocalTime fim = (dia == DayOfWeek.SUNDAY) ? LocalTime.of(12, 0)
+                    : (dia == DayOfWeek.SATURDAY) ? LocalTime.of(13, 0) : LocalTime.of(18, 0);
+            disponibilidadeRepository.save(new DisponibilidadeSemanal(dia, ativo, LocalTime.of(8, 0), fim, 60));
         }
 
-        LocalDate hoje = LocalDate.now(clock);
-        LocalDate proximoDiaUtil = proximoDiaAtivo(hoje.plusDays(1));
-        LocalDate segundoDiaUtil = proximoDiaAtivo(proximoDiaUtil.plusDays(1));
-        LocalDate diaFolgaFutura = proximoDiaAtivo(segundoDiaUtil.plusDays(4));
+        LocalDate hoje = LocalDate.now();
+        LocalDate proximoDiaUtil = pularDomingo(hoje.plusDays(1));
+        LocalDate segundoDiaUtil = pularDomingo(proximoDiaUtil.plusDays(1));
+        bloqueioRepository.save(new BloqueioAgenda(pularDomingo(segundoDiaUtil.plusDays(4)), "Curso externo / reciclagem técnica"));
 
-        bloqueioRepository.save(new BloqueioAgenda(diaFolgaFutura, "Curso externo / reciclagem técnica"));
+        // 2. Clientes de exemplo
+        Cliente c1 = salvarCliente("Mariana Ferreira", "16991234567", "mariana.ferreira@exemplo.com",
+                "Rua São Sebastião, 410 - Centro, Ribeirão Preto", PerfilCliente.RESIDENCIAL, "Apartamento 42 - Interfone na portaria");
+        Cliente c2 = salvarCliente("Condomínio Residencial Ipê Branco", "1636258899", "sindico.ipe@exemplo.com",
+                "Av. João Fiúsa, 1420 - Jardim Irajá, Ribeirão Preto", PerfilCliente.EMPRESARIAL_CONDOMINIO, "Procurar zelador Marcos; manutenção preventiva mensal");
+        Cliente c3 = salvarCliente("Padaria Artesanal Pão Quente Ltda", "16992345678", "contato@paoquente.com",
+                "Av. Independência, 890 - Sumaré, Ribeirão Preto", PerfilCliente.EMPRESARIAL_CONDOMINIO, "Quadro trifásico dos fornos industriais");
+        Cliente c4 = salvarCliente("Lucas Andrade", "16997776655", null,
+                "Rua Conde Afonso Celso, 620 - Boulevard, Ribeirão Preto", PerfilCliente.RESIDENCIAL, null);
 
-        // Clientes iniciais
-        Cliente c1 = new Cliente("Mariana Ferreira", "16991234567",
-                "Rua São Sebastião, 410 - Centro, Ribeirão Preto", PerfilCliente.RESIDENCIAL);
-        c1.setEmail("mariana.ferreira@exemplo.com");
-        c1.setObservacoes("Apartamento 42 - Interfone na portaria");
-        clienteRepository.save(c1);
+        // 3. Agendamentos iniciais
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDate diaHojeAgenda = pularDomingo(hoje);
 
-        Cliente c2 = new Cliente("Condomínio Residencial Ipê Branco", "1636258899",
-                "Av. João Fiúsa, 1420 - Jardim Irajá, Ribeirão Preto", PerfilCliente.EMPRESARIAL_CONDOMINIO);
-        c2.setEmail("sindico.ipe@exemplo.com");
-        c2.setObservacoes("Procurar zelador Marcos; manutenção preventiva mensal");
-        clienteRepository.save(c2);
-
-        Cliente c3 = new Cliente("Padaria Artesanal Pão Quente Ltda", "16992345678",
-                "Av. Independência, 890 - Sumaré, Ribeirão Preto", PerfilCliente.EMPRESARIAL_CONDOMINIO);
-        c3.setEmail("contato@paoquente.com");
-        c3.setObservacoes("Quadro trifásico dos fornos industriais");
-        clienteRepository.save(c3);
-
-        Cliente c4 = new Cliente("Lucas Andrade", "16997776655",
-                "Rua Conde Afonso Celso, 620 - Boulevard, Ribeirão Preto", PerfilCliente.RESIDENCIAL);
-        clienteRepository.save(c4);
-
-        LocalDateTime agora = LocalDateTime.now(clock);
-
-        // Agendamentos iniciais
-        LocalDate diaHojeAgenda = hoje.getDayOfWeek() == DayOfWeek.SUNDAY ? proximoDiaUtil : hoje;
-
-        Agendamento a1 = criarSeed("PP-2026-0101", c1, diaHojeAgenda, LocalTime.of(9, 0),
-                TipoServico.INSTALACAO_ELETRICA, c1.getEnderecoPadrao(),
+        Agendamento a1 = salvarSeed("PP-2026-0101", c1, diaHojeAgenda, LocalTime.of(9, 0), TipoServico.INSTALACAO_ELETRICA,
                 "Substituição de disjuntor e instalação de chuveiro 220V", StatusAgendamento.CONCLUIDO, agora.minusHours(3));
         a1.setObservacaoTecnica("Instalado disjuntor bipolar 40A + cabo 6mm².");
         agendamentoRepository.save(a1);
         historicoRepository.save(new HistoricoStatusAgendamento(a1, StatusAgendamento.CONFIRMADO, StatusAgendamento.CONCLUIDO,
                 "Leonardo (Proprietário Power Plus)", "Serviço concluído e testado", agora.minusHours(1)));
 
-        Agendamento a2 = criarSeed("PP-2026-0102", c2, diaHojeAgenda, LocalTime.of(14, 0),
-                TipoServico.MANUTENCAO_PREVENTIVA, c2.getEnderecoPadrao(),
+        Agendamento a2 = salvarSeed("PP-2026-0102", c2, diaHojeAgenda, LocalTime.of(14, 0), TipoServico.MANUTENCAO_PREVENTIVA,
                 "Inspeção preventiva nas bombas do reservatório e iluminação de emergência", StatusAgendamento.CONFIRMADO, agora.minusHours(5));
-
-        Agendamento a3 = criarSeed("PP-2026-0103", c3, proximoDiaUtil, LocalTime.of(10, 0),
-                TipoServico.QUADRO_DISJUNTORES, c3.getEnderecoPadrao(),
+        salvarSeed("PP-2026-0103", c3, proximoDiaUtil, LocalTime.of(10, 0), TipoServico.QUADRO_DISJUNTORES,
                 "Balanceamento de fases e reaperto de barramentos do quadro principal", StatusAgendamento.CONFIRMADO, agora.minusHours(2));
-
-        Agendamento a4 = criarSeed("PP-2026-0104", c4, segundoDiaUtil, LocalTime.of(15, 0),
-                TipoServico.VISTORIA_ORCAMENTO, c4.getEnderecoPadrao(),
+        salvarSeed("PP-2026-0104", c4, segundoDiaUtil, LocalTime.of(15, 0), TipoServico.VISTORIA_ORCAMENTO,
                 "Orçamento para pontos de ar-condicionado nos quartos", StatusAgendamento.AGUARDANDO_APROVACAO, agora.minusMinutes(40));
-
-        Agendamento a5 = criarSeed("PP-2026-0105", c1, proximoDiaUtil, LocalTime.of(16, 0),
-                TipoServico.REPARO_ELETRICO, c1.getEnderecoPadrao(),
+        Agendamento a5 = salvarSeed("PP-2026-0105", c1, proximoDiaUtil, LocalTime.of(16, 0), TipoServico.REPARO_ELETRICO,
                 "Tomada da lavanderia aquecendo ao ligar secadora", StatusAgendamento.AGUARDANDO_APROVACAO, agora.minusMinutes(15));
 
-        // Conversa de exemplo no chat
+        // 4. Conversa e notificações iniciais
         ConversaChat chat = new ConversaChat("Roberto (Síndico Cond. Ipê)", "1636258899", agora.minusMinutes(25));
-        chat.adicionarMensagem("ASSISTENTE",
-                "Olá, Roberto! Sou o assistente virtual da Power Plus. Como posso ajudar?", agora.minusMinutes(25));
-        chat.adicionarMensagem("CLIENTE",
-                "Preciso verificar se conseguimos incluir termografia do QGBT na visita preventiva de hoje às 14h.", agora.minusMinutes(24));
-        chat.adicionarMensagem("ASSISTENTE",
-                "Sua solicitação envolve detalhes específicos que precisam da avaliação direta do eletricista. Encaminhei nossa conversa com todo o histórico para o proprietário assumir o atendimento!",
-                agora.minusMinutes(24));
+        chat.adicionarMensagem("ASSISTENTE", "Olá, Roberto! Sou o assistente virtual da Power Plus. Como posso ajudar?", agora.minusMinutes(25));
+        chat.adicionarMensagem("CLIENTE", "Preciso verificar se conseguimos incluir termografia do QGBT na visita preventiva de hoje às 14h.", agora.minusMinutes(24));
+        chat.adicionarMensagem("ASSISTENTE", "Sua solicitação envolve detalhes específicos que precisam da avaliação direta do eletricista. Encaminhei nossa conversa com todo o histórico para o proprietário assumir o atendimento!", agora.minusMinutes(24));
         chat.setStatus(StatusConversaChat.AGUARDANDO_HUMANO);
         conversaChatRepository.save(chat);
 
-        // Avisos iniciais
-        notificacaoRepository.save(new NotificacaoRegistro(
-                TipoNotificacao.SOLICITACAO_RECEBIDA, "PROPRIETARIO",
-                "Aprovação pendente: " + c1.getNome(),
-                "Protocolo " + a5.getProtocolo() + " aguarda sua aprovação para às 16:00 – Reparo Elétrico.",
-                a5.getProtocolo(), "SISTEMA_INTERNO", agora.minusMinutes(15)
-        ));
-        notificacaoRepository.save(new NotificacaoRegistro(
-                TipoNotificacao.CONFIRMACAO, "PROPRIETARIO",
-                "Novo agendamento confirmado: " + c2.getNome(),
-                "Protocolo " + a2.getProtocolo() + " agendado às 14:00 – Manutenção Preventiva.",
-                a2.getProtocolo(), "SISTEMA_INTERNO", agora.minusHours(2)
-        ));
-        notificacaoRepository.save(new NotificacaoRegistro(
-                TipoNotificacao.TRANSBORDO_CHAT, "PROPRIETARIO",
-                "Cliente aguarda atendimento humano no chat",
-                "Roberto (Síndico Cond. Ipê) solicitou avaliação sobre termografia do QGBT.",
-                "CHAT-1", "SISTEMA_INTERNO", agora.minusMinutes(24)
-        ));
+        notificacaoRepository.save(new NotificacaoRegistro(TipoNotificacao.SOLICITACAO_RECEBIDA, "PROPRIETARIO",
+                "Aprovação pendente: " + c1.getNome(), "Protocolo " + a5.getProtocolo() + " aguarda sua aprovação para às 16:00 – Reparo Elétrico.",
+                a5.getProtocolo(), "SISTEMA_INTERNO", agora.minusMinutes(15)));
+        notificacaoRepository.save(new NotificacaoRegistro(TipoNotificacao.CONFIRMACAO, "PROPRIETARIO",
+                "Novo agendamento confirmado: " + c2.getNome(), "Protocolo " + a2.getProtocolo() + " agendado às 14:00 – Manutenção Preventiva.",
+                a2.getProtocolo(), "SISTEMA_INTERNO", agora.minusHours(2)));
+        notificacaoRepository.save(new NotificacaoRegistro(TipoNotificacao.TRANSBORDO_CHAT, "PROPRIETARIO",
+                "Cliente aguarda atendimento humano no chat", "Roberto (Síndico Cond. Ipê) solicitou avaliação sobre termografia do QGBT.",
+                "CHAT-1", "SISTEMA_INTERNO", agora.minusMinutes(24)));
     }
 
-    private Agendamento criarSeed(String protocolo, Cliente cliente, LocalDate data, LocalTime inicio,
-                                  TipoServico servico, String endereco, String descricao,
-                                  StatusAgendamento status, LocalDateTime criadoEm) {
-        Agendamento a = new Agendamento(protocolo, cliente, data, inicio, inicio.plusMinutes(60),
-                servico, endereco, descricao);
+    private Cliente salvarCliente(String nome, String tel, String email, String endereco, PerfilCliente perfil, String obs) {
+        Cliente c = new Cliente(nome, tel, endereco, perfil);
+        c.setEmail(email);
+        c.setObservacoes(obs);
+        return clienteRepository.save(c);
+    }
+
+    private Agendamento salvarSeed(String protocolo, Cliente cliente, LocalDate data, LocalTime inicio,
+                                   TipoServico servico, String descricao, StatusAgendamento status, LocalDateTime criadoEm) {
+        Agendamento a = new Agendamento(protocolo, cliente, data, inicio, inicio.plusMinutes(60), servico, cliente.getEnderecoPadrao(), descricao);
         a.setStatus(status);
         a.setCriadoEm(criadoEm);
         a.setAtualizadoEm(criadoEm);
         Agendamento salvo = agendamentoRepository.save(a);
-        historicoRepository.save(new HistoricoStatusAgendamento(
-                salvo, null, status == StatusAgendamento.AGUARDANDO_APROVACAO
-                        ? StatusAgendamento.AGUARDANDO_APROVACAO
-                        : StatusAgendamento.CONFIRMADO,
+        boolean pendente = status == StatusAgendamento.AGUARDANDO_APROVACAO;
+        historicoRepository.save(new HistoricoStatusAgendamento(salvo, null,
+                pendente ? StatusAgendamento.AGUARDANDO_APROVACAO : StatusAgendamento.CONFIRMADO,
                 "CLIENTE (Autoatendimento)",
-                status == StatusAgendamento.AGUARDANDO_APROVACAO
-                        ? "Solicitação enviada — aguardando aprovação do proprietário"
-                        : "Agendamento registrado e aprovado",
-                criadoEm
-        ));
+                pendente ? "Solicitação enviada — aguardando aprovação do proprietário" : "Agendamento registrado e aprovado",
+                criadoEm));
         return salvo;
     }
 
-    private LocalDate proximoDiaAtivo(LocalDate base) {
-        LocalDate d = base;
-        while (d.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            d = d.plusDays(1);
-        }
-        return d;
+    private LocalDate pularDomingo(LocalDate data) {
+        return data.getDayOfWeek() == DayOfWeek.SUNDAY ? data.plusDays(1) : data;
     }
 }

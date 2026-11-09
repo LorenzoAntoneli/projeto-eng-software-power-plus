@@ -33,35 +33,8 @@ public class BloqueioAgenda {
         this.criadoEm = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDate getData() {
-        return data;
-    }
-
-    public void setData(LocalDate data) {
-        this.data = data;
-    }
-
-    public String getMotivo() {
-        return motivo;
-    }
-
-    public void setMotivo(String motivo) {
-        this.motivo = motivo;
-    }
-
-    public LocalDateTime getCriadoEm() {
-        return criadoEm;
-    }
-
-    public void setCriadoEm(LocalDateTime criadoEm) {
-        this.criadoEm = criadoEm;
-    }
+    public Long getId() { return id; }
+    public LocalDate getData() { return data; }
+    public String getMotivo() { return motivo; }
+    public LocalDateTime getCriadoEm() { return criadoEm; }
 }

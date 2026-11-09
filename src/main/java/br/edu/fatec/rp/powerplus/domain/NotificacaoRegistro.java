@@ -52,43 +52,14 @@ public class NotificacaoRegistro {
         this.criadaEm = criadaEm;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public TipoNotificacao getTipo() {
-        return tipo;
-    }
-
-    public String getDestinatarioPapel() {
-        return destinatarioPapel;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public String getMensagem() {
-        return mensagem;
-    }
-
-    public String getProtocoloReferencia() {
-        return protocoloReferencia;
-    }
-
-    public String getCanalEnvio() {
-        return canalEnvio;
-    }
-
-    public boolean isLida() {
-        return lida;
-    }
-
-    public void setLida(boolean lida) {
-        this.lida = lida;
-    }
-
-    public LocalDateTime getCriadaEm() {
-        return criadaEm;
-    }
+    public Long getId() { return id; }
+    public TipoNotificacao getTipo() { return tipo; }
+    public String getDestinatarioPapel() { return destinatarioPapel; }
+    public String getTitulo() { return titulo; }
+    public String getMensagem() { return mensagem; }
+    public String getProtocoloReferencia() { return protocoloReferencia; }
+    public String getCanalEnvio() { return canalEnvio; }
+    public boolean isLida() { return lida; }
+    public void setLida(boolean lida) { this.lida = lida; }
+    public LocalDateTime getCriadaEm() { return criadaEm; }
 }

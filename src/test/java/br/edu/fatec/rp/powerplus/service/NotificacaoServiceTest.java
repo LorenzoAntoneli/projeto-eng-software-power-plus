@@ -1,8 +1,7 @@
-package br.edu.fatec.rp.powerplus.service.notification;
+package br.edu.fatec.rp.powerplus.service;
 
 import br.edu.fatec.rp.powerplus.domain.*;
 import br.edu.fatec.rp.powerplus.repository.NotificacaoRegistroRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,30 +9,22 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CentralNotificacaoServiceTest {
+class NotificacaoServiceTest {
 
-    @Mock
-    private NotificacaoRegistroRepository repository;
-
-    private Clock clock;
-
-    @BeforeEach
-    void setUp() {
-        ZoneId zona = ZoneId.of("America/Sao_Paulo");
-        clock = Clock.fixed(LocalDateTime.of(2026, 9, 10, 10, 0).atZone(zona).toInstant(), zona);
-    }
+    @Mock private NotificacaoRegistroRepository repository;
 
     @Test
     @DisplayName("Registra envio pelo canal interno quando integração WhatsApp está desligada")
     void deveUsarCanalInternoQuandoFeatureFlagDesativada() {
-        CentralNotificacaoService service = new CentralNotificacaoService(repository, clock, false);
+        NotificacaoService service = new NotificacaoService(repository, false);
         assertFalse(service.isIntegracaoWhatsAppAtiva());
 
         Cliente cli = new Cliente("Mariana", "16991234567", "Rua X, 10", PerfilCliente.RESIDENCIAL);
@@ -53,7 +44,7 @@ class CentralNotificacaoServiceTest {
     @Test
     @DisplayName("Habilita canal WhatsApp quando a flag de integração está ativa")
     void deveHabilitarCanalWhatsAppQuandoFeatureFlagAtiva() {
-        CentralNotificacaoService service = new CentralNotificacaoService(repository, clock, true);
+        NotificacaoService service = new NotificacaoService(repository, true);
         assertTrue(service.isIntegracaoWhatsAppAtiva());
 
         Cliente cli = new Cliente("Condomínio Sol", "1636201010", "Av. Y, 50", PerfilCliente.EMPRESARIAL_CONDOMINIO);
@@ -102,7 +93,7 @@ class CentralNotificacaoServiceTest {
     @Test
     @DisplayName("Registra avisos de nova solicitação e de recusa")
     void deveRegistrarNotificacoesDeSolicitacaoERecusa() {
-        CentralNotificacaoService service = new CentralNotificacaoService(repository, clock, false);
+        NotificacaoService service = new NotificacaoService(repository, false);
         Cliente cli = new Cliente("Roberto", "16992223344", "Av. Z, 100", PerfilCliente.EMPRESARIAL_CONDOMINIO);
         Agendamento ag = new Agendamento("PP-2026-0205", cli, LocalDate.of(2026, 9, 14),
                 LocalTime.of(15, 0), LocalTime.of(16, 0), TipoServico.QUADRO_DISJUNTORES, "Av. Z, 100", "QGBT");

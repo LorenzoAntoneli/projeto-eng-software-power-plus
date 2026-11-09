@@ -77,107 +77,25 @@ public class Agendamento {
         return LocalDateTime.of(data, horaInicio);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getProtocolo() {
-        return protocolo;
-    }
-
-    public void setProtocolo(String protocolo) {
-        this.protocolo = protocolo;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public LocalDate getData() {
-        return data;
-    }
-
-    public void setData(LocalDate data) {
-        this.data = data;
-    }
-
-    public LocalTime getHoraInicio() {
-        return horaInicio;
-    }
-
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
-    }
-
-    public LocalTime getHoraFim() {
-        return horaFim;
-    }
-
-    public void setHoraFim(LocalTime horaFim) {
-        this.horaFim = horaFim;
-    }
-
-    public TipoServico getTipoServico() {
-        return tipoServico;
-    }
-
-    public void setTipoServico(TipoServico tipoServico) {
-        this.tipoServico = tipoServico;
-    }
-
-    public String getEnderecoAtendimento() {
-        return enderecoAtendimento;
-    }
-
-    public void setEnderecoAtendimento(String enderecoAtendimento) {
-        this.enderecoAtendimento = enderecoAtendimento;
-    }
-
-    public String getDescricaoServico() {
-        return descricaoServico;
-    }
-
-    public void setDescricaoServico(String descricaoServico) {
-        this.descricaoServico = descricaoServico;
-    }
-
-    public StatusAgendamento getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusAgendamento status) {
-        this.status = status;
-    }
-
-    public String getObservacaoTecnica() {
-        return observacaoTecnica;
-    }
-
-    public void setObservacaoTecnica(String observacaoTecnica) {
-        this.observacaoTecnica = observacaoTecnica;
-    }
-
-    public LocalDateTime getCriadoEm() {
-        return criadoEm;
-    }
-
-    public void setCriadoEm(LocalDateTime criadoEm) {
-        this.criadoEm = criadoEm;
-    }
-
-    public LocalDateTime getAtualizadoEm() {
-        return atualizadoEm;
-    }
-
-    public void setAtualizadoEm(LocalDateTime atualizadoEm) {
-        this.atualizadoEm = atualizadoEm;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getProtocolo() { return protocolo; }
+    public Cliente getCliente() { return cliente; }
+    public LocalDate getData() { return data; }
+    public void setData(LocalDate data) { this.data = data; }
+    public LocalTime getHoraInicio() { return horaInicio; }
+    public void setHoraInicio(LocalTime horaInicio) { this.horaInicio = horaInicio; }
+    public LocalTime getHoraFim() { return horaFim; }
+    public void setHoraFim(LocalTime horaFim) { this.horaFim = horaFim; }
+    public TipoServico getTipoServico() { return tipoServico; }
+    public String getEnderecoAtendimento() { return enderecoAtendimento; }
+    public String getDescricaoServico() { return descricaoServico; }
+    public StatusAgendamento getStatus() { return status; }
+    public void setStatus(StatusAgendamento status) { this.status = status; }
+    public String getObservacaoTecnica() { return observacaoTecnica; }
+    public void setObservacaoTecnica(String observacaoTecnica) { this.observacaoTecnica = observacaoTecnica; }
+    public LocalDateTime getCriadoEm() { return criadoEm; }
+    public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
+    public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
+    public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
 }

@@ -10,23 +10,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Formatos simples de JSON trocados entre as telas (HTML/JS) e o servidor Java.
+ */
 public final class ApiDtos {
 
-    private ApiDtos() {
-    }
+    private ApiDtos() {}
 
-    public record OpcaoEnumDto(String codigo, String descricao, Integer duracaoMinutos) {}
-
-    public record CatalogoPublicoResponse(
-            List<OpcaoEnumDto> tiposServico,
-            List<OpcaoEnumDto> perfisCliente
-    ) {}
-
-    public record HorariosLivresResponse(
-            LocalDate data,
-            String diaSemana,
-            List<String> horariosLivres
-    ) {}
+    // === 1. Dados recebidos do navegador (Requests) ===
 
     public record NovoAgendamentoRequest(
             @NotBlank(message = "O nome completo é obrigatório.") String nomeCliente,
@@ -46,10 +37,6 @@ public final class ApiDtos {
             String motivo
     ) {}
 
-    public record CancelarAgendamentoRequest(String motivo) {}
-
-    public record DecisaoAprovacaoRequest(String observacao) {}
-
     public record AtualizarStatusRequest(
             @NotNull(message = "Informe o novo status.") StatusAgendamento novoStatus,
             String observacao
@@ -65,10 +52,8 @@ public final class ApiDtos {
     ) {}
 
     public record SalvarDisponibilidadeRequest(
-            @NotNull DayOfWeek diaSemana,
-            boolean ativo,
-            @NotNull LocalTime horaInicio,
-            @NotNull LocalTime horaFim,
+            @NotNull DayOfWeek diaSemana, boolean ativo,
+            @NotNull LocalTime horaInicio, @NotNull LocalTime horaFim,
             int duracaoSlotMinutos
     ) {}
 
@@ -83,12 +68,8 @@ public final class ApiDtos {
             @NotBlank(message = "Informe a senha.") String password
     ) {}
 
-    public record LoginResponse(String token, String username, String nomeExibicao) {}
-
     public record MensagemClienteChatRequest(
-            Long conversaId,
-            String nomeCliente,
-            String telefoneCliente,
+            Long conversaId, String nomeCliente, String telefoneCliente,
             @NotBlank(message = "Digite sua mensagem.") String mensagem,
             boolean solicitarHumano
     ) {}
@@ -98,144 +79,59 @@ public final class ApiDtos {
             boolean encerrar
     ) {}
 
-    public record ClienteResponse(
-            Long id,
-            String nome,
-            String telefone,
-            String email,
-            String enderecoPadrao,
-            String perfilCodigo,
-            String perfilDescricao,
-            String observacoes,
-            LocalDateTime criadoEm
-    ) {
+    // === 2. Dados devolvidos pelo servidor (Responses) ===
+
+    public record OpcaoEnumDto(String codigo, String descricao, Integer duracaoMinutos) {}
+
+    public record ClienteResponse(Long id, String nome, String telefone, String email, String enderecoPadrao,
+                                  String perfilCodigo, String perfilDescricao, String observacoes, LocalDateTime criadoEm) {
         public static ClienteResponse from(Cliente c) {
-            return new ClienteResponse(
-                    c.getId(),
-                    c.getNome(),
-                    c.getTelefone(),
-                    c.getEmail(),
-                    c.getEnderecoPadrao(),
-                    c.getPerfil().name(),
-                    c.getPerfil().getDescricao(),
-                    c.getObservacoes(),
-                    c.getCriadoEm()
-            );
+            return new ClienteResponse(c.getId(), c.getNome(), c.getTelefone(), c.getEmail(), c.getEnderecoPadrao(),
+                    c.getPerfil().name(), c.getPerfil().getDescricao(), c.getObservacoes(), c.getCriadoEm());
         }
     }
 
-    public record AgendamentoResponse(
-            Long id,
-            String protocolo,
-            Long clienteId,
-            String clienteNome,
-            String clienteTelefone,
-            String clientePerfil,
-            LocalDate data,
-            String horaInicio,
-            String horaFim,
-            String tipoServicoCodigo,
-            String tipoServicoDescricao,
-            String enderecoAtendimento,
-            String descricaoServico,
-            String statusCodigo,
-            String statusDescricao,
-            String observacaoTecnica,
-            LocalDateTime criadoEm
-    ) {
+    public record AgendamentoResponse(Long id, String protocolo, Long clienteId, String clienteNome, String clienteTelefone,
+                                      String clientePerfil, LocalDate data, String horaInicio, String horaFim,
+                                      String tipoServicoCodigo, String tipoServicoDescricao, String enderecoAtendimento,
+                                      String descricaoServico, String statusCodigo, String statusDescricao,
+                                      String observacaoTecnica, LocalDateTime criadoEm) {
         public static AgendamentoResponse from(Agendamento a) {
-            return new AgendamentoResponse(
-                    a.getId(),
-                    a.getProtocolo(),
-                    a.getCliente().getId(),
-                    a.getCliente().getNome(),
-                    a.getCliente().getTelefone(),
-                    a.getCliente().getPerfil().getDescricao(),
-                    a.getData(),
-                    a.getHoraInicio().toString(),
-                    a.getHoraFim().toString(),
-                    a.getTipoServico().name(),
-                    a.getTipoServico().getDescricao(),
-                    a.getEnderecoAtendimento(),
-                    a.getDescricaoServico(),
-                    a.getStatus().name(),
-                    a.getStatus().getDescricao(),
-                    a.getObservacaoTecnica(),
-                    a.getCriadoEm()
-            );
+            return new AgendamentoResponse(a.getId(), a.getProtocolo(), a.getCliente().getId(), a.getCliente().getNome(),
+                    a.getCliente().getTelefone(), a.getCliente().getPerfil().getDescricao(), a.getData(),
+                    a.getHoraInicio().toString(), a.getHoraFim().toString(), a.getTipoServico().name(),
+                    a.getTipoServico().getDescricao(), a.getEnderecoAtendimento(), a.getDescricaoServico(),
+                    a.getStatus().name(), a.getStatus().getDescricao(), a.getObservacaoTecnica(), a.getCriadoEm());
         }
     }
 
-    public record HistoricoStatusResponse(
-            Long id,
-            String statusAnterior,
-            String statusNovo,
-            String responsavel,
-            String observacao,
-            LocalDateTime dataHora
-    ) {
+    public record HistoricoStatusResponse(Long id, String statusAnterior, String statusNovo,
+                                          String responsavel, String observacao, LocalDateTime dataHora) {
         public static HistoricoStatusResponse from(HistoricoStatusAgendamento h) {
-            return new HistoricoStatusResponse(
-                    h.getId(),
-                    h.getStatusAnterior() != null ? h.getStatusAnterior().getDescricao() : "Criação",
-                    h.getStatusNovo().getDescricao(),
-                    h.getResponsavel(),
-                    h.getObservacao(),
-                    h.getDataHora()
-            );
+            String anterior = h.getStatusAnterior() != null ? h.getStatusAnterior().getDescricao() : "Criação";
+            return new HistoricoStatusResponse(h.getId(), anterior, h.getStatusNovo().getDescricao(),
+                    h.getResponsavel(), h.getObservacao(), h.getDataHora());
         }
     }
 
-    public record MensagemChatDto(
-            Long id,
-            String remetente,
-            String conteudo,
-            LocalDateTime enviadaEm
-    ) {
-        public static MensagemChatDto from(MensagemChat m) {
-            return new MensagemChatDto(m.getId(), m.getRemetente(), m.getConteudo(), m.getEnviadaEm());
-        }
-    }
+    public record MensagemChatDto(Long id, String remetente, String conteudo, LocalDateTime enviadaEm) {}
 
-    public record ConversaChatResponse(
-            Long id,
-            String nomeCliente,
-            String telefoneCliente,
-            String statusCodigo,
-            String statusDescricao,
-            LocalDateTime atualizadaEm,
-            List<MensagemChatDto> mensagens
-    ) {
+    public record ConversaChatResponse(Long id, String nomeCliente, String telefoneCliente, String statusCodigo,
+                                       String statusDescricao, LocalDateTime atualizadaEm, List<MensagemChatDto> mensagens) {
         public static ConversaChatResponse from(ConversaChat c) {
-            return new ConversaChatResponse(
-                    c.getId(),
-                    c.getNomeCliente(),
-                    c.getTelefoneCliente(),
-                    c.getStatus().name(),
-                    c.getStatus().getDescricao(),
-                    c.getAtualizadaEm(),
-                    c.getMensagens().stream().map(MensagemChatDto::from).toList()
-            );
+            List<MensagemChatDto> msgs = c.getMensagens().stream()
+                    .map(m -> new MensagemChatDto(m.getId(), m.getRemetente(), m.getConteudo(), m.getEnviadaEm()))
+                    .toList();
+            return new ConversaChatResponse(c.getId(), c.getNomeCliente(), c.getTelefoneCliente(),
+                    c.getStatus().name(), c.getStatus().getDescricao(), c.getAtualizadaEm(), msgs);
         }
     }
 
-    public record DisponibilidadeResponse(
-            Long id,
-            String diaSemana,
-            boolean ativo,
-            String horaInicio,
-            String horaFim,
-            int duracaoSlotMinutos
-    ) {
+    public record DisponibilidadeResponse(Long id, String diaSemana, boolean ativo,
+                                          String horaInicio, String horaFim, int duracaoSlotMinutos) {
         public static DisponibilidadeResponse from(DisponibilidadeSemanal d) {
-            return new DisponibilidadeResponse(
-                    d.getId(),
-                    d.getDiaSemana().name(),
-                    d.isAtivo(),
-                    d.getHoraInicio().toString(),
-                    d.getHoraFim().toString(),
-                    d.getDuracaoSlotMinutos()
-            );
+            return new DisponibilidadeResponse(d.getId(), d.getDiaSemana().name(), d.isAtivo(),
+                    d.getHoraInicio().toString(), d.getHoraFim().toString(), d.getDuracaoSlotMinutos());
         }
     }
 
@@ -245,52 +141,19 @@ public final class ApiDtos {
         }
     }
 
-    public record ConfiguracaoAgendaResponse(
-            List<DisponibilidadeResponse> disponibilidades,
-            List<BloqueioResponse> bloqueios
-    ) {}
-
-    public record NotificacaoResponse(
-            Long id,
-            String tipo,
-            String destinatarioPapel,
-            String titulo,
-            String mensagem,
-            String protocoloReferencia,
-            String canalEnvio,
-            boolean lida,
-            LocalDateTime criadaEm
-    ) {
+    public record NotificacaoResponse(Long id, String tipo, String destinatarioPapel, String titulo, String mensagem,
+                                      String protocoloReferencia, String canalEnvio, boolean lida, LocalDateTime criadaEm) {
         public static NotificacaoResponse from(NotificacaoRegistro n) {
-            return new NotificacaoResponse(
-                    n.getId(),
-                    n.getTipo().name(),
-                    n.getDestinatarioPapel(),
-                    n.getTitulo(),
-                    n.getMensagem(),
-                    n.getProtocoloReferencia(),
-                    n.getCanalEnvio(),
-                    n.isLida(),
-                    n.getCriadaEm()
-            );
+            return new NotificacaoResponse(n.getId(), n.getTipo().name(), n.getDestinatarioPapel(), n.getTitulo(),
+                    n.getMensagem(), n.getProtocoloReferencia(), n.getCanalEnvio(), n.isLida(), n.getCriadaEm());
         }
     }
 
     public record DashboardResumoResponse(
-            LocalDate dataReferencia,
-            long totalHoje,
-            long aguardandoAprovacaoHoje,
-            long confirmadosHoje,
-            long emAtendimentoHoje,
-            long concluidosHoje,
-            long canceladosHoje,
-            long totalSemana,
-            long pendentesAprovacaoTotal,
-            long chatsAguardandoHumano,
-            long notificacoesNaoLidas,
-            boolean whatsappFeatureFlagAtiva,
-            List<AgendamentoResponse> pendentesAprovacao,
-            List<AgendamentoResponse> atendimentosHoje,
-            List<AgendamentoResponse> todosAgendamentos
+            LocalDate dataReferencia, long totalHoje, long aguardandoAprovacaoHoje, long confirmadosHoje,
+            long emAtendimentoHoje, long concluidosHoje, long canceladosHoje, long totalSemana,
+            long pendentesAprovacaoTotal, long chatsAguardandoHumano, long notificacoesNaoLidas,
+            boolean whatsappFeatureFlagAtiva, List<AgendamentoResponse> pendentesAprovacao,
+            List<AgendamentoResponse> atendimentosHoje, List<AgendamentoResponse> todosAgendamentos
     ) {}
 }

@@ -35,19 +35,8 @@ public class MensagemChat {
         this.enviadaEm = enviadaEm;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getRemetente() {
-        return remetente;
-    }
-
-    public String getConteudo() {
-        return conteudo;
-    }
-
-    public LocalDateTime getEnviadaEm() {
-        return enviadaEm;
-    }
+    public Long getId() { return id; }
+    public String getRemetente() { return remetente; }
+    public String getConteudo() { return conteudo; }
+    public LocalDateTime getEnviadaEm() { return enviadaEm; }
 }

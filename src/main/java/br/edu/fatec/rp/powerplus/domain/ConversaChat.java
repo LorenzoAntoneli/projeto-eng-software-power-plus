@@ -46,48 +46,17 @@ public class ConversaChat {
     }
 
     public void adicionarMensagem(String remetente, String conteudo, LocalDateTime instante) {
-        MensagemChat msg = new MensagemChat(this, remetente, conteudo, instante);
-        this.mensagens.add(msg);
+        this.mensagens.add(new MensagemChat(this, remetente, conteudo, instante));
         this.atualizadaEm = instante;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNomeCliente() {
-        return nomeCliente;
-    }
-
-    public String getTelefoneCliente() {
-        return telefoneCliente;
-    }
-
-    public StatusConversaChat getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusConversaChat status) {
-        this.status = status;
-    }
-
-    public List<MensagemChat> getMensagens() {
-        return mensagens;
-    }
-
-    public LocalDateTime getCriadaEm() {
-        return criadaEm;
-    }
-
-    public LocalDateTime getAtualizadaEm() {
-        return atualizadaEm;
-    }
-
-    public void setAtualizadaEm(LocalDateTime atualizadaEm) {
-        this.atualizadaEm = atualizadaEm;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getNomeCliente() { return nomeCliente; }
+    public String getTelefoneCliente() { return telefoneCliente; }
+    public StatusConversaChat getStatus() { return status; }
+    public void setStatus(StatusConversaChat status) { this.status = status; }
+    public List<MensagemChat> getMensagens() { return mensagens; }
+    public LocalDateTime getCriadaEm() { return criadaEm; }
+    public LocalDateTime getAtualizadaEm() { return atualizadaEm; }
 }
