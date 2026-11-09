@@ -470,6 +470,12 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andExpect(jsonPath("$.statusCodigo").value("RECUSADO"))
                 .andExpect(jsonPath("$.statusDescricao").value("Recusado"));
 
+        mockMvc.perform(get("/api/admin/dashboard")
+                        .header("Authorization", "Bearer " + token)
+                        .param("data", LocalDate.now(clock).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.todosAgendamentos[?(@.id == " + idAprovar + ")].statusCodigo", hasItem("CONFIRMADO")));
+
         mockMvc.perform(get("/api/publico/horarios-livres").param("data", proximaDataUtil.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.horariosLivres", not(hasItem("13:00"))))

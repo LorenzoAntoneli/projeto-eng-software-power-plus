@@ -16,6 +16,8 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
 
     Optional<Agendamento> findByProtocoloIgnoreCase(String protocolo);
 
+    List<Agendamento> findAllByOrderByDataAscHoraInicioAsc();
+
     List<Agendamento> findByDataOrderByHoraInicioAsc(LocalDate data);
 
     List<Agendamento> findByDataBetweenOrderByDataAscHoraInicioAsc(LocalDate inicio, LocalDate fim);

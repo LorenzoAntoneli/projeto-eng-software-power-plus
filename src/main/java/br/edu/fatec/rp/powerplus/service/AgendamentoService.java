@@ -227,6 +227,28 @@ public class AgendamentoService {
     }
 
     @Transactional(readOnly = true)
+    public List<Agendamento> listarTodosOrdenados(LocalDate referencia) {
+        List<Agendamento> todos = agendamentoRepository.findAllByOrderByDataAscHoraInicioAsc();
+        if (referencia == null) {
+            return todos;
+        }
+        List<Agendamento> futurosOuHoje = todos.stream()
+                .filter(a -> !a.getData().isBefore(referencia))
+                .toList();
+        List<Agendamento> passados = todos.stream()
+                .filter(a -> a.getData().isBefore(referencia))
+                .sorted((a, b) -> {
+                    int cmp = b.getData().compareTo(a.getData());
+                    return cmp != 0 ? cmp : b.getHoraInicio().compareTo(a.getHoraInicio());
+                })
+                .toList();
+        java.util.ArrayList<Agendamento> resultado = new java.util.ArrayList<>(todos.size());
+        resultado.addAll(futurosOuHoje);
+        resultado.addAll(passados);
+        return resultado;
+    }
+
+    @Transactional(readOnly = true)
     public List<Agendamento> listarAgendaPeriodo(LocalDate inicio, LocalDate fim) {
         return agendamentoRepository.findByDataBetweenOrderByDataAscHoraInicioAsc(inicio, fim);
     }

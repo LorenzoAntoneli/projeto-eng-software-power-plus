@@ -71,6 +71,7 @@ public class ProprietarioAdminController {
         List<Agendamento> doDia = agendamentoService.listarAgendaDia(hoje);
         List<Agendamento> daSemana = agendamentoService.listarAgendaPeriodo(inicioSemana, fimSemana);
         List<Agendamento> pendentes = agendamentoService.listarPendentesAprovacao();
+        List<Agendamento> todos = agendamentoService.listarTodosOrdenados(hoje);
 
         long aguardandoHoje = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.AGUARDANDO_APROVACAO).count();
         long confirmados = doDia.stream().filter(a -> a.getStatus() == StatusAgendamento.CONFIRMADO).count();
@@ -94,7 +95,8 @@ public class ProprietarioAdminController {
                 notificacaoService.contarNaoLidasProprietario(),
                 notificacaoService.isIntegracaoWhatsAppAtiva(),
                 pendentes.stream().map(AgendamentoResponse::from).toList(),
-                doDia.stream().map(AgendamentoResponse::from).toList()
+                doDia.stream().map(AgendamentoResponse::from).toList(),
+                todos.stream().map(AgendamentoResponse::from).toList()
         );
     }
 
