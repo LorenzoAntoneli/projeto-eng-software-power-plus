@@ -28,23 +28,7 @@ public class UsuarioProprietario {
         this.senhaHash = senhaHash;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getNomeExibicao() {
-        return nomeExibicao;
-    }
-
-    public String getSenhaHash() {
-        return senhaHash;
-    }
-
-    public void setSenhaHash(String senhaHash) {
-        this.senhaHash = senhaHash;
-    }
+    public String getUsername() { return username; }
+    public String getNomeExibicao() { return nomeExibicao; }
+    public String getSenhaHash() { return senhaHash; }
 }

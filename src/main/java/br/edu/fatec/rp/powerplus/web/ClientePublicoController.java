@@ -19,6 +19,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Endpoints públicos usados pelo portal do cliente (agendar, consultar protocolo e chat).
+ */
 @RestController
 @RequestMapping("/api/publico")
 public class ClientePublicoController {
@@ -38,38 +41,27 @@ public class ClientePublicoController {
     }
 
     @GetMapping("/catalogo")
-    public CatalogoPublicoResponse obterCatalogo() {
+    public Map<String, Object> obterCatalogo() {
         List<OpcaoEnumDto> servicos = Arrays.stream(TipoServico.values())
-                .map(s -> new OpcaoEnumDto(s.name(), s.getDescricao(), s.getDuracaoPadraoMinutos()))
-                .toList();
+                .map(s -> new OpcaoEnumDto(s.name(), s.getDescricao(), s.getDuracaoPadraoMinutos())).toList();
         List<OpcaoEnumDto> perfis = Arrays.stream(PerfilCliente.values())
-                .map(p -> new OpcaoEnumDto(p.name(), p.getDescricao(), null))
-                .toList();
-        return new CatalogoPublicoResponse(servicos, perfis);
+                .map(p -> new OpcaoEnumDto(p.name(), p.getDescricao(), null)).toList();
+        return Map.of("tiposServico", servicos, "perfisCliente", perfis);
     }
 
     @GetMapping("/horarios-livres")
-    public HorariosLivresResponse consultarHorariosLivres(
+    public Map<String, Object> consultarHorariosLivres(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        List<String> livres = disponibilidadeService.consultarHorariosLivres(data)
-                .stream()
-                .map(h -> h.format(FMT_HORA))
-                .toList();
-        return new HorariosLivresResponse(data, data.getDayOfWeek().name(), livres);
+        List<String> livres = disponibilidadeService.consultarHorariosLivres(data).stream()
+                .map(h -> h.format(FMT_HORA)).toList();
+        return Map.of("data", data, "diaSemana", data.getDayOfWeek().name(), "horariosLivres", livres);
     }
 
     @PostMapping("/agendamentos")
     public ResponseEntity<AgendamentoResponse> criarAgendamento(@Valid @RequestBody NovoAgendamentoRequest req) {
         Agendamento criado = agendamentoService.agendarAutoatendimento(
-                req.nomeCliente(),
-                req.telefone(),
-                req.email(),
-                req.endereco(),
-                req.perfilCliente(),
-                req.data(),
-                req.horaInicio(),
-                req.tipoServico(),
-                req.descricaoServico()
+                req.nomeCliente(), req.telefone(), req.email(), req.endereco(),
+                req.perfilCliente(), req.data(), req.horaInicio(), req.tipoServico(), req.descricaoServico()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(AgendamentoResponse.from(criado));
     }
@@ -77,49 +69,35 @@ public class ClientePublicoController {
     @GetMapping("/agendamentos/protocolo/{protocolo}")
     public Map<String, Object> consultarPorProtocolo(@PathVariable String protocolo) {
         Agendamento a = agendamentoService.buscarPorProtocolo(protocolo);
-        List<HistoricoStatusResponse> historico = agendamentoService.listarHistoricoStatus(a.getId())
-                .stream()
-                .map(HistoricoStatusResponse::from)
-                .toList();
-        return Map.of(
-                "agendamento", AgendamentoResponse.from(a),
-                "historico", historico
-        );
+        List<HistoricoStatusResponse> historico = agendamentoService.listarHistoricoStatus(a.getId()).stream()
+                .map(HistoricoStatusResponse::from).toList();
+        return Map.of("agendamento", AgendamentoResponse.from(a), "historico", historico);
     }
 
     @GetMapping("/agendamentos/cliente")
     public List<AgendamentoResponse> consultarPorTelefone(@RequestParam String telefone) {
-        return agendamentoService.consultarPorTelefoneCliente(telefone)
-                .stream()
-                .map(AgendamentoResponse::from)
-                .toList();
+        return agendamentoService.consultarPorTelefoneCliente(telefone).stream()
+                .map(AgendamentoResponse::from).toList();
     }
 
     @PutMapping("/agendamentos/{protocolo}/remarcar")
     public AgendamentoResponse remarcar(@PathVariable String protocolo,
                                         @Valid @RequestBody RemarcarAgendamentoRequest req) {
-        Agendamento atualizado = agendamentoService.remarcarPeloCliente(
-                protocolo, req.novaData(), req.novaHoraInicio(), req.motivo()
-        );
-        return AgendamentoResponse.from(atualizado);
+        return AgendamentoResponse.from(agendamentoService.remarcarPeloCliente(
+                protocolo, req.novaData(), req.novaHoraInicio(), req.motivo()));
     }
 
     @PostMapping("/agendamentos/{protocolo}/cancelar")
     public AgendamentoResponse cancelar(@PathVariable String protocolo,
-                                        @RequestBody(required = false) CancelarAgendamentoRequest req) {
-        String motivo = req != null ? req.motivo() : null;
+                                        @RequestBody(required = false) Map<String, String> body) {
+        String motivo = body != null ? body.get("motivo") : null;
         return AgendamentoResponse.from(agendamentoService.cancelarPeloCliente(protocolo, motivo));
     }
 
     @PostMapping("/chat/mensagens")
     public ConversaChatResponse enviarMensagemChat(@Valid @RequestBody MensagemClienteChatRequest req) {
         return ConversaChatResponse.from(chatAssistenteService.iniciarOuEnviarMensagemCliente(
-                req.conversaId(),
-                req.nomeCliente(),
-                req.telefoneCliente(),
-                req.mensagem(),
-                req.solicitarHumano()
-        ));
+                req.conversaId(), req.nomeCliente(), req.telefoneCliente(), req.mensagem(), req.solicitarHumano()));
     }
 
     @GetMapping("/chat/{conversaId}")

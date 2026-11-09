@@ -2,16 +2,17 @@ package br.edu.fatec.rp.powerplus.service;
 
 import br.edu.fatec.rp.powerplus.domain.Cliente;
 import br.edu.fatec.rp.powerplus.domain.PerfilCliente;
-import br.edu.fatec.rp.powerplus.domain.exception.DuplicidadeCadastroException;
-import br.edu.fatec.rp.powerplus.domain.exception.RecursoNaoEncontradoException;
-import br.edu.fatec.rp.powerplus.domain.exception.RegraNegocioException;
+import br.edu.fatec.rp.powerplus.domain.RegraNegocioException;
 import br.edu.fatec.rp.powerplus.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
+/**
+ * Gerencia o cadastro, atualização e busca de clientes pelo nome ou telefone.
+ */
 @Service
 public class ClienteService {
 
@@ -24,101 +25,93 @@ public class ClienteService {
     @Transactional
     public Cliente cadastrarManual(String nome, String telefone, String email,
                                    String endereco, PerfilCliente perfil, String observacoes) {
-        validarDadosObrigatorios(nome, telefone, endereco);
-        String telNormalizado = Cliente.normalizarTelefone(telefone);
-
+        String telNormalizado = validarDadosObrigatorios(nome, telefone, endereco);
         if (clienteRepository.existsByTelefone(telNormalizado)) {
-            throw new DuplicidadeCadastroException(
-                    "Já existe um cliente cadastrado com o telefone informado: " + telefone);
+            throw RegraNegocioException.conflito("Já existe um cliente cadastrado com o telefone informado: " + telefone);
         }
 
         Cliente novo = new Cliente(nome.trim(), telNormalizado, endereco.trim(), perfil);
-        novo.setEmail(email != null && !email.isBlank() ? email.trim() : null);
-        novo.setObservacoes(observacoes != null && !observacoes.isBlank() ? observacoes.trim() : null);
+        novo.setEmail(limparTextoOpcional(email));
+        novo.setObservacoes(limparTextoOpcional(observacoes));
         return clienteRepository.save(novo);
     }
 
     @Transactional
     public Cliente obterOuCadastrarNoAgendamento(String nome, String telefone,
                                                  String email, String endereco, PerfilCliente perfil) {
-        validarDadosObrigatorios(nome, telefone, endereco);
-        String telNormalizado = Cliente.normalizarTelefone(telefone);
+        String telNormalizado = validarDadosObrigatorios(nome, telefone, endereco);
+        Cliente cliente = clienteRepository.findByTelefone(telNormalizado)
+                .orElseGet(() -> new Cliente(nome.trim(), telNormalizado, endereco.trim(), perfil));
 
-        Optional<Cliente> existente = clienteRepository.findByTelefone(telNormalizado);
-        if (existente.isPresent()) {
-            Cliente c = existente.get();
-            c.setNome(nome.trim());
-            c.setEnderecoPadrao(endereco.trim());
-            if (perfil != null) {
-                c.setPerfil(perfil);
-            }
-            if (email != null && !email.isBlank()) {
-                c.setEmail(email.trim());
-            }
-            return clienteRepository.save(c);
+        cliente.setNome(nome.trim());
+        cliente.setEnderecoPadrao(endereco.trim());
+        if (perfil != null) {
+            cliente.setPerfil(perfil);
         }
-
-        Cliente novo = new Cliente(nome.trim(), telNormalizado, endereco.trim(), perfil);
         if (email != null && !email.isBlank()) {
-            novo.setEmail(email.trim());
+            cliente.setEmail(email.trim());
         }
-        return clienteRepository.save(novo);
+        return clienteRepository.save(cliente);
     }
 
     @Transactional
     public Cliente atualizar(Long id, String nome, String telefone, String email,
                              String endereco, PerfilCliente perfil, String observacoes) {
         Cliente cliente = buscarPorId(id);
-        validarDadosObrigatorios(nome, telefone, endereco);
-        String telNormalizado = Cliente.normalizarTelefone(telefone);
+        String telNormalizado = validarDadosObrigatorios(nome, telefone, endereco);
 
         clienteRepository.findByTelefone(telNormalizado)
                 .filter(outro -> !outro.getId().equals(id))
                 .ifPresent(outro -> {
-                    throw new DuplicidadeCadastroException(
-                            "O telefone informado já pertence a outro cliente cadastrado: " + outro.getNome());
+                    throw RegraNegocioException.conflito("O telefone informado já pertence a outro cliente cadastrado: " + outro.getNome());
                 });
 
         cliente.setNome(nome.trim());
         cliente.setTelefone(telNormalizado);
-        cliente.setEmail(email != null && !email.isBlank() ? email.trim() : null);
+        cliente.setEmail(limparTextoOpcional(email));
         cliente.setEnderecoPadrao(endereco.trim());
         if (perfil != null) {
             cliente.setPerfil(perfil);
         }
-        cliente.setObservacoes(observacoes != null && !observacoes.isBlank() ? observacoes.trim() : null);
+        cliente.setObservacoes(limparTextoOpcional(observacoes));
         return clienteRepository.save(cliente);
     }
 
     @Transactional(readOnly = true)
     public Cliente buscarPorId(Long id) {
         return clienteRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado para o ID: " + id));
+                .orElseThrow(() -> RegraNegocioException.naoEncontrado("Cliente não encontrado para o ID: " + id));
     }
 
     @Transactional(readOnly = true)
     public List<Cliente> listarOuPesquisar(String termo) {
+        List<Cliente> todos = clienteRepository.findAllByOrderByNomeAsc();
         if (termo == null || termo.isBlank()) {
-            return clienteRepository.findAllByOrderByNomeAsc();
+            return todos;
         }
-        String limpo = termo.trim();
-        String numerico = Cliente.normalizarTelefone(limpo);
-        if (numerico.isEmpty()) {
-            numerico = "__SEM_NUMERO__";
-        }
-        return clienteRepository.pesquisarPorNomeOuTelefone(limpo, numerico);
+        String buscaTexto = termo.trim().toLowerCase(Locale.ROOT);
+        String buscaDigitos = Cliente.normalizarTelefone(termo);
+        return todos.stream()
+                .filter(c -> c.getNome().toLowerCase(Locale.ROOT).contains(buscaTexto)
+                        || (!buscaDigitos.isEmpty() && c.getTelefone().contains(buscaDigitos)))
+                .toList();
     }
 
-    private void validarDadosObrigatorios(String nome, String telefone, String endereco) {
+    private String validarDadosObrigatorios(String nome, String telefone, String endereco) {
         if (nome == null || nome.isBlank()) {
             throw new RegraNegocioException("O nome do cliente é obrigatório.");
         }
-        String telNormalizado = Cliente.normalizarTelefone(telefone);
-        if (telNormalizado.length() < 10 || telNormalizado.length() > 13) {
+        String tel = Cliente.normalizarTelefone(telefone);
+        if (tel.length() < 10 || tel.length() > 13) {
             throw new RegraNegocioException("Informe um telefone válido com DDD (10 ou 11 dígitos).");
         }
         if (endereco == null || endereco.isBlank()) {
             throw new RegraNegocioException("O endereço de atendimento é obrigatório.");
         }
+        return tel;
+    }
+
+    private String limparTextoOpcional(String valor) {
+        return (valor != null && !valor.isBlank()) ? valor.trim() : null;
     }
 }

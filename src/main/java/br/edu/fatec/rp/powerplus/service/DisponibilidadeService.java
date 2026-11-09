@@ -3,23 +3,25 @@ package br.edu.fatec.rp.powerplus.service;
 import br.edu.fatec.rp.powerplus.domain.Agendamento;
 import br.edu.fatec.rp.powerplus.domain.BloqueioAgenda;
 import br.edu.fatec.rp.powerplus.domain.DisponibilidadeSemanal;
-import br.edu.fatec.rp.powerplus.domain.exception.RecursoNaoEncontradoException;
-import br.edu.fatec.rp.powerplus.domain.exception.RegraNegocioException;
+import br.edu.fatec.rp.powerplus.domain.RegraNegocioException;
 import br.edu.fatec.rp.powerplus.repository.AgendamentoRepository;
 import br.edu.fatec.rp.powerplus.repository.BloqueioAgendaRepository;
 import br.edu.fatec.rp.powerplus.repository.DisponibilidadeSemanalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Calcula horários livres na agenda, configura o expediente semanal e gerencia bloqueios (folgas/feriados).
+ */
 @Service
 public class DisponibilidadeService {
 
@@ -28,19 +30,13 @@ public class DisponibilidadeService {
     private final DisponibilidadeSemanalRepository disponibilidadeRepository;
     private final BloqueioAgendaRepository bloqueioRepository;
     private final AgendamentoRepository agendamentoRepository;
-    private final CalculadoraHorariosLivres calculadoraHorariosLivres;
-    private final Clock clock;
 
     public DisponibilidadeService(DisponibilidadeSemanalRepository disponibilidadeRepository,
                                   BloqueioAgendaRepository bloqueioRepository,
-                                  AgendamentoRepository agendamentoRepository,
-                                  CalculadoraHorariosLivres calculadoraHorariosLivres,
-                                  Clock clock) {
+                                  AgendamentoRepository agendamentoRepository) {
         this.disponibilidadeRepository = disponibilidadeRepository;
         this.bloqueioRepository = bloqueioRepository;
         this.agendamentoRepository = agendamentoRepository;
-        this.calculadoraHorariosLivres = calculadoraHorariosLivres;
-        this.clock = clock;
     }
 
     @Transactional(readOnly = true)
@@ -48,17 +44,32 @@ public class DisponibilidadeService {
         if (data == null) {
             throw new RegraNegocioException("Informe a data para consultar os horários livres.");
         }
-        boolean bloqueada = bloqueioRepository.existsByData(data);
+        LocalDateTime agora = LocalDateTime.now();
+        if (data.isBefore(agora.toLocalDate()) || bloqueioRepository.existsByData(data)) {
+            return List.of();
+        }
+
         DisponibilidadeSemanal disp = disponibilidadeRepository.findByDiaSemana(data.getDayOfWeek()).orElse(null);
-        Set<LocalTime> ocupados = agendamentoRepository
-                .listarAtivosNaData(data, PoliticaAgendamentoValidator.STATUS_QUE_OCUPAM_AGENDA)
-                .stream()
+        if (disp == null || !disp.isAtivo()) {
+            return List.of();
+        }
+
+        Set<LocalTime> horariosOcupados = agendamentoRepository.findByDataOrderByHoraInicioAsc(data).stream()
+                .filter(a -> a.getStatus().ocupaHorarioNaAgenda())
                 .map(Agendamento::getHoraInicio)
                 .collect(Collectors.toSet());
 
-        return calculadoraHorariosLivres.calcularSlotsLivres(
-                data, disp, bloqueada, ocupados, LocalDateTime.now(clock)
-        );
+        int passo = Math.max(30, disp.getDuracaoSlotMinutos());
+        List<LocalTime> livres = new ArrayList<>();
+        LocalTime cursor = disp.getHoraInicio();
+
+        while (!cursor.plusMinutes(passo).isAfter(disp.getHoraFim())) {
+            if (LocalDateTime.of(data, cursor).isAfter(agora) && !horariosOcupados.contains(cursor)) {
+                livres.add(cursor);
+            }
+            cursor = cursor.plusMinutes(passo);
+        }
+        return livres;
     }
 
     @Transactional
@@ -98,26 +109,26 @@ public class DisponibilidadeService {
             throw new RegraNegocioException("Esta data já se encontra bloqueada na agenda.");
         }
 
-        List<Agendamento> existentes = agendamentoRepository.listarAtivosNaData(
-                data, PoliticaAgendamentoValidator.STATUS_QUE_OCUPAM_AGENDA
-        );
-        List<String> protocolos = existentes.stream().map(Agendamento::getProtocolo).toList();
+        List<String> protocolosConflitantes = agendamentoRepository.findByDataOrderByHoraInicioAsc(data).stream()
+                .filter(a -> a.getStatus().ocupaHorarioNaAgenda())
+                .map(Agendamento::getProtocolo)
+                .toList();
 
-        if (!existentes.isEmpty() && !forcarComConflito) {
+        if (!protocolosConflitantes.isEmpty() && !forcarComConflito) {
             throw new RegraNegocioException(String.format(
                     "Já existem %d atendimento(s) confirmado(s) nesta data (%s). Confirme o bloqueio para registrar e remarcar os clientes.",
-                    existentes.size(), String.join(", ", protocolos)
+                    protocolosConflitantes.size(), String.join(", ", protocolosConflitantes)
             ));
         }
 
         BloqueioAgenda salvo = bloqueioRepository.save(new BloqueioAgenda(data, motivo.trim()));
-        return new ResultadoBloqueio(salvo, existentes.size(), protocolos);
+        return new ResultadoBloqueio(salvo, protocolosConflitantes.size(), protocolosConflitantes);
     }
 
     @Transactional
     public void removerBloqueio(Long bloqueioId) {
         if (!bloqueioRepository.existsById(bloqueioId)) {
-            throw new RecursoNaoEncontradoException("Bloqueio não encontrado: " + bloqueioId);
+            throw RegraNegocioException.naoEncontrado("Bloqueio não encontrado: " + bloqueioId);
         }
         bloqueioRepository.deleteById(bloqueioId);
     }

@@ -2,7 +2,6 @@ package br.edu.fatec.rp.powerplus.web;
 
 import br.edu.fatec.rp.powerplus.domain.DisponibilidadeSemanal;
 import br.edu.fatec.rp.powerplus.repository.DisponibilidadeSemanalRepository;
-import br.edu.fatec.rp.powerplus.service.AutenticacaoProprietarioService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,13 +16,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,20 +30,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class PowerPlusIntegrationAcceptanceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private DisponibilidadeSemanalRepository disponibilidadeRepository;
-
-    @Autowired
-    private AutenticacaoProprietarioService authService;
-
-    @Autowired
-    private Clock clock;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private DisponibilidadeSemanalRepository disponibilidadeRepository;
 
     private LocalDate proximaDataUtil;
 
@@ -59,7 +45,7 @@ class PowerPlusIntegrationAcceptanceTest {
                     dia, ativo, LocalTime.of(8, 0), LocalTime.of(18, 0), 60
             ));
         }
-        LocalDate d = LocalDate.now(clock).plusDays(2);
+        LocalDate d = LocalDate.now().plusDays(2);
         if (d.getDayOfWeek() == DayOfWeek.SUNDAY) {
             d = d.plusDays(1);
         }
@@ -67,9 +53,7 @@ class PowerPlusIntegrationAcceptanceTest {
     }
 
     private String autenticarProprietario() throws Exception {
-        String loginJson = """
-                {"username":"leonardo.powerplus","password":"PowerPlus@2026"}
-                """;
+        String loginJson = "{\"username\":\"leonardo.powerplus\",\"password\":\"PowerPlus@2026\"}";
         MvcResult res = mockMvc.perform(post("/api/admin/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson))
@@ -172,13 +156,7 @@ class PowerPlusIntegrationAcceptanceTest {
     @Test
     @DisplayName("Retorna erro 400 quando campos obrigatórios estão vazios")
     void deveRetornar400QuandoCamposObrigatoriosVazios() throws Exception {
-        String invalido = """
-                {
-                  "nomeCliente": "",
-                  "telefone": "",
-                  "endereco": ""
-                }
-                """;
+        String invalido = "{\"nomeCliente\":\"\",\"telefone\":\"\",\"endereco\":\"\"}";
         mockMvc.perform(post("/api/publico/agendamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalido))
@@ -209,9 +187,7 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andReturn();
         String protocolo = objectMapper.readTree(res.getResponse().getContentAsString()).get("protocolo").asText();
 
-        String remarcacao = String.format("""
-                {"novaData": "%s", "novaHoraInicio": "16:00", "motivo": "Ajuste com zelador"}
-                """, proximaDataUtil);
+        String remarcacao = String.format("{\"novaData\":\"%s\",\"novaHoraInicio\":\"16:00\",\"motivo\":\"Ajuste com zelador\"}", proximaDataUtil);
         mockMvc.perform(put("/api/publico/agendamentos/" + protocolo + "/remarcar")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(remarcacao))
@@ -239,9 +215,7 @@ class PowerPlusIntegrationAcceptanceTest {
     void deveExecutarFluxoCompletoDeChatETransbordoHumano() throws Exception {
         MvcResult faqRes = mockMvc.perform(post("/api/publico/chat/mensagens")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"nomeCliente":"Carlos Cliente","telefoneCliente":"16998887777","mensagem":"Qual o valor da visita e orçamento?","solicitarHumano":false}
-                                """))
+                        .content("{\"nomeCliente\":\"Carlos Cliente\",\"telefoneCliente\":\"16998887777\",\"mensagem\":\"Qual o valor da visita e orçamento?\",\"solicitarHumano\":false}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCodigo").value("AUTOMATICO"))
                 .andReturn();
@@ -250,9 +224,7 @@ class PowerPlusIntegrationAcceptanceTest {
 
         mockMvc.perform(post("/api/publico/chat/mensagens")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(String.format("""
-                                {"conversaId":%d,"mensagem":"Quero falar com o proprietário sobre entrada trifásica","solicitarHumano":true}
-                                """, conversaId)))
+                        .content(String.format("{\"conversaId\":%d,\"mensagem\":\"Quero falar com o proprietário sobre entrada trifásica\",\"solicitarHumano\":true}", conversaId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCodigo").value("AGUARDANDO_HUMANO"));
 
@@ -260,9 +232,7 @@ class PowerPlusIntegrationAcceptanceTest {
         mockMvc.perform(post("/api/admin/conversas/" + conversaId + "/responder")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"resposta":"Olá! Posso avaliar o padrão trifásico amanhã às 10h.","encerrar":false}
-                                """))
+                        .content("{\"resposta\":\"Olá! Posso avaliar o padrão trifásico amanhã às 10h.\",\"encerrar\":false}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.statusCodigo").value("EM_ATENDIMENTO_HUMANO"));
 
@@ -308,7 +278,6 @@ class PowerPlusIntegrationAcceptanceTest {
                         .content(cliJson))
                 .andExpect(status().isConflict());
 
-        // Cria agendamento, consulta dashboard/agenda semanal, envia lembrete e conclui atendimento
         String agJson = String.format("""
                 {
                   "nomeCliente": "Clínica Odontológica Sorriso",
@@ -384,6 +353,17 @@ class PowerPlusIntegrationAcceptanceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
 
+        mockMvc.perform(get("/api/admin/clientes")
+                        .header("Authorization", "Bearer " + token)
+                        .param("termo", "Sorriso"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+        mockMvc.perform(get("/api/admin/disponibilidade")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.disponibilidades", hasSize(7)));
+
         mockMvc.perform(get("/api/admin/notificacoes")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -402,8 +382,7 @@ class PowerPlusIntegrationAcceptanceTest {
                 "/painel/login", "/painel/agenda", "/painel/expediente",
                 "/painel/clientes", "/painel/mensagens", "/painel/avisos"
         }) {
-            mockMvc.perform(get(rota))
-                    .andExpect(status().isOk());
+            mockMvc.perform(get(rota)).andExpect(status().isOk());
         }
         mockMvc.perform(get("/painel"))
                 .andExpect(status().is3xxRedirection())
@@ -472,7 +451,7 @@ class PowerPlusIntegrationAcceptanceTest {
 
         mockMvc.perform(get("/api/admin/dashboard")
                         .header("Authorization", "Bearer " + token)
-                        .param("data", LocalDate.now(clock).toString()))
+                        .param("data", LocalDate.now().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.todosAgendamentos[?(@.id == " + idAprovar + ")].statusCodigo", hasItem("CONFIRMADO")));
 

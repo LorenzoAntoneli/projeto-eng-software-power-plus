@@ -47,31 +47,10 @@ public class HistoricoStatusAgendamento {
         this.dataHora = dataHora;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Agendamento getAgendamento() {
-        return agendamento;
-    }
-
-    public StatusAgendamento getStatusAnterior() {
-        return statusAnterior;
-    }
-
-    public StatusAgendamento getStatusNovo() {
-        return statusNovo;
-    }
-
-    public String getResponsavel() {
-        return responsavel;
-    }
-
-    public String getObservacao() {
-        return observacao;
-    }
-
-    public LocalDateTime getDataHora() {
-        return dataHora;
-    }
+    public Long getId() { return id; }
+    public StatusAgendamento getStatusAnterior() { return statusAnterior; }
+    public StatusAgendamento getStatusNovo() { return statusNovo; }
+    public String getResponsavel() { return responsavel; }
+    public String getObservacao() { return observacao; }
+    public LocalDateTime getDataHora() { return dataHora; }
 }
